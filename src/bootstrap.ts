@@ -9,9 +9,11 @@ import { Logger, Validator } from "sdz-agent-common";
 const bootstrap = async (config: Config) => {
   try {
     Logger.info("INICIANDO CLIENTE DE INTEGRAÇÃO SEEDZ.");
+
     validate(config);
 
     Logger.info("VALIDANDO CONEXÃO FTP");
+
     const ftp = new FTP(config.auth.ftp);
     await ftp.connect();
 
@@ -23,12 +25,15 @@ const bootstrap = async (config: Config) => {
     const csv = new CSV();
     for (const entity of entities) {
       Logger.info("BUSCANDO DADOS NO REPOSITORIO");
+
       const file = entity.file;
-      const limit = 10;
-      const method = `get${"Invoices"}` as keyof Repository;
+      const limit = 1000;
+      const method = `get${entity.name}` as keyof Repository;
       let page = 1;
       let response = await respository[method]({ limit, page });
+
       Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
+
       while (0 < response.length) {
         response.length;
         await csv.write(file, response);
@@ -45,15 +50,9 @@ const bootstrap = async (config: Config) => {
         });
       }
     }
-    // Logger.info("EXECUTANDO SHELL SCRIPT");
-    //const shell = shelljs.exec('ping -c 4 8.8.8.8').code
-    // const shell = shelljs.exec("./files/EXAMPLE.sh").code;
-    // if (shell !== 0) {
-    //   Logger.error("ERRO AO EXECUTAR ARQUIVO SH");
-    //   process.exit(1);
-    // }
 
     Logger.info("ENCERRANDO PROCESSO");
+
     process.exit(1);
   } catch (e: any) {
     Logger.error(e.message);
