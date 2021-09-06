@@ -1,4 +1,4 @@
-import { Config, Entity, Repository } from "sdz-agent-types";
+import { Config, DatabaseRow, Entity, Repository } from "sdz-agent-types";
 import ConfigJson from "../config/index";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
@@ -16,30 +16,31 @@ const bootstrap = async (config: Config) => {
     await ftp.connect();
     // Logger.info("ENCERRANDO CONEXÃO FTP");
 
-    const database: Database = new Database(config.database);
+    const database = new Database(config.database);
     const entities: Entity[] = [{ file: "clientes.csv", name: "Clients" }];
 
-    const respository: Repository = database.getRepository();
+    const respository = database.getRepository();
 
-    const csv: CSV = new CSV();
+    const csv = new CSV();
 
     for (const entity of entities) {
       const file = entity.file;
       const limit = 1000;
+      const method = `get${entity.name}` as keyof Repository
       let page = 1;
-      let response = await respository[`get${entity.name}`]({ limit, page });
+      let response = await respository[method]({ limit, page });
 
       while (0 < response.length) {
         await csv.write(file, response);
         page++;
-        response = await respository[`get${entity.name}`]({ limit, page });
+        response = await respository[method]({ limit, page });
       }
 
       Logger.info("ENVIANDO DADOS VIA FTP");
       await ftp.sendFile(entity.file, file);
 
-      if (fs.existSync(file)) {
-        fs.unlink(file);
+      if (fs.existsSync(file)) {
+        fs.unlink(file, err => { throw err });
       }
     }
 
