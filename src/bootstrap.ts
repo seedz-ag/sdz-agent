@@ -1,15 +1,10 @@
-import { Config, Repository } from "sdz-agent-types";
+import { Config, Entity, Repository } from "sdz-agent-types";
 import ConfigJson from "../config/index";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
+import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Logger, Validator } from "sdz-agent-common";
-import shelljs from "shelljs";
-
-type Entity = {
-  file: string;
-  name: string;
-};
 
 const bootstrap = async (config: Config) => {
   try {
@@ -21,29 +16,31 @@ const bootstrap = async (config: Config) => {
     await ftp.connect();
     // Logger.info("ENCERRANDO CONEXÃO FTP");
 
-    const database = new Database(config.database);
+    const database: Database = new Database(config.database);
     const entities: Entity[] = [{ file: "clientes.csv", name: "Clients" }];
 
-    const respository: any = database.getRepository();
+    const respository: Repository = database.getRepository();
 
-    const csv = new CSV();
+    const csv: CSV = new CSV();
 
     for (const entity of entities) {
-      const data = [];
       const file = entity.file;
       const limit = 1000;
       let page = 1;
       let response = await respository[`get${entity.name}`]({ limit, page });
-      while (response.hasNext) {
-        data.push(response.data);
+
+      while (0 < response.length) {
+        await csv.write(file, response);
         page++;
         response = await respository[`get${entity.name}`]({ limit, page });
       }
-      // APPEND DIRETO NO WHILE?
-      Logger.info("GRAVANDO");
-      await csv.write(file, response);
+
       Logger.info("ENVIANDO DADOS VIA FTP");
-      ftp.sendFile(entity.file, file);
+      await ftp.sendFile(entity.file, file);
+
+      if (fs.existSync(file)) {
+        fs.unlink(file);
+      }
     }
 
     // Logger.info("EXECUTANDO SHELL SCRIPT");
