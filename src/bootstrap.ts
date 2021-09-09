@@ -19,7 +19,7 @@ const bootstrap = async (config: Config) => {
 
     const database = new Database(config.database);
     const entities: Entity[] = [
-      { file: "clientes.csv", name: "Clients", dto: "seedzCliente" },
+      { file: "invoices_test.csv", name: "Invoices", dto: "seedzInvoices" },
     ];
 
     const respository = database.getRepository();
@@ -39,7 +39,7 @@ const bootstrap = async (config: Config) => {
       let response = await respository[method]({ limit, page });
 
       Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-      console.log(response);
+
       while (0 < response.length) {
         await csv.write(
           file,
