@@ -9,6 +9,14 @@ Essse projeto usa o `Node 12.14`, `Yarn 1.x`, `Cmake 3.x`, `g++ 9.x` certifique 
 É necessário que seja realizada configuracao dos Dtos dentro de `config/dto`.
 Para executar o projeto executar o Yarn na raiz, depois `./bin/run` em ambientes Linux, e `run /bin/run.cmd` em ambientes Windows.
 
+## Pacotes dependentes:
+
+- sdz-agent-common
+- sdz-agent-data
+- sdz-agent-database
+- sdz-agent-sftp
+- sdz-agent-types
+
 ### Estrutura de arquivos
 
 ```
