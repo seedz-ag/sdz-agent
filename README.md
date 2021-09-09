@@ -36,6 +36,7 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 |__📁src
    |__📃bootstrap.ts
 |__⚙️.gitignore
+|__⚙️config.json
 |__📃index.js
 |__📃index.ts
 |__⚙️LICENCE
