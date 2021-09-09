@@ -1,6 +1,6 @@
 # Sumário
 
-O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de conexao entre o Client e a Seedz.
+O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de conexão entre o Client e a Seedz.
 
 # Instalacao
 
@@ -38,3 +38,5 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 |__⚙️tsconfig.json
 |__⚙️yarn.lock
 ```
+
+####L
