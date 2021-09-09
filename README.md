@@ -39,4 +39,4 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 |__⚙️yarn.lock
 ```
 
-####L
+#### LGPD
