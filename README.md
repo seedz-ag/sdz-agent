@@ -2,7 +2,7 @@
 
 O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de conexão entre o Client e a Seedz.
 
-# Instalacao
+# Instalacão
 
 Essse projeto usa o `Node 12.14`, `Yarn 1.x`, `Cmake 3.x`, `g++ 9.x` certifique que a maquina contém essas versões instaladas.
 É necessário configuar o arquivo `config.json` na raiz do projeto com os dados referentes a autenticacão na plataforma.
@@ -40,3 +40,5 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 ```
 
 #### LGPD
+
+A Seedz pensando na nova lei LGPD criou uma estrutura configurável, onde o usuário consegue definir quais dados ele deseja enviar, baseado em um processo mapaemanto de informacoes obtidas o DTO é possivel que o cliente configure e selecione quais dados serao transmitidos.
