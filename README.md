@@ -8,14 +8,14 @@ OS: Windows com WSL ou Ubuntu
 RAM: 2GB
 HD: 1GB
 
-## Instalacão
+### Instalacão
 
 Essse projeto usa o `Node 12.14`, `Yarn 1.x`, `Cmake 3.x`, `g++ 9.x` certifique que a maquina contém essas versões instaladas.
 É necessário configuar o arquivo `config.json` na raiz do projeto com os dados referentes a autenticacão na plataforma.
 É necessário que seja realizada configuracão dos Dtos dentro de `config/dto`.
 Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em ambientes Linux, e `run /bin/run.cmd` em ambientes Windows.
 
-### Pacotes dependentes:
+#### Pacotes dependentes:
 
 - sdz-agent-common
 - sdz-agent-data
@@ -23,7 +23,7 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 - sdz-agent-sftp
 - sdz-agent-types
 
-#### Estrutura de arquivos
+##### Estrutura de arquivos
 
 ```
  sdz-agent
@@ -45,6 +45,6 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 |__⚙️yarn.lock
 ```
 
-##### LGPD
+###### LGPD
 
 A Seedz pensando na nova lei LGPD criou uma estrutura configurável, onde o usuário consegue definir quais dados ele deseja enviar, baseado em um processo mapaemanto de informacoes obtidas o DTO é possível que o cliente configure e selecione quais dados serão transmitidos.
