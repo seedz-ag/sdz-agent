@@ -1,0 +1,28 @@
+{
+  "auth": {
+    "api": {
+      "token": ""
+    },
+    "ftp": {
+      "password": "",
+      "username": "",
+      "host": "",
+      "port": ""
+    }
+  },
+  "ftp": {
+    "path": ""
+  },
+  "database": {
+    "collation": "",
+    "driver": "",
+    "password": "",
+    "port": "",
+    "server": "",
+    "username": "",
+    "host": ""
+  },
+  "http": {
+    "baseUrl": ""
+  }
+}
