@@ -19,7 +19,27 @@ const bootstrap = async (config: Config) => {
 
     const database = new Database(config.database);
     const entities: Entity[] = [
-      { file: "invoices_test.csv", name: "Invoices", dto: "seedzInvoices" },
+      { file: "test.csv", name: "Invoices", dto: "test" },
+      { file: "cliente.csv", name: "Clients", dto: "clientes" },
+      { file: "endereco.csv", name: "Enderecos", dto: "enderecos" },
+      { file: "propriedades.csv", name: "Propriedades", dto: "propriedades" },
+      { file: "item.csv", name: "Item", dto: "item" },
+      { file: "item_branding.csv", name: "ItemBranding", dto: "itemBranding" },
+      { file: "item_grupo.csv", name: "ItemGrupo", dto: "itemGrupo" },
+      { file: "pedido.csv", name: "Pedido", dto: "pedido" },
+      { file: "pedido_item.csv", name: "PedidoItem", dto: "pedidoItem" },
+      { file: "faturamento.csv", name: "Faturamento", dto: "faturamento" },
+      {
+        file: "faturamento_item.csv",
+        name: "FaturamentoItem",
+        dto: "faturamentoItem",
+      },
+      {
+        file: "especie_pagamento.csv",
+        name: "EspeciePagamento",
+        dto: "especiePagamento",
+      },
+      { file: "fornecedor.csv", name: "Fornecedor", dto: "fornecedor" },
     ];
 
     const respository = database.getRepository();

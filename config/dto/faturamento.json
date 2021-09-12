@@ -1,0 +1,19 @@
+{
+    "cnpjOrigemDadosFaturamento": "cnpjorigemdadosfaturamento",
+    "id": "id",
+    "dataCadastroFaturamento": "datacadastrofaturamento",
+    "dataAtualizacaoFaturamento": "dataatualizacaofaturamento",
+    "idCliente": "idcliente",
+    "documentoCliente": "documentocliente",
+    "numeroNfFaturamento": "numeronffaturamento",
+    "serieNfFaturamento": "serienffaturamento",
+    "cfopFaturamento": "cfopfaturamento",
+    "dtEmissaoFaturamento": "dtEmissaofaturamento",
+    "dtSaidaFaturamento": "dtsaidafaturamento",
+    "statusNfFaturamento": "statusnffaturamento",
+    "municipioEntregaFaturamento": "municipioentregafaturamento",
+    "ufEntregaFaturamento": "ufentregafaturamento",
+    "vlrTotalProdutosFaturamento": "vlrtotalprodutosfaturamento",
+    "vlrTotalNfFaturamento": "vlrtotalnffaturamento",
+    "tipoFaturamento": "tipofaturamento"
+}

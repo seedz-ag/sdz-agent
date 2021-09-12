@@ -1,0 +1,18 @@
+{
+    "cnpjOrigemDados": "cnpjorigemdados",
+    "dataCadastro": "datacadastro",
+    "id": "id",
+    "dataAtualizacao": "dataatualizacao",
+    "idCliente": "idcliente",
+    "idPropriedade": "idpropriedade",
+    "documentoCliente": "documentocliente",
+    "tipo": "tipo",
+    "cep": "cep",
+    "uf": "uf",
+    "municipio": "municipio",
+    "bairro": "bairro",
+    "logradouro": "logradouro",
+    "numero": "numero",
+    "complemento": "complemento",
+    "codIbge": "codibge"
+}

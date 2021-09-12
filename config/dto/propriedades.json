@@ -1,0 +1,15 @@
+{
+    "cnpjOrigemDados": "cnpjorigemdados",
+    "id": "id",
+    "dataCadastro": "datacadastro",
+    "dataAtualizacao": "dataatualizacao",
+    "idCliente": "idcliente",
+    "razaoSocial": "razaosocial",
+    "cnpj": "cnpj",
+    "celular": "celular",
+    "telefone": "telefone",
+    "inscEstadual": "inscestadual",
+    "atividade": "atividade",
+    "tamanho": "tamanho",
+    "unidadeMedidaTamanho": "unidademedidatamanho"
+}
