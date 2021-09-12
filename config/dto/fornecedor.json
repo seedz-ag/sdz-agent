@@ -1,0 +1,21 @@
+{
+    "cnpjOrigemDados": "cnpjorigemdados",
+    "dataCadastro": "datacadastro",
+    "dataAtualizacao": "dataatualizacao",
+    "id": "id",
+    "documento": "documento",
+    "razaoSocial": "razaosocial",
+    "nomeFantasia": "nomefantasia",
+    "telefoneFixo1": "telefonefixo1",
+    "telefoneFixo2": "telefonefixo2",
+    "celular": "celular",
+    "email": "email",
+    "logradouro": "logradouro",
+    "numero": "numero",
+    "bairro": "bairro",
+    "cep": "cep",
+    "municipio": "municipio",
+    "codIbge": "codIbge",
+    "uf": "uf",
+    "inscricaoEstadual": "inscricaoestadual"
+}
