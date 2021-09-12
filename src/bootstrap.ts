@@ -40,6 +40,8 @@ const bootstrap = async (config: Config) => {
         dto: "especiePagamento",
       },
       { file: "fornecedor.csv", name: "Fornecedor", dto: "fornecedor" },
+      { file: "contas_pagar.csv", name: "ContasPagar", dto: "contasPagar" },
+      { file: "contas_receber.csv", name: "Fornecedor", dto: "contasReceber" },
     ];
 
     const respository = database.getRepository();
