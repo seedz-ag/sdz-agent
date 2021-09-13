@@ -18,4 +18,6 @@ const job = scheduleJob(schedule, () => {
   child = fork(file);
 });
 
+job.on("cancel", () => child.kill());
+
 export default job;
