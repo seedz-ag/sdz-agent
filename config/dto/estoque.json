@@ -1,0 +1,15 @@
+{
+    "cnpjOrigemDados": "cnpjorigemdados",
+    "dataCadastro": "datacadastro",
+    "idItem": "iditem",
+    "descricaoItem": "descricaoitem",
+    "vlrUnitario": "vlrunitario",
+    "armazem": "armazem",
+    "qtdTotal": "qtdtotal",
+    "vlrTotal": "vlrtotal",
+    "qtdPedidaVenda": "qtdpedidavenda",
+    "qtdReservada": "qtdreservada",
+    "qtdPrevisaoEntrada": "qtdprevisaoentrada",
+    "dtUltimaVenda": "dtultimavenda",
+    "dtUltimaCompra": "dtultimacompra"
+}
