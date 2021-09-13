@@ -1,4 +1,4 @@
-import { Config, Entity, HydratorMapping, Repository } from "sdz-agent-types";
+import { Config, DatabaseRow, Entity, HydratorMapping, Repository } from "sdz-agent-types";
 import ConfigJson from "../config/index";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
@@ -63,7 +63,7 @@ const bootstrap = async (config: Config) => {
       while (0 < response.length) {
         await csv.write(
           file,
-          response.map((row) => Hydrator(dto, row))
+          response.map((row: DatabaseRow) => Hydrator(dto, row))
         );
         page++;
         response = await respository[method]({ limit, page });
