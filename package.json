@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "license": "Apache",
   "dependencies": {
+    "child_process": "^1.0.2",
+    "chokidar": "^3.5.2",
+    "node-schedule": "^2.0.0",
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
