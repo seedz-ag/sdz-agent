@@ -2,19 +2,21 @@ import { watch } from "chokidar";
 import config from "../config";
 import Scheduler from "./job";
 
-const watcher = watch("../config/**", {
-  // ignoreInitial: true,
-});
+const watcher = watch("../config/**");
 
 watcher.on("all", () => {
-  console.log("watch");
   Scheduler.cancel();
 
-  const schedule = config.schedule || {
-    minute: "0",
-    hour: "0",
-    dayOfWeek: "*",
+  const schedule = {
+    ...{
+      minute: "*",
+      hour: "*",
+      dayOfWeek: "*",
+      dayOfMonth: "*",
+      month: "*",
+    },
+    ...(config.schedule || {}),
   };
 
-  Scheduler.reschedule(schedule);
+  Scheduler.reschedule(`${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`);
 });
