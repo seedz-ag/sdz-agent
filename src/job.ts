@@ -3,7 +3,7 @@ import { scheduleJob } from "node-schedule";
 
 import config from "../config";
 
-const file = "../dist/bootstrap";
+const file = "./bootstrap";
 
 let child = fork(file);
 child.kill();
