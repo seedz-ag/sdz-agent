@@ -22,7 +22,9 @@ const job = scheduleJob(
     if (child) {
       child.kill();
     }
-    child = fork("./src/bootstrap.ts");
+    child = fork("./src/bootstrap.ts", [], {
+      execArgv: ["-r", "ts-node/register"],
+    });
   }
 );
 
