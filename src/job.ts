@@ -1,23 +1,26 @@
-import { fork } from "child_process";
+import { ChildProcess, fork } from "child_process";
 import { scheduleJob } from "node-schedule";
 
 import config from "../config";
 
-const file = "./bootstrap";
+let child: ChildProcess;
 
-let child = fork(file);
-child.kill();
-
-const schedule = config.schedule || {
-  minute: "0",
-  hour: "0",
-  dayOfWeek: "*",
+const schedule = {
+  ...{
+    minute: "*",
+    hour: "*",
+    dayOfWeek: "*",
+    dayOfMonth: "*",
+    month: "*",
+  },
+  ...(config.schedule || {}),
 };
 
-const job = scheduleJob(schedule, () => {
-  child = fork(file);
+const job = scheduleJob(`${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`, () => {
+  if (child) {
+    child.kill();
+  }
+  child = fork("./src/callstack.ts");
 });
-
-job.on("cancel", () => child.kill());
 
 export default job;
