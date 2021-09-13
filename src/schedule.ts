@@ -2,7 +2,7 @@ import { watch } from "chokidar";
 import config from "../config";
 import Scheduler from "./job";
 
-const watcher = watch("../config/**");
+const watcher = watch(["../config.json", "../config/dto/**"]);
 
 watcher.on("all", () => {
   Scheduler.cancel();
