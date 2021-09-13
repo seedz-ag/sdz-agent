@@ -16,11 +16,14 @@ const schedule = {
   ...(config.schedule || {}),
 };
 
-const job = scheduleJob(`${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`, () => {
-  if (child) {
-    child.kill();
+const job = scheduleJob(
+  `${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`,
+  () => {
+    if (child) {
+      child.kill();
+    }
+    child = fork("./src/bootstrap.ts");
   }
-  child = fork("./src/callstack.ts");
-});
+);
 
 export default job;
