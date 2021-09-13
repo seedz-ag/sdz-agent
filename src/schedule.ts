@@ -7,6 +7,8 @@ const watcher = watch("../config", {
 });
 
 watcher.on("all", () => {
+  Scheduler.cancel();
+
   const schedule = config.schedule || {
     minute: "0",
     hour: "0",
