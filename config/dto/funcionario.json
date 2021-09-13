@@ -1,0 +1,13 @@
+{
+    "cnpjOrigemDados": "cnpjorigemdados",
+    "dataCadastro": "datacadastro",
+    "dataAtualizacao": "dataatualizacao",
+    "idFuncionario": "idfuncionario",
+    "documento": "documento",
+    "nome": "nome",
+    "celular": "celular",
+    "email": "email",
+    "sexo": "sexo",
+    "dtNascimento": "dtnascimento",
+    "cnpjVinculado": "cnpjvinculado"
+}
