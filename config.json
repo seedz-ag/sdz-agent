@@ -1,26 +1,26 @@
 {
   "auth": {
     "api": {
-      "token": ""
+      "token": "xxx"
     },
     "ftp": {
-      "password": "",
-      "username": "",
-      "host": "",
-      "port": ""
+      "password": "rubenscurvello",
+      "username": "rubenscurvello",
+      "host": "ftps.seedz.ag",
+      "port": 22
     }
   },
   "ftp": {
-    "path": ""
+    "path": "rubenscurvello"
   },
   "database": {
-    "collation": "",
-    "driver": "",
-    "password": "",
-    "port": "",
-    "server": "",
-    "username": "",
-    "host": ""
+    "collation": "sysmaster",
+    "driver": "informix",
+    "password": "in4mix",
+    "port": 9088,
+    "server": "informix",
+    "username": "informix",
+    "host": "localhost"
   },
   "http": {
     "baseUrl": ""
