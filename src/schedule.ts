@@ -1,22 +1,20 @@
 import { watch } from "chokidar";
 import config from "../config";
-import Scheduler from "./job";
+import { Logger } from "sdz-agent-common";
 
-const watcher = watch(["../config.json", "../config/dto/**"]);
+import call from "./utils/call";
 
-watcher.on("all", () => {
-  Scheduler.cancel();
+const job = "./src/job";
+const watcher = watch(["./config.json", "./config/dto/**"], {
+  ignoreInitial: false,
+});
 
-  const schedule = {
-    ...{
-      minute: "*",
-      hour: "*",
-      dayOfWeek: "*",
-      dayOfMonth: "*",
-      month: "*",
-    },
-    ...(config.schedule || {}),
-  };
+let child = call(job);
+child.send("START_JOB");
 
-  Scheduler.reschedule(`${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`);
+watcher.on("change", () => {
+  Logger.info("FINALIZANDO O AGENDADOR");
+  child.kill();
+  child = call(job);
+  child.send("START_JOB");
 });
