@@ -1,4 +1,10 @@
-import { Config, DatabaseRow, Entity, HydratorMapping, Repository } from "sdz-agent-types";
+import {
+  Config,
+  DatabaseRow,
+  Entity,
+  HydratorMapping,
+  Repository,
+} from "sdz-agent-types";
 import ConfigJson from "../config/index";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
@@ -19,27 +25,38 @@ const bootstrap = async (config: Config) => {
 
     const database = new Database(config.database);
     const entities: Entity[] = [
-      { file: "test.csv", name: "Invoices", dto: "test" },
-      { file: "cliente.csv", name: "Clients", dto: "clientes" },
-      { file: "endereco.csv", name: "Enderecos", dto: "enderecos" },
-      { file: "propriedades.csv", name: "Propriedades", dto: "propriedades" },
-      { file: "item.csv", name: "Item", dto: "item" },
-      { file: "item_branding.csv", name: "ItemBranding", dto: "itemBranding" },
-      { file: "item_grupo.csv", name: "ItemGrupo", dto: "itemGrupo" },
-      { file: "pedido.csv", name: "Pedido", dto: "pedido" },
-      { file: "pedido_item.csv", name: "PedidoItem", dto: "pedidoItem" },
-      { file: "faturamento.csv", name: "Faturamento", dto: "faturamento" },
-      {
-        file: "faturamento_item.csv",
-        name: "FaturamentoItem",
-        dto: "faturamentoItem",
-      },
-      {
-        file: "especie_pagamento.csv",
-        name: "EspeciePagamento",
-        dto: "especiePagamento",
-      },
-      { file: "fornecedor.csv", name: "Fornecedor", dto: "fornecedor" },
+      { file: "test.csv", name: "Test", dto: "test" },
+      { file: "test2.csv", name: "Test", dto: "test" },
+      { file: "test3.csv", name: "Test", dto: "test" },
+      // { file: "cliente.csv", name: "Clients", dto: "clientes" },
+      // { file: "endereco.csv", name: "Address", dto: "enderecos" },
+      // { file: "propriedade.csv", name: "Property", dto: "propriedades" },
+      // { file: "item.csv", name: "Item", dto: "item" },
+      // { file: "item_branding.csv", name: "ItemBranding", dto: "itemBranding" },
+      // { file: "item_grupo.csv", name: "ItemGroup", dto: "itemGrupo" },
+      // { file: "pedido.csv", name: "Request", dto: "pedido" },
+      // { file: "pedido_item.csv", name: "RequestItem", dto: "pedidoItem" },
+      // { file: "faturamento.csv", name: "Invoices", dto: "faturamento" },
+      // {
+      //   file: "faturamento_item.csv",
+      //   name: "BillingItem",
+      //   dto: "faturamentoItem",
+      // },
+      // {
+      //   file: "especie_pagamento.csv",
+      //   name: "PaymentType",
+      //   dto: "especiePagamento",
+      // },
+      // { file: "fornecedor.csv", name: "Provider", dto: "fornecedor" },
+      // { file: "contas_pagar.csv", name: "AccountPay", dto: "contasPagar" },
+      // {
+      //   file: "contas_receber.csv",
+      //   name: "AccountReceivable",
+      //   dto: "contasReceber",
+      // },
+      // { file: "vendedor.csv", name: "Vendor", dto: "vendedor" },
+      // { file: "funcionario.csv", name: "Employee", dto: "funcionario" },
+      // { file: "estoque.csv", name: "Inventory", dto: "estoque" },
     ];
 
     const respository = database.getRepository();
@@ -56,7 +73,7 @@ const bootstrap = async (config: Config) => {
       const limit = 1000;
       const method = `get${entity.name}` as keyof Repository;
       let page = 1;
-      let response = await respository[method]({ limit, page });
+      let response = await respository[method]({ limit, page }, "T");
 
       Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
 
@@ -66,16 +83,14 @@ const bootstrap = async (config: Config) => {
           response.map((row: DatabaseRow) => Hydrator(dto, row))
         );
         page++;
-        response = await respository[method]({ limit, page });
+        response = await respository[method]({ limit, page }, "T");
       }
 
       Logger.info("ENVIANDO DADOS VIA SFTP");
       await ftp.sendFile(entity.file, file);
 
       if (fs.existsSync(file)) {
-        fs.unlink(file, (err) => {
-          throw err;
-        });
+        fs.unlinkSync(file);
       }
     }
 
