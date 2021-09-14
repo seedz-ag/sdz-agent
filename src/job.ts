@@ -1,26 +1,28 @@
 import { ChildProcess, fork } from "child_process";
 import { scheduleJob } from "node-schedule";
-
-import config from "../config";
+import { Logger } from "sdz-agent-common";
+import extractScheduleConfig from "./utils/extract-schedule-config";
 
 let child: ChildProcess;
 
-const schedule = {
-  ...{
-    minute: "*",
-    hour: "*",
-    dayOfWeek: "*",
-    dayOfMonth: "*",
-    month: "*",
-  },
-  ...(config.schedule || {}),
+const job = () => {
+  const schedule = extractScheduleConfig();
+  scheduleJob(
+    `${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`,
+    () => {
+      if (child) {
+        child.kill();
+      }
+      child = fork("./src/bootstrap.ts", [], {
+        execArgv: ["-r", "ts-node/register"],
+      });
+    }
+  );
 };
 
-const job = scheduleJob(`${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`, () => {
-  if (child) {
-    child.kill();
+process.on("message", (message: string) => {
+  if ("START_JOB" === message) {
+    Logger.info("INICIALIZANDO O AGENDADOR.");
+    job();
   }
-  child = fork("./src/callstack.ts");
 });
-
-export default job;
