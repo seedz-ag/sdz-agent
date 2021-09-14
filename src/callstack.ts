@@ -37,7 +37,7 @@ const bootstrap = async (config: Config) => {
       { file: "faturamento.csv", name: "Invoices", dto: "faturamento" },
       {
         file: "faturamento_item.csv",
-        name: "BillingItem",
+        name: "InvoicesItem",
         dto: "faturamentoItem",
       },
       {
