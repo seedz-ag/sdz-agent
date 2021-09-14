@@ -74,8 +74,7 @@ const bootstrap = async (config: Config) => {
       const method = `get${entity.name}` as keyof Repository;
       let page = 1;
       let response = await respository[method]({ limit, page }, "T");
-      if (response) {
-        //console.log(response);
+      if (response.length) {
         Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
 
         while (0 < response.length) {
@@ -86,16 +85,14 @@ const bootstrap = async (config: Config) => {
           page++;
           response = await respository[method]({ limit, page }, "T");
         }
-
-        Logger.info("ENVIANDO DADOS VIA SFTP");
-        await ftp.sendFile(entity.file, file);
-
         if (fs.existsSync(file)) {
+          Logger.info("ENVIANDO DADOS VIA SFTP");
+          await ftp.sendFile(entity.file, file);
           fs.unlinkSync(file);
         }
       } else {
-        Logger.warning(
-          `ERRO AO BUSCAR DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
+        Logger.info(
+          `NAO FORAM ENCONTRADO XPTO  NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
         );
       }
     }
