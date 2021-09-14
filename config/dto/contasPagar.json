@@ -1,0 +1,21 @@
+{
+    "cnpjOrigemDados": "cnpjorigemdados",
+    "dataCadastro": "datacadastro",
+    "dataAtualizacao": "dataatualizacao",
+    "titulo": "titulo",
+    "idFornecedor": "idfornecedor",
+    "nomeFornecedor": "nomefornecedor",
+    "dtEmissao": "dtemissao",
+    "documento": "documento",
+    "serie": "serie",
+    "dtVencimentoOriginal": "dtvencimentooriginal",
+    "dtVencimentoProrrogado": "dtvencimentoprorrogado",
+    "competencia": "competencia",
+    "vlrBruto": "vlrbruto",
+    "vlrAcrescimos": "vlracrescimos",
+    "vlrDescontos": "vlrdescontos",
+    "vlrLiquido": "vlrliquido",
+    "parcela": "parcela",
+    "situacao": "situacao",
+    "dtBaixa": "dtbaixa"
+}

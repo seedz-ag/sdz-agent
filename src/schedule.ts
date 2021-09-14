@@ -1,5 +1,4 @@
 import { watch } from "chokidar";
-import config from "../config";
 import { Logger } from "sdz-agent-common";
 
 import call from "./utils/call";
