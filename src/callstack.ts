@@ -74,7 +74,7 @@ const bootstrap = async (config: Config) => {
       const method = `get${entity.name}` as keyof Repository;
       let page = 1;
       let response = await respository[method]({ limit, page }, "T");
-      if (response.length) {
+      if (response && response.length) {
         Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
 
         while (0 < response.length) {
@@ -92,7 +92,7 @@ const bootstrap = async (config: Config) => {
         }
       } else {
         Logger.info(
-          `NAO FORAM ENCONTRADO XPTO  NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
+          `NAO FORAM ENCONTRADO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
         );
       }
     }
