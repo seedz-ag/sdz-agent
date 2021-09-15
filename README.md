@@ -34,7 +34,13 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
     |__📁dto
     |__📃index.ts
 |__📁src
-   |__📃bootstrap.ts
+    |__📁src
+        |__📃call.ts
+        |__📃extract-schedule-config.ts
+    |__📃bootstrap.ts
+    |__📃callstack.ts
+    |__📃job.ts
+    |__📃schedule.ts
 |__⚙️.gitignore
 |__⚙️config.json
 |__📃index.js
@@ -43,7 +49,6 @@ Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em amb
 |__⚙️package.json
 |__📃README.md
 |__⚙️tsconfig.json
-|__⚙️yarn.lock
 ```
 
 ###### LGPD
