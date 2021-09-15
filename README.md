@@ -4,8 +4,8 @@ O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de con
 
 ## Requisitos
 
-OS: Windows com WSL ou Ubuntu
-RAM: 2GB
+OS: Windows com WSL ou Ubuntu LTS 20.04
+RAM: 4GB
 HD: 1GB
 
 ### Instalacão
