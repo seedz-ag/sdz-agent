@@ -23,9 +23,9 @@ const bootstrap = async (config: Config) => {
 
     Logger.info("VALIDANDO CONEXÃO FTP");
 
-    const ftp = new FTP(config.auth.ftp);
-    await ftp.connect();
-    await ftp.disconnect();
+    const ftp1 = new FTP(config.auth.ftp);
+    await ftp1.connect();
+    await ftp1.disconnect();
 
     const database = new Database(config.database);
     const entities: Entity[] = [
@@ -111,6 +111,7 @@ const bootstrap = async (config: Config) => {
 
         if (fs.existsSync(file)) {
           Logger.info("ENVIANDO DADOS VIA SFTP");
+          const ftp = new FTP(config.auth.ftp);
           await ftp.connect();
           await ftp.sendFile(entity.file, file);
           fs.unlinkSync(file);
