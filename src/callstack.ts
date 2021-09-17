@@ -5,15 +5,18 @@ import {
   HydratorMapping,
   Repository,
 } from "sdz-agent-types";
-import ConfigJson from "../config/index";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
 import fs from "fs";
 import FTP from "sdz-agent-sftp";
+import cliProgress from "cli-progress";
+
 import { Hydrator, Logger, Validator } from "sdz-agent-common";
 
 const bootstrap = async (config: Config) => {
   try {
+    process.env.DEBUG = config.debug ? "true" : undefined;
+
     Logger.info("INICIANDO CLIENTE DE INTEGRAÇÃO SEEDZ.");
 
     validate(config);
@@ -22,10 +25,11 @@ const bootstrap = async (config: Config) => {
 
     const ftp = new FTP(config.auth.ftp);
     await ftp.connect();
+    await ftp.disconnect();
 
     const database = new Database(config.database);
     const entities: Entity[] = [
-      // { file: "test.csv", name: "Test", dto: "test" },
+      //{ file: "test.csv", name: "Test", dto: "test" },
       { file: "cliente.csv", name: "Clients", dto: "clientes" },
       { file: "endereco.csv", name: "Address", dto: "enderecos" },
       { file: "propriedade.csv", name: "Property", dto: "propriedades" },
@@ -72,10 +76,19 @@ const bootstrap = async (config: Config) => {
       const file = entity.file;
       const limit = 1000;
       const method = `get${entity.name}` as keyof Repository;
+      const count = `count${entity.name}` as keyof Repository;
       let page = 1;
       let response = await respository[method]({ limit, page }, "T");
+      const countResponse = await respository[count]({ limit, page }, "T");
+
+      const barProgress = new cliProgress.SingleBar(
+        {},
+        cliProgress.Presets.shades_classic
+      );
+
       if (response && response.length) {
         Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
+        barProgress.start(countResponse[0].total, 0);
 
         while (0 < response.length) {
           await csv.write(
@@ -84,9 +97,21 @@ const bootstrap = async (config: Config) => {
           );
           page++;
           response = await respository[method]({ limit, page }, "T");
+
+          let updateProgress = page * limit;
+          let difUpdateProgress = countResponse[0].total - page * limit;
+          if (difUpdateProgress < limit) {
+            updateProgress = parseFloat(countResponse[0].total);
+          }
+          barProgress.increment();
+          barProgress.update(updateProgress);
         }
+
+        barProgress.stop();
+
         if (fs.existsSync(file)) {
           Logger.info("ENVIANDO DADOS VIA SFTP");
+          await ftp.connect();
           await ftp.sendFile(entity.file, file);
           fs.unlinkSync(file);
         }

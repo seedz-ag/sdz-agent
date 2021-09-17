@@ -4,10 +4,10 @@
       "token": "xxx"
     },
     "ftp": {
+	    "username": "",
       "password": "",
-      "username": "",
       "host": "",
-      "port": ""
+      "port": 22
     }
   },
   "ftp": {
@@ -17,11 +17,11 @@
     "collation": "",
     "driver": "",
     "password": "",
-    "port": "",
+    "port": 9088,
     "server": "",
     "username": "",
     "host": "",
-	  "locale": ""
+	"locale": "en_US.UTF8"
   },
   "http": {
     "baseUrl": ""
@@ -32,5 +32,6 @@
     "dayOfWeek": "*",
     "dayOfMonth": "*",
     "month": "*"
-  } 
+  },
+  "debug": "false"
 }
