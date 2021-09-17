@@ -10,7 +10,7 @@ import Database from "sdz-agent-database";
 import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import cliProgress from "cli-progress";
-
+import chalk from "chalk";
 import { Hydrator, Logger, Validator } from "sdz-agent-common";
 
 const bootstrap = async (config: Config) => {
@@ -74,7 +74,7 @@ const bootstrap = async (config: Config) => {
       ) as HydratorMapping;
 
       const file = entity.file;
-      const limit = 1000;
+      const limit = 5;
       const method = `get${entity.name}` as keyof Repository;
       const count = `count${entity.name}` as keyof Repository;
       let page = 1;
@@ -82,7 +82,10 @@ const bootstrap = async (config: Config) => {
       const countResponse = await respository[count]({ limit, page }, "T");
 
       const barProgress = new cliProgress.SingleBar(
-        {},
+        {
+          format:
+            chalk.green("{bar}") + "| {percentage}% || {value}/{total} Linhas",
+        },
         cliProgress.Presets.shades_classic
       );
 
