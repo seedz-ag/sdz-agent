@@ -61,70 +61,86 @@ const bootstrap = async (config: Config) => {
       { file: "estoque.csv", name: "Inventory", dto: "estoque" },
     ];
 
+    const promises = [];
     const respository = database.getRepository();
 
     const csv = new CSV();
     for (const entity of entities) {
-      Logger.info(
-        `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
-      );
+      promises.push(
+        new Promise(async (resolve, reject) => {
+          try {
+            Logger.info(
+              `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
+            );
 
-      const dto = JSON.parse(
-        fs.readFileSync(`./config/dto/${entity.dto}.json`).toString()
-      ) as HydratorMapping;
+            const dto = JSON.parse(
+              fs.readFileSync(`./config/dto/${entity.dto}.json`).toString()
+            ) as HydratorMapping;
 
-      const file = entity.file;
-      const limit = 1000;
-      const method = `get${entity.name}` as keyof Repository;
-      const count = `count${entity.name}` as keyof Repository;
-      let page = 1;
-      let response = await respository[method]({ limit, page }, "T");
-      const countResponse = await respository[count]({ limit, page }, "T");
+            const file = entity.file;
+            const limit = 1000;
+            const method = `get${entity.name}` as keyof Repository;
+            const count = `count${entity.name}` as keyof Repository;
+            let page = 1;
+            let response = await respository[method]({ limit, page }, "T");
+            const countResponse = await respository[count](
+              { limit, page },
+              "T"
+            );
 
-      const barProgress = new cliProgress.SingleBar(
-        {
-          format:
-            chalk.green("{bar}") + "| {percentage}% || {value}/{total} Linhas",
-        },
-        cliProgress.Presets.shades_classic
-      );
+            const barProgress = new cliProgress.SingleBar(
+              {
+                format:
+                  chalk.green("{bar}") +
+                  "| {percentage}% || {value}/{total} Linhas",
+              },
+              cliProgress.Presets.shades_classic
+            );
 
-      if (response && response.length) {
-        Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-        barProgress.start(countResponse[0].total, 0);
+            if (response && response.length) {
+              Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
+              barProgress.start(countResponse[0].total, 0);
 
-        while (0 < response.length) {
-          await csv.write(
-            file,
-            response.map((row: DatabaseRow) => Hydrator(dto, row))
-          );
-          page++;
-          response = await respository[method]({ limit, page }, "T");
+              while (0 < response.length) {
+                await csv.write(
+                  file,
+                  response.map((row: DatabaseRow) => Hydrator(dto, row))
+                );
+                page++;
+                response = await respository[method]({ limit, page }, "T");
 
-          let updateProgress = page * limit;
-          let difUpdateProgress = countResponse[0].total - page * limit;
-          if (difUpdateProgress < limit) {
-            updateProgress = parseFloat(countResponse[0].total);
+                let updateProgress = page * limit;
+                let difUpdateProgress = countResponse[0].total - page * limit;
+                if (difUpdateProgress < limit) {
+                  updateProgress = parseFloat(countResponse[0].total);
+                }
+                barProgress.increment();
+                barProgress.update(updateProgress);
+              }
+
+              barProgress.stop();
+
+              if (fs.existsSync(file)) {
+                Logger.info("ENVIANDO DADOS VIA SFTP");
+                const ftp = new FTP(config.auth.ftp);
+                await ftp.connect();
+                await ftp.sendFile(entity.file, file);
+                fs.unlinkSync(file);
+              }
+            } else {
+              Logger.info(
+                `NAO FORAM ENCONTRADO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
+              );
+            }
+            resolve(true);
+          } catch (e) {
+            reject(e);
           }
-          barProgress.increment();
-          barProgress.update(updateProgress);
-        }
-
-        barProgress.stop();
-
-        if (fs.existsSync(file)) {
-          Logger.info("ENVIANDO DADOS VIA SFTP");
-          const ftp = new FTP(config.auth.ftp);
-          await ftp.connect();
-          await ftp.sendFile(entity.file, file);
-          fs.unlinkSync(file);
-        }
-      } else {
-        Logger.info(
-          `NAO FORAM ENCONTRADO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
-        );
-      }
+        })
+      );
     }
+
+    await Promise.all(promises);
 
     Logger.info("ENCERRANDO PROCESSO");
 
