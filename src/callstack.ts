@@ -78,7 +78,7 @@ const bootstrap = async (config: Config) => {
             ) as HydratorMapping;
 
             const file = entity.file;
-            const limit = 1000;
+            const limit = config.pageSize || 1000;
             const method = `get${entity.name}` as keyof Repository;
             const count = `count${entity.name}` as keyof Repository;
             let page = 1;
