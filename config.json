@@ -1,56 +1,108 @@
 {
-  "auth": {
-    "api": {
-      "token": "*"
-    },
-    "ftp": {
-	    "username": "",
-      "password": "",
-      "host": "",
-      "port": 22
-    }
+  "auth":{
+     "api":{
+        "token":"*"
+     },
+     "ftp":{
+        "username":"",
+        "password":"",
+        "host":"",
+        "port":22
+     }
   },
-  "ftp": {
-    "path": ""
+  "ftp":{
+     "path":""
   },
-  "database": {
-    "collation": "",
-    "driver": "",
-    "password": "",
-    "port": 9088,
-    "server": "",
-    "username": "",
-    "host": "",
-	  "locale": "en_US.UTF8"
+  "database":{
+     "collation":"",
+     "driver":"",
+     "password":"",
+     "port":9088,
+     "server":"",
+     "username":"",
+     "host":"",
+     "locale":"en_US.UTF8"
   },
-  "http": {
-    "baseUrl": ""
+  "http":{
+     "baseUrl":""
   },
-  "schedule": {
-    "hour": "*",
-    "minute": "*",
-    "dayOfWeek": "*",
-    "dayOfMonth": "*",
-    "month": "*"
+  "schedule":{
+     "hour":"*",
+     "minute":"*",
+     "dayOfWeek":"*",
+     "dayOfMonth":"*",
+     "month":"*"
   },
-  "debug": "true",
-  "scope": [{ "name": "Clients","file": "cliente.csv"  },
-            { "name": "Address","file": "endereco.csv" },
-            { "name": "Properties", "file": "propriedade.csv"},
-            { "name": "Items", "file": "item.csv" },
-            { "name": "ItemsBranding", "file": "item_branding.csv"},
-            { "name": "ItemsGroup", "file": "item_grupo.csv"},
-            { "name": "Orders", "file": "pedido.csv" },
-            { "name": "OrdersItem", "file": "pedido_item.csv" },
-            { "name": "Invoices", "file": "faturamento.csv" },
-            { "name": "InvoicesItem", "file": "faturamento_item.csv" },
-            { "name": "PaymentsType", "file": "especie_pagamento.csv" },
-            { "name": "Providers","file": "fornecedor.csv"  },
-            { "name": "AccountsPay", "file": "contas_pagar.csv" },
-            { "name": "AccountsReceivable", "file": "contas_receber.csv"},
-            { "name": "Vendors", "file": "vendedor.csv" },
-            { "name": "Employees", "file": "funcionario.csv" },
-            { "name": "Inventories", "file": "estoque.csv"}
+  "debug":"true",
+  "scope":[
+     {
+        "name":"Clients",
+        "file":"cliente.csv"
+     },
+     {
+        "name":"Address",
+        "file":"endereco.csv"
+     },
+     {
+        "name":"Properties",
+        "file":"propriedade.csv"
+     },
+     {
+        "name":"Items",
+        "file":"item.csv"
+     },
+     {
+        "name":"ItemsBranding",
+        "file":"item_branding.csv"
+     },
+     {
+        "name":"ItemsGroup",
+        "file":"item_grupo.csv"
+     },
+     {
+        "name":"Orders",
+        "file":"pedido.csv"
+     },
+     {
+        "name":"OrdersItem",
+        "file":"pedido_item.csv"
+     },
+     {
+        "name":"Invoices",
+        "file":"faturamento.csv"
+     },
+     {
+        "name":"InvoicesItem",
+        "file":"faturamento_item.csv"
+     },
+     {
+        "name":"PaymentsType",
+        "file":"especie_pagamento.csv"
+     },
+     {
+        "name":"Providers",
+        "file":"fornecedor.csv"
+     },
+     {
+        "name":"AccountsPay",
+        "file":"contas_pagar.csv"
+     },
+     {
+        "name":"AccountsReceivable",
+        "file":"contas_receber.csv"
+     },
+     {
+        "name":"Vendors",
+        "file":"vendedor.csv"
+     },
+     {
+        "name":"Employees",
+        "file":"funcionario.csv"
+     },
+     {
+        "name":"Inventories",
+        "file":"estoque.csv"
+     }
   ],
-  "pageSize": 1000
+  "pageSize":1000
 }
