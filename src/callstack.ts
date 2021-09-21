@@ -28,38 +28,7 @@ const bootstrap = async (config: Config) => {
     await ftp1.disconnect();
 
     const database = new Database(config.database);
-    const entities: Entity[] = [
-      //{ file: "test.csv", name: "Test", dto: "test" },
-      { file: "cliente.csv", name: "Clients", dto: "clientes" },
-      { file: "endereco.csv", name: "Address", dto: "enderecos" },
-      { file: "propriedade.csv", name: "Property", dto: "propriedades" },
-      { file: "item.csv", name: "Item", dto: "item" },
-      { file: "item_branding.csv", name: "ItemBranding", dto: "itemBranding" },
-      { file: "item_grupo.csv", name: "ItemGroup", dto: "itemGrupo" },
-      { file: "pedido.csv", name: "Request", dto: "pedido" },
-      { file: "pedido_item.csv", name: "RequestItem", dto: "pedidoItem" },
-      { file: "faturamento.csv", name: "Invoices", dto: "faturamento" },
-      {
-        file: "faturamento_item.csv",
-        name: "InvoicesItem",
-        dto: "faturamentoItem",
-      },
-      {
-        file: "especie_pagamento.csv",
-        name: "PaymentType",
-        dto: "especiePagamento",
-      },
-      { file: "fornecedor.csv", name: "Provider", dto: "fornecedor" },
-      { file: "contas_pagar.csv", name: "AccountPay", dto: "contasPagar" },
-      {
-        file: "contas_receber.csv",
-        name: "AccountReceivable",
-        dto: "contasReceber",
-      },
-      { file: "vendedor.csv", name: "Vendor", dto: "vendedor" },
-      { file: "funcionario.csv", name: "Employee", dto: "funcionario" },
-      { file: "estoque.csv", name: "Inventory", dto: "estoque" },
-    ];
+    const entities: Entity[] = config.scope;
 
     const promises = [];
     const respository = database.getRepository();
@@ -74,7 +43,7 @@ const bootstrap = async (config: Config) => {
             );
 
             const dto = JSON.parse(
-              fs.readFileSync(`./config/dto/${entity.dto}.json`).toString()
+              fs.readFileSync(`./dto/${entity.name}.json`).toString()
             ) as HydratorMapping;
 
             const file = entity.file;

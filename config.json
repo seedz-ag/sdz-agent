@@ -21,7 +21,7 @@
     "server": "",
     "username": "",
     "host": "",
-	"locale": "en_US.UTF8"
+	  "locale": "en_US.UTF8"
   },
   "http": {
     "baseUrl": ""
@@ -33,5 +33,23 @@
     "dayOfMonth": "*",
     "month": "*"
   },
-  "debug": "false"
+  "debug": "true",
+  "scope": [{ "name": "Clients","file": "cliente.csv"  },
+            { "name": "Address","file": "endereco.csv" },
+            { "name": "Properties", "file": "propriedade.csv"},
+            { "name": "Items", "file": "item.csv" },
+            { "name": "ItemsBranding", "file": "item_branding.csv"},
+            { "name": "ItemsGroup", "file": "item_grupo.csv"},
+            { "name": "Orders", "file": "pedido.csv" },
+            { "name": "OrdersItem", "file": "pedido_item.csv" },
+            { "name": "Invoices", "file": "faturamento.csv" },
+            { "name": "InvoicesItem", "file": "faturamento_item.csv" },
+            { "name": "PaymentsType", "file": "especie_pagamento.csv" },
+            { "file": "fornecedor.csv", "name": "Providers"  },
+            { "file": "contas_pagar.csv", "name": "AccountsPay" },
+            { "file": "contas_receber.csv", "name": "AccountsReceivable"},
+            { "file": "vendedor.csv", "name": "Vendors" },
+            { "file": "funcionario.csv", "name": "Employees" },
+            { "file": "estoque.csv", "name": "Inventories"}
+  ]
 }
