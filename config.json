@@ -1,7 +1,7 @@
 {
   "auth": {
     "api": {
-      "token": "xxx"
+      "token": "*"
     },
     "ftp": {
 	    "username": "",
@@ -45,11 +45,12 @@
             { "name": "Invoices", "file": "faturamento.csv" },
             { "name": "InvoicesItem", "file": "faturamento_item.csv" },
             { "name": "PaymentsType", "file": "especie_pagamento.csv" },
-            { "file": "fornecedor.csv", "name": "Providers"  },
-            { "file": "contas_pagar.csv", "name": "AccountsPay" },
-            { "file": "contas_receber.csv", "name": "AccountsReceivable"},
-            { "file": "vendedor.csv", "name": "Vendors" },
-            { "file": "funcionario.csv", "name": "Employees" },
-            { "file": "estoque.csv", "name": "Inventories"}
-  ]
+            { "name": "Providers","file": "fornecedor.csv"  },
+            { "name": "AccountsPay", "file": "contas_pagar.csv" },
+            { "name": "AccountsReceivable", "file": "contas_receber.csv"},
+            { "name": "Vendors", "file": "vendedor.csv" },
+            { "name": "Employees", "file": "funcionario.csv" },
+            { "name": "Inventories", "file": "estoque.csv"}
+  ],
+  "pageSize": 1000
 }
