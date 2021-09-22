@@ -7,10 +7,16 @@ if (dev) {
   require('ts-node').register({ project })
 }
 
+const isConfig = !!process.argv.filter(n => ["-C", "--config"].some(n2 => n === n2)).length
 const isSchedule = !!process.argv.filter(n => ["-S", "--schedule"].some(n2 => n === n2)).length
 
-if (isSchedule) {
-  require(`../src/schedule.ts`)
-} else {
-  require(`../src/bootstrap.ts`)
+switch (true) {
+  case isConfig:
+    require(`../src/config/config.ts`);
+    break;
+  case isSchedule:
+    require(`../src/schedule.ts`);
+    break;
+  default:
+    require(`../src/bootstrap.ts`);
 }
