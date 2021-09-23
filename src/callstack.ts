@@ -9,7 +9,7 @@ import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
 import fs from "fs";
 import FTP from "sdz-agent-sftp";
-import cliProgress from "cli-progress";
+import progress from "../src/utils/progress";
 import chalk from "chalk";
 import { Hydrator, Logger, Validator } from "sdz-agent-common";
 
@@ -61,18 +61,9 @@ const bootstrap = async (config: Config) => {
               "T"
             );
 
-            const barProgress = new cliProgress.SingleBar(
-              {
-                format:
-                  chalk.green("{bar}") +
-                  "| {percentage}% || {value}/{total} Linhas",
-              },
-              cliProgress.Presets.shades_classic
-            );
-
             if (response && response.length) {
               Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-              barProgress.start(countResponse[0].total, 0);
+              const barProgress = progress.create(countResponse[0].total, 0);
 
               while (0 < response.length) {
                 await csv.write(
