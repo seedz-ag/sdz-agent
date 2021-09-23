@@ -8,11 +8,15 @@ if (dev) {
 }
 
 const isConfig = !!process.argv.filter(n => ["-C", "--config"].some(n2 => n === n2)).length
+const isConfigDTO = !!process.argv.filter(n => ["-D", "--config-dto"].some(n2 => n === n2)).length
 const isSchedule = !!process.argv.filter(n => ["-S", "--schedule"].some(n2 => n === n2)).length
 
 switch (true) {
   case isConfig:
     require(`../src/config/config.ts`);
+    break;
+  case isConfigDTO:
+    require(`../src/config/dto.ts`);
     break;
   case isSchedule:
     require(`../src/schedule.ts`);
