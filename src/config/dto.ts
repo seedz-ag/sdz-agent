@@ -9,11 +9,9 @@ const log = (msg: string) => console.log(chalk.green(msg));
 const dtos = async () => {
   const dtos: any = {};
 
-  /*
   log("SEEDZ INTEGRATION AGENT");
   log("YOU WILL WALK THROUGH SOME DTO CONFIGURATIONS STEPS");
   log("");
-  */
 
   const files = fs.readdirSync(`${__dirname}/../../config/dto`);
 
@@ -24,7 +22,7 @@ const dtos = async () => {
         (await new Select({
           choices: ["yes", "no"],
           initial: "yes",
-          message: `DO YOU WANT TO ALTER THE ${file} DTO FILE?`,
+          message: `DO YOU WANT TO ALTER THE ${chalk.bold(file)} DTO FILE?`,
         }).run())
       ) {
         dtos[file] = await edit(file);
@@ -32,12 +30,10 @@ const dtos = async () => {
     }
   }
 
-  console.log(dtos);
+  saveDTOS(dtos);
 
-  /*
   log("");
   log("CONGRATULATIONS, DTO CONFIGURATION COMPLETED!");
-  */
 };
 
 const edit = async (file: string) => {
@@ -78,6 +74,15 @@ const edit = async (file: string) => {
   };
 
   return await ask();
+};
+
+const saveDTOS = (dtos: any[]) => {
+  for (const file in Object.keys(dtos)) {
+    fs.writeFileSync(
+      `${__dirname}/../../config/dto/${file}`,
+      JSON.stringify(dtos[file], null, "\t")
+    );
+  }
 };
 
 !(async () => {
