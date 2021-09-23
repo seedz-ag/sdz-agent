@@ -1,40 +1,43 @@
 import chalk from "chalk";
 import enquirer from "enquirer";
+import { ConfigAuthFTP, QuestionResponse } from "sdz-agent-types";
 
 export default async () => {
-  const answers: { [key: string]: any } = {};
-  await enquirer
-    .prompt({
+  const answers: Partial<ConfigAuthFTP> = {};
+
+  answers.host = (
+    await enquirer.prompt<QuestionResponse>({
       type: "input",
       name: "response",
       initial: "ftps.seedz.ag",
       message: `What is your ${chalk.green(chalk.bold("FTP"))} host?`,
     })
-    .then((answer) => (answers.host = answer));
+  ).response as string;
 
-  await enquirer
-    .prompt({
+  answers.port = (
+    await enquirer.prompt<QuestionResponse>({
       type: "input",
       name: "response",
       initial: "22",
       message: `What is your ${chalk.green(chalk.bold("FTP"))} port?`,
     })
-    .then((answer) => (answers.port = answer));
+  ).response as number;
 
-  await enquirer
-    .prompt({
+  answers.username = (
+    await enquirer.prompt<QuestionResponse>({
       type: "input",
       name: "response",
       message: `What is your ${chalk.green(chalk.bold("FTP"))} username?`,
     })
-    .then((answer) => (answers.username = answer));
+  ).response as string;
 
-  await enquirer
-    .prompt({
+  answers.password = (
+    await enquirer.prompt<QuestionResponse>({
       type: "password",
       name: "response",
       message: `What is your ${chalk.green(chalk.bold("FTP"))} password?`,
     })
-    .then((answer) => (answers.password = answer));
+  ).response as string;
+
   return answers;
 };
