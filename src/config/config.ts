@@ -54,5 +54,7 @@ const config = async () => {
 };
 
 !(async () => {
-  await config();
+  try {
+    await config();
+  } catch {}
 })();
