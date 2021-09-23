@@ -43,7 +43,11 @@ const bootstrap = async (config: Config) => {
             );
 
             const dto = JSON.parse(
-              fs.readFileSync(`./dto/${entity.name}.json`).toString()
+              fs
+                .readFileSync(
+                  `${__dirname}/../config/dto/${entity.name.toLocaleLowerCase()}.json`
+                )
+                .toString()
             ) as HydratorMapping;
 
             const file = entity.file;

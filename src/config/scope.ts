@@ -82,10 +82,7 @@ export default async () => {
     choices: ["minimum", "maximum", "custom"],
   });
 
-  const scopeType = await prompt1
-    .run()
-
-    console.log(scopeType)
+  const scopeType = await prompt1.run();
 
   const prompt2 = new MultiSelect({
     name: "response",
@@ -97,7 +94,7 @@ export default async () => {
     sort: true,
   });
 
-  const scope = await prompt2.run()
+  const scope = await prompt2.run();
 
   return {
     scope: choices
