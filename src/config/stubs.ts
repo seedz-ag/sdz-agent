@@ -15,4 +15,23 @@ export default (
       .toString();
     fs.writeFileSync(`${__dirname}/../../config/dto/${dto}.json`, file);
   }
+
+  if ("database" === connector) {
+    const files = fs.readdirSync(
+      `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/stubs/sql/`
+    );
+
+    for (const file of files) {
+      const sql = fs
+        .readFileSync(
+          `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/stubs/sql/${file}`
+        )
+        .toString();
+
+      fs.writeFileSync(
+        `${__dirname}/../../config/sql/${file.replace(".stub", "")}.sql`,
+        sql
+      );
+    }
+  }
 };
