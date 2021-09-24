@@ -66,7 +66,7 @@ const bootstrap = async (config: Config) => {
                 countResponse[0].total,
                 0,
                 {
-                  color: `\u001b[32m`,
+                  color: `\u001b[33m`,
                   event: "WRITING",
                   text: entity.file,
                   unit: "Records",
@@ -86,25 +86,24 @@ const bootstrap = async (config: Config) => {
                 if (difUpdateProgress < limit) {
                   updateProgress = parseFloat(countResponse[0].total);
                   barProgress.update(updateProgress, {
-                    color: `\u001b[33m`,
+                    color: `\u001b[32m`,
                     event: "DONE",
+                    count: `${updateProgress}/${countResponse[0].total}`,
                   });
                 }
                 barProgress.increment();
-                barProgress.update(updateProgress);
+                barProgress.update(updateProgress, {
+                  count: `${updateProgress}/${countResponse[0].total}`,
+                });
               }
 
               if (fs.existsSync(file)) {
                 // Logger.info("ENVIANDO DADOS VIA SFTP");
-                // const ftp = new FTP(config.auth.ftp);
-                // await ftp.connect();
-                // await ftp.sendFile(entity.file, file);
-                // fs.unlinkSync(file);
+                const ftp = new FTP(config.auth.ftp);
+                await ftp.connect();
+                await ftp.sendFile(entity.file, file);
+                fs.unlinkSync(file);
               }
-            } else {
-              Logger.info(
-                `NAO FORAM ENCONTRADO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
-              );
             }
             resolve(true);
           } catch (e) {
@@ -115,6 +114,7 @@ const bootstrap = async (config: Config) => {
     }
 
     await Promise.all(promises);
+    ProgressBar.close();
 
     Logger.info("ENCERRANDO PROCESSO");
 
