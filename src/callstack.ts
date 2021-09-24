@@ -9,9 +9,7 @@ import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
 import fs from "fs";
 import FTP from "sdz-agent-sftp";
-import progress from "../src/utils/progress";
-import chalk from "chalk";
-import { Hydrator, Logger, Validator } from "sdz-agent-common";
+import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 
 const bootstrap = async (config: Config) => {
   try {
@@ -63,14 +61,15 @@ const bootstrap = async (config: Config) => {
 
             if (response && response.length) {
               // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-              const barProgress = progress.create(
+              const barProgress = ProgressBar.create(
                 entity.file,
                 countResponse[0].total,
                 0,
                 {
                   color: `\u001b[32m`,
-                  event: "WRITE",
-                  file: entity.file,
+                  event: "WRITING",
+                  text: entity.file,
+                  unit: "Records",
                 }
               );
 
@@ -96,11 +95,11 @@ const bootstrap = async (config: Config) => {
               }
 
               if (fs.existsSync(file)) {
-                Logger.info("ENVIANDO DADOS VIA SFTP");
-                const ftp = new FTP(config.auth.ftp);
-                await ftp.connect();
-                await ftp.sendFile(entity.file, file);
-                fs.unlinkSync(file);
+                // Logger.info("ENVIANDO DADOS VIA SFTP");
+                // const ftp = new FTP(config.auth.ftp);
+                // await ftp.connect();
+                // await ftp.sendFile(entity.file, file);
+                // fs.unlinkSync(file);
               }
             } else {
               Logger.info(
