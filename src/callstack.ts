@@ -38,9 +38,9 @@ const bootstrap = async (config: Config) => {
       promises.push(
         new Promise(async (resolve, reject) => {
           try {
-            Logger.info(
-              `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
-            );
+            // Logger.info(
+            //   `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
+            // );
 
             const dto = JSON.parse(
               fs
@@ -62,8 +62,17 @@ const bootstrap = async (config: Config) => {
             );
 
             if (response && response.length) {
-              Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-              const barProgress = progress.create(countResponse[0].total, 0);
+              // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
+              const barProgress = progress.create(
+                entity.file,
+                countResponse[0].total,
+                0,
+                {
+                  color: `\u001b[32m`,
+                  event: "WRITE",
+                  file: entity.file,
+                }
+              );
 
               while (0 < response.length) {
                 await csv.write(
@@ -73,16 +82,18 @@ const bootstrap = async (config: Config) => {
                 page++;
                 response = await respository[method]({ limit, page }, "T");
 
-                let updateProgress = page * limit;
+                let updateProgress: any = page * limit;
                 let difUpdateProgress = countResponse[0].total - page * limit;
                 if (difUpdateProgress < limit) {
                   updateProgress = parseFloat(countResponse[0].total);
+                  barProgress.update(updateProgress, {
+                    color: `\u001b[33m`,
+                    event: "DONE",
+                  });
                 }
                 barProgress.increment();
                 barProgress.update(updateProgress);
               }
-
-              barProgress.stop();
 
               if (fs.existsSync(file)) {
                 Logger.info("ENVIANDO DADOS VIA SFTP");
