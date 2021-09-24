@@ -17,11 +17,11 @@ const bootstrap = async (config: Config) => {
 
     Logger.info("INICIANDO CLIENTE DE INTEGRAÇÃO SEEDZ.");
 
-    validate(config);
+    //validate(config);
 
     Logger.info("VALIDANDO CONEXÃO FTP");
 
-    const ftp1 = new FTP(config.auth.ftp);
+    const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
     await ftp1.disconnect();
 
