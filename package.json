@@ -11,7 +11,7 @@
     "node-schedule": "^2.0.0",
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
-    "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git#feature/stubs",
+    "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
     "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git"
   },
