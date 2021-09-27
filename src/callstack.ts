@@ -31,7 +31,7 @@ const bootstrap = async (config: Config) => {
     const promises = [];
     const respository = database.getRepository();
 
-    const csv = new CSV();
+    const csv = new CSV(config.legacy);
     for (const entity of entities) {
       promises.push(
         new Promise(async (resolve, reject) => {
