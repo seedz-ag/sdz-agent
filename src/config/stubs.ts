@@ -6,6 +6,15 @@ export default (
   driver: string,
   scope: string[]
 ) => {
+  let dir = `${__dirname}/../../config/dto`;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+  dir = `${__dirname}/../../config/sql`;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+
   for (const entity of scope) {
     const dto = entity.toLocaleLowerCase();
     const file = fs
