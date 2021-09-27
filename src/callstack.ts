@@ -99,7 +99,7 @@ const bootstrap = async (config: Config) => {
 
               if (fs.existsSync(file)) {
                 // Logger.info("ENVIANDO DADOS VIA SFTP");
-                const ftp = new FTP(config.auth.ftp);
+                const ftp = new FTP(config.ftp);
                 await ftp.connect();
                 await ftp.sendFile(entity.file, file);
                 fs.unlinkSync(file);
