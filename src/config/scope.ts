@@ -46,8 +46,12 @@ export default async () => {
       file: "faturamento_item.csv",
     },
     {
-      name: "PaymentsType",
+      name: "PaymentsSpecie",
       file: "especie_pagamento.csv",
+    },
+    {
+      name: "PaymentsCondition",
+      file: "condicao_pagamento.csv",
     },
     {
       name: "Providers",
