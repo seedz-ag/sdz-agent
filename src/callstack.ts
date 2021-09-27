@@ -15,11 +15,11 @@ const bootstrap = async (config: Config) => {
   try {
     process.env.DEBUG = config.debug ? "true" : undefined;
 
-    Logger.info("INICIANDO CLIENTE DE INTEGRAÇÃO SEEDZ.");
+    Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
 
     //validate(config);
 
-    Logger.info("VALIDANDO CONEXÃO FTP");
+    Logger.info("VALIDATING CLIENT FTP");
 
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
@@ -116,7 +116,7 @@ const bootstrap = async (config: Config) => {
     await Promise.all(promises);
     ProgressBar.close();
 
-    Logger.info("ENCERRANDO PROCESSO");
+    Logger.info("ENDING PROCESS");
 
     process.exit(1);
   } catch (e: any) {
@@ -126,7 +126,7 @@ const bootstrap = async (config: Config) => {
 };
 
 const validate = (config: Config) => {
-  Logger.info("VERIFICANDO CONFIGURAÇÕES.");
+  Logger.info("VALIDATING SETTINGS.");
   const validator = new Validator(config);
   validator.auth();
   validator.database();
