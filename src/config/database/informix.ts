@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import enquirer from "enquirer";
+import fs from "fs";
 import { QuestionResponse } from "sdz-agent-types";
 
 export default async () => {
@@ -61,5 +62,10 @@ export default async () => {
       message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} password?`,
     })
     .then((answer) => answer.response);
+
+  fs.writeFileSync(
+    `${__dirname}/../../../node_modules/informixdb/installer/onedb-odbc-driver/etc/sqlhosts`,
+    `${answers.server} onsoctcp ${answers.host} ${answers.port}`
+  );
   return answers;
 };
