@@ -4,9 +4,12 @@ import fs from "fs";
 import { QuestionResponse } from "sdz-agent-types";
 
 const createSQLHosts = ({ host, port, server }: { [key: string]: any }) => {
-  const INFORMIXDIR = process.env.INFORMIXDIR || `${__dirname}/../../../node_modules/informixdb`;
+  let INFORMIXDIR = `${__dirname}/../../../node_modules/informixdb/installer/onedb-odbc-driver`;
+  if (process.env.INFORMIXDIR) {
+    INFORMIXDIR = process.env.INFORMIXDIR;
+  }
   fs.writeFileSync(
-    `${INFORMIXDIR}/installer/onedb-odbc-driver/etc/sqlhosts`,
+    `${INFORMIXDIR}/etc/sqlhosts`,
     `${server} onsoctcp ${host} ${port}`
   );
 };
