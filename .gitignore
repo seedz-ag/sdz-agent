@@ -1,3 +1,5 @@
+config/dto/*
+config/sql/*
 # Logs
 logs
 *.log
