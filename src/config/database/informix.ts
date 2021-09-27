@@ -3,6 +3,14 @@ import enquirer from "enquirer";
 import fs from "fs";
 import { QuestionResponse } from "sdz-agent-types";
 
+const createSQLHosts = ({ host, port, server }: { [key: string]: any }) => {
+  const INFORMIXDIR = process.env.INFORMIXDIR || `${__dirname}/../../../node_modules/informixdb`;
+  fs.writeFileSync(
+    `${INFORMIXDIR}/installer/onedb-odbc-driver/etc/sqlhosts`,
+    `${server} onsoctcp ${host} ${port}`
+  );
+};
+
 export default async () => {
   const answers: { [key: string]: any } = {};
 
@@ -62,10 +70,6 @@ export default async () => {
       message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} password?`,
     })
     .then((answer) => answer.response);
-
-  fs.writeFileSync(
-    `${__dirname}/../../../node_modules/informixdb/installer/onedb-odbc-driver/etc/sqlhosts`,
-    `${answers.server} onsoctcp ${answers.host} ${answers.port}`
-  );
+  createSQLHosts(answers);
   return answers;
 };
