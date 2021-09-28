@@ -86,7 +86,6 @@ const bootstrap = async (config: Config) => {
                 if (difUpdateProgress < limit) {
                   updateProgress = parseFloat(countResponse[0].total);
                   barProgress.update(updateProgress, {
-                    color: `\u001b[32m`,
                     event: "DONE",
                     count: `${updateProgress}/${countResponse[0].total}`,
                   });
