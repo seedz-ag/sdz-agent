@@ -11,7 +11,7 @@ import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 
-const bootstrap = async (config: Config) => {
+const callstack = async (config: Config) => {
   try {
     process.env.DEBUG = config.debug ? "true" : undefined;
 
@@ -28,91 +28,95 @@ const bootstrap = async (config: Config) => {
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
 
-    const promises = [];
+    const promises: Promise<boolean>[] = [];
     const respository = database.getRepository();
 
     const csv = new CSV(config.legacy);
+
     for (const entity of entities) {
-      promises.push(
-        new Promise(async (resolve, reject) => {
-          try {
-            // Logger.info(
-            //   `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
-            // );
+      const promise = new Promise<boolean>(async (resolve, reject) => {
+        try {
+          // Logger.info(
+          //   `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
+          // );
 
-            const dto = JSON.parse(
-              fs
-                .readFileSync(
-                  `${__dirname}/../config/dto/${entity.name.toLocaleLowerCase()}.json`
-                )
-                .toString()
-            ) as HydratorMapping;
+          const dto = JSON.parse(
+            fs
+              .readFileSync(
+                `${__dirname}/../config/dto/${entity.name.toLocaleLowerCase()}.json`
+              )
+              .toString()
+          ) as HydratorMapping;
 
-            const file = entity.file;
-            const limit = config.pageSize || 1000;
-            const method = `get${entity.name}` as keyof Repository;
-            const count = `count${entity.name}` as keyof Repository;
-            let page = 1;
-            let response = await respository[method]({ limit, page }, "T");
-            const countResponse = await respository[count](
-              { limit, page },
-              "T"
+          const file = entity.file;
+          const limit = config.pageSize || 1000;
+          const method = `get${entity.name}` as keyof Repository;
+          const count = `count${entity.name}` as keyof Repository;
+          let page = 1;
+          let response = await respository[method]({ limit, page }, "T");
+          const countResponse = await respository[count]({ limit, page }, "T");
+
+          if (response && response.length) {
+            // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
+            const barProgress = ProgressBar.create(
+              entity.file,
+              countResponse[0].total,
+              0,
+              {
+                color: `\u001b[33m`,
+                event: "WRITING",
+                text: entity.file,
+                unit: "Records",
+              }
             );
 
-            if (response && response.length) {
-              // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-              const barProgress = ProgressBar.create(
-                entity.file,
-                countResponse[0].total,
-                0,
-                {
-                  color: `\u001b[33m`,
-                  event: "WRITING",
-                  text: entity.file,
-                  unit: "Records",
-                }
+            while (0 < response.length) {
+              await csv.write(
+                file,
+                response.map((row: DatabaseRow) => Hydrator(dto, row))
               );
+              page++;
+              response = await respository[method]({ limit, page }, "T");
 
-              while (0 < response.length) {
-                await csv.write(
-                  file,
-                  response.map((row: DatabaseRow) => Hydrator(dto, row))
-                );
-                page++;
-                response = await respository[method]({ limit, page }, "T");
-
-                let updateProgress: any = page * limit;
-                let difUpdateProgress = countResponse[0].total - page * limit;
-                if (difUpdateProgress < limit) {
-                  updateProgress = parseFloat(countResponse[0].total);
-                  barProgress.update(updateProgress, {
-                    event: "DONE",
-                    count: `${updateProgress}/${countResponse[0].total}`,
-                  });
-                }
-                barProgress.increment();
+              let updateProgress: any = page * limit;
+              let difUpdateProgress = countResponse[0].total - page * limit;
+              if (difUpdateProgress < limit) {
+                updateProgress = parseFloat(countResponse[0].total);
                 barProgress.update(updateProgress, {
+                  event: "DONE",
                   count: `${updateProgress}/${countResponse[0].total}`,
                 });
               }
-
-              if (fs.existsSync(file)) {
-                // Logger.info("ENVIANDO DADOS VIA SFTP");
-                const ftp = new FTP(config.ftp);
-                await ftp.connect();
-                await ftp.sendFile(entity.file, file);
-                fs.unlinkSync(file);
-              }
+              barProgress.increment();
+              barProgress.update(updateProgress, {
+                count: `${updateProgress}/${countResponse[0].total}`,
+              });
             }
-            resolve(true);
-          } catch (e) {
-            reject(e);
+
+            if (fs.existsSync(file)) {
+              // Logger.info("ENVIANDO DADOS VIA SFTP");
+              const ftp = new FTP(config.ftp);
+              await ftp.connect();
+              await ftp.sendFile(entity.file, file);
+              fs.unlinkSync(file);
+            }
           }
-        })
-      );
+          resolve(true);
+        } catch (e) {
+          reject(e);
+        }
+      });
+      if (config.async) {
+        promises.push(promise);
+      } else {
+        await Promise.resolve(promise);
+      }
     }
 
-    await Promise.all(promises);
+    if (promises.length) {
+      await Promise.all(promises);
+    }
+
     ProgressBar.close();
 
     Logger.info("ENDING PROCESS");
@@ -131,4 +135,4 @@ const validate = (config: Config) => {
   validator.database();
 };
 
-export default bootstrap;
+export default callstack;
