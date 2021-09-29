@@ -7,7 +7,7 @@ export default async () => {
     choices: ["Legacy", "Latest"],
     name: "response",
     initial: "Latest",
-    message: `What is your desired ${chalk.green(chalk.bold("MODE"))}?`,
+    message: `What is your desired ${chalk.green(chalk.bold("FORMAT"))} mode?`,
   });
-  return await question.run();
+  return "Legacy" === await question.run();
 };

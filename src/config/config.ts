@@ -3,8 +3,9 @@ import fs from "fs";
 
 import connector from "./connector";
 import database from "./database";
+import exportMode from "./export";
 import ftp from "./ftp";
-import legacy from "./legacy";
+import legacyMode from "./legacy";
 import schedule from "./schedule";
 import scope from "./scope";
 import stubs from "./stubs";
@@ -18,7 +19,9 @@ const config = async () => {
   log("YOU WILL WALK THROUGH SOME CONFIGURATIONS STEPS");
   log("");
 
-  answers.legacy = "Legacy" === (await legacy());
+  answers.legacy = await legacyMode();
+
+  answers.async = await exportMode();
 
   answers.ftp = await ftp();
 
