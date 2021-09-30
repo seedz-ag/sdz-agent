@@ -1,9 +1,10 @@
 import chalk from "chalk";
 import { QuestionResponse } from "sdz-agent-types";
+import ConfigScope from "sdz-agent-types/types/config.scope.type";
 
 const { MultiSelect, Select } = require("enquirer");
 
-export default async () => {
+export default async (config: ConfigScope | undefined) => {
   const choices = [
     {
       name: "Clients",
@@ -93,7 +94,7 @@ export default async () => {
     message: `What is your desired ${chalk.green(
       chalk.bold("SCOPE")
     )} entities?`,
-    initial: choices.map((item) => item.name),
+    initial: config?.map((item) => item.name) || choices.map((item) => item.name),
     choices,
     sort: true,
   });
