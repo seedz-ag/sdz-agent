@@ -11,6 +11,6 @@ const load = (file: string): Partial<Config> => {
   return json;
 };
 
-const config = load(`../config`);
+const config = load(`../config`) as Config;
 
 export default config;
