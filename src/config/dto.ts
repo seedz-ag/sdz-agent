@@ -43,7 +43,7 @@ const edit = async (file: string) => {
   const ask = async (): Promise<
     { [key: string]: string | number } | undefined
   > => {
-    const dto: { [key: string]: string | number } = {};
+    const dto: { [key: string]: string | number | null } = {};
 
     log("");
     log(`LET'S STEP OVER ${file} FIELDS:`);
@@ -54,7 +54,7 @@ const edit = async (file: string) => {
         message: `DO YOU WANT THE PROPERTY ${key} TO BE MAPPED TO?`,
         name: "response",
         type: "input",
-      }).then((answer: QuestionResponse) => (dto[key] = answer.response));
+      }).then((answer: QuestionResponse) => (dto[key] = ['null'].includes(`${answer.response}`.toLowerCase()) ? null : answer.response));
     }
 
     log(JSON.stringify(dto, null, "\t"));
