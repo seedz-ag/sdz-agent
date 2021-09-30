@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import enquirer from "enquirer";
 import { QuestionResponse } from "sdz-agent-types";
+import ConfigSchedule from "sdz-agent-types/types/config.schedule.type";
 
 const validate = (value: string): string | boolean  => {
 	const cleared = value.replace(/[0-9\/\*]/g, '');
@@ -10,13 +11,13 @@ const validate = (value: string): string | boolean  => {
 	return true; 
 }
 
-export default async () => {
+export default async (config: ConfigSchedule | undefined) => {
   const answers: { [key: string]: any } = {};
   answers.hour = await enquirer
     .prompt<QuestionResponse>({
       type: "input",
       name: "response",
-      initial: "*",
+      initial: config?.hour || "*",
       message: `What is your desired ${chalk.green(chalk.bold("SCHEDULE"))} hour?`,
       validate,
     })
@@ -25,7 +26,7 @@ export default async () => {
     .prompt<QuestionResponse>({
       type: "input",
       name: "response",
-      initial: "*",
+      initial: config?.minute || "*",
       message: `What is your desired ${chalk.green(chalk.bold("SCHEDULE"))} minute?`,
       validate,
     })
