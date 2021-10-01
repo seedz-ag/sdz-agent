@@ -2,6 +2,7 @@ import { Config } from "sdz-agent-types";
 import { Logger, Validator } from "sdz-agent-common";
 import ProcessScope from "./process-scope";
 import ProcessScopeDatabase from "./process-scope-database";
+import ProcessScopeFTP from "./process-scope-ftp";
 
 export default class Caller {
   private config: Config;
@@ -10,13 +11,33 @@ export default class Caller {
 
   constructor(config: Config) {
     this.config = config;
-//     this.scope = new ProcessScope(this.config.scope, this.config.connector);
+    this.scope = new ProcessScope(
+      this.config.scope,
+      this.getConnector(),
+      this.getTransport()
+    );
     process.env.DEBUG = config.debug ? "true" : undefined;
+  }
+
+  getConnector() {
+    switch (this.config.connector) {
+      case "database":
+        return new ProcessScopeDatabase(this.config.database);
+      default:
+        this.logger.error(
+          `UNKNOW CONNECTOR SPECIFIED: ${this.config.connector}`
+        );
+        process.exit(0);
+    }
+  }
+
+  getTransport() {
+    return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
   }
 
   async run(): Promise<void> {
     this.logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
-//     this.validate();
+    //     this.validate();
     await this.scope.process();
   }
 
