@@ -14,7 +14,7 @@ export default class ProcessScopeFTP {
     this.ftp.connect();
   }
 
-  send(data: any): void {
+  process(data: any): void {
     if (!this.files.includes(data.meta.file)) {
       this.files.push(data.meta.file);
     }
@@ -25,7 +25,7 @@ export default class ProcessScopeFTP {
     this.promises.push(promise);
   }
 
-  async process() {
+  async send() {
     await Promise.all(this.promises);
     for (const file of this.files) {
       if (fs.existsSync(file)) {
