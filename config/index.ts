@@ -5,8 +5,8 @@ import { Config } from "sdz-agent-types";
 const load = (file: string): Partial<Config> => {
   let json: Partial<Config> = {};
   try {
-    const buffer = fs.readFileSync(`./config/${file}.json`).toString();
-    json = JSON.parse(buffer);
+    const buffer = fs.readFileSync(`./config/${file}.json`);
+    json = JSON.parse(buffer.toString());
   } catch {}
   return json;
 };
