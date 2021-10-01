@@ -1,14 +1,16 @@
 export default class {
   private config: any;
+  private legacy: boolean;
 	private promises: Promise<boolean>[];
   private transport: any;
-	constructor(config: any) {
+	constructor(config: any, legacy: boolean) {
     this.config = config;
+    this.legacy = legacy;
   }
 
   getTransport() {
     if (!this.transport) {
-      // this.transport = new ;
+      // this.transport = new (this.legacy ? : );
     }
     return this.transport;
   }
