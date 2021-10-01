@@ -14,12 +14,12 @@ export default class ProcessScopeFTP {
     this.ftp.connect();
   }
 
-  process(data: any): void {
-    if (!this.files.includes(data.meta.file)) {
-      this.files.push(data.meta.file);
+  process(response: any): void {
+    if (!this.files.includes(response.meta.file)) {
+      this.files.push(response.meta.file);
     }
     const promise = new Promise<boolean>((resolve): void => {
-      this.csv.write(data.meta.file, data.results);
+      this.csv.write(response.meta.file, response.data);
       resolve(true);
     });
     this.promises.push(promise);
