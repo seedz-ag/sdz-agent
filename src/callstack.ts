@@ -43,12 +43,12 @@ const callstack = async (config: Config) => {
           const dto = JSON.parse(
             fs
               .readFileSync(
-                `${__dirname}/../config/dto/${entity.name.toLocaleLowerCase()}.json`
+                `${process.cwd()}/config/dto/${entity.name.toLocaleLowerCase()}.json`
               )
               .toString()
           ) as HydratorMapping;
 
-          const file = entity.file;
+          const file = `${process.cwd()}/${entity.file}`;
           const limit = config.pageSize || 1000;
           const method = `get${entity.name}` as keyof Repository;
           const count = `count${entity.name}` as keyof Repository;
@@ -103,8 +103,8 @@ const callstack = async (config: Config) => {
               // Logger.info("ENVIANDO DADOS VIA SFTP");
               const ftp = new FTP(config.ftp);
               await ftp.connect();
-              await ftp.sendFile(entity.file, file);
-              fs.unlinkSync(file);
+              await ftp.sendFile(file, entity.file);
+              fs.existsSync(file) && fs.unlinkSync(file);
             }
           }
           resolve(true);
