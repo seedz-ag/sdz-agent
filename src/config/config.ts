@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import fs from "fs";
 
+import ConfigJson from "../../config";
 import connector from "./connector";
 import database from "./database";
 import exportMode from "./export";
@@ -19,13 +20,13 @@ const config = async () => {
   log("YOU WILL WALK THROUGH SOME CONFIGURATIONS STEPS");
   log("");
 
-  answers.legacy = await legacyMode();
+  answers.legacy = await legacyMode(ConfigJson?.legacy);
 
-  answers.async = await exportMode();
+  answers.async = await exportMode(ConfigJson?.async);
 
-  answers.ftp = await ftp();
+  answers.ftp = await ftp(ConfigJson?.ftp);
 
-  const scopeAnswers = await scope();
+  const scopeAnswers = await scope(ConfigJson?.scope);
   answers.scope = scopeAnswers.scope;
 
   const connectorType = await connector();
@@ -33,12 +34,12 @@ const config = async () => {
 
   switch (connectorType) {
     case "database": {
-      answers.database = await database();
+      answers.database = await database(ConfigJson?.database);
       dtoType = answers.database.driver;
     }
   }
 
-  answers.schedule = await schedule();
+  answers.schedule = await schedule(ConfigJson?.schedule);
 
   stubs(
     scopeAnswers.scopeType,
