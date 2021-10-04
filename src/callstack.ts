@@ -55,20 +55,22 @@ const callstack = async (config: Config) => {
           let page = 1;
           let response = await respository[method]({ limit, page }, "T");
           const countResponse = await respository[count]({ limit, page }, "T");
-
+          let barProgress: any = "";
           if (response && response.length) {
             // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
-            const barProgress = ProgressBar.create(
-              entity.file,
-              countResponse[0].total,
-              0,
-              {
-                color: `\u001b[33m`,
-                event: "WRITING",
-                text: entity.file,
-                unit: "Records",
-              }
-            );
+            if (!process.env.COMMAND_LINE) {
+              barProgress = ProgressBar.create(
+                entity.file,
+                countResponse[0].total,
+                0,
+                {
+                  color: `\u001b[33m`,
+                  event: "WRITING",
+                  text: entity.file,
+                  unit: "Records",
+                }
+              );
+            }
 
             while (0 < response.length) {
               await csv.write(
@@ -81,16 +83,20 @@ const callstack = async (config: Config) => {
               let updateProgress: any = page * limit;
               let difUpdateProgress = countResponse[0].total - page * limit;
               if (difUpdateProgress < limit) {
-                updateProgress = parseFloat(countResponse[0].total);
+                if (!process.env.COMMAND_LINE) {
+                  updateProgress = parseFloat(countResponse[0].total);
+                  barProgress.update(updateProgress, {
+                    event: "DONE",
+                    count: `${updateProgress}/${countResponse[0].total}`,
+                  });
+                }
+              }
+              if (!process.env.COMMAND_LINE) {
+                barProgress.increment();
                 barProgress.update(updateProgress, {
-                  event: "DONE",
                   count: `${updateProgress}/${countResponse[0].total}`,
                 });
               }
-              barProgress.increment();
-              barProgress.update(updateProgress, {
-                count: `${updateProgress}/${countResponse[0].total}`,
-              });
             }
 
             if (fs.existsSync(file)) {
