@@ -24,6 +24,7 @@ switch (true) {
     require(`../src/config/dto.ts`);
     break;
   case isSchedule:
+    process.env.COMMAND_LINE = true;
     require(`../src/schedule.ts`);
     break;
   case isUpdate:

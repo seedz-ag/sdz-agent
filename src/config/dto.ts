@@ -4,7 +4,7 @@ import { QuestionResponse } from "sdz-agent-types";
 
 const { prompt, Select } = require("enquirer");
 
-const log = (msg: string) => console.log(chalk.green(msg));
+const baseDir = `${process.cwd()}/config/dto/`;
 
 const dtos = async () => {
   const dtos: any = {};
@@ -13,7 +13,7 @@ const dtos = async () => {
   log("YOU WILL WALK THROUGH SOME DTO CONFIGURATIONS STEPS");
   log("");
 
-  const files = fs.readdirSync(`${__dirname}/../../config/dto`);
+  const files = fs.readdirSync(baseDir);
 
   for (const file of files) {
     if (file.match(/.json$/)) {
@@ -37,11 +37,9 @@ const dtos = async () => {
 };
 
 const edit = async (file: string) => {
-  const json = JSON.parse(
-    fs.readFileSync(`${__dirname}/../../config/dto/${file}`).toString()
-  );
+  const json = load(file);
   const ask = async (): Promise<
-    { [key: string]: string | number } | undefined
+    { [key: string]: string | number | null } | undefined
   > => {
     const dto: { [key: string]: string | number | null } = {};
 
@@ -54,7 +52,12 @@ const edit = async (file: string) => {
         message: `DO YOU WANT THE PROPERTY ${key} TO BE MAPPED TO?`,
         name: "response",
         type: "input",
-      }).then((answer: QuestionResponse) => (dto[key] = ['null'].includes(`${answer.response}`.toLowerCase()) ? null : answer.response));
+      }).then(
+        (answer: QuestionResponse) =>
+          (dto[key] = ["null"].includes(`${answer.response}`.toLowerCase())
+            ? null
+            : answer.response)
+      );
     }
 
     log(JSON.stringify(dto, null, "\t"));
@@ -76,10 +79,21 @@ const edit = async (file: string) => {
   return await ask();
 };
 
-const saveDTOS = (dtos: any[]) => {
-  for (const file in Object.keys(dtos)) {
+const load = (file: string): {[key: string]: string} => {
+  let json = {};
+  try {
+    const buffer = fs.readFileSync(`${baseDir}${file}`);
+    json = JSON.parse(buffer.toString());
+  } catch {}
+  return json;
+};
+
+const log = (msg: string) => console.log(chalk.green(msg));
+
+const saveDTOS = (dtos: {[key:string]: any}) => {
+  for (const file of Object.keys(dtos)) {
     fs.writeFileSync(
-      `${__dirname}/../../config/dto/${file}`,
+      `${baseDir}${file}`,
       JSON.stringify(dtos[file], null, "\t")
     );
   }
