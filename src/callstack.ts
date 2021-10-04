@@ -112,16 +112,10 @@ const callstack = async (config: Config) => {
           reject(e);
         }
       });
-      if (config.async) {
-        promises.push(promise);
-      } else {
-        await Promise.resolve(promise);
-      }
+      config.async && promises.push(promise) || await Promise.resolve(promise);
     }
 
-    if (promises.length) {
-      await Promise.all(promises);
-    }
+    !config.async && await Promise.all(promises);
 
     ProgressBar.close();
 
