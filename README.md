@@ -6,7 +6,7 @@ O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de con
 
 OS: Ubuntu LTS 20.04
 RAM: 4GB
-HD: 1GB 
+HD: 20GB 
 
 ### Instalacão
 
