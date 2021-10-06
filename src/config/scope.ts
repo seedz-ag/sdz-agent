@@ -94,7 +94,9 @@ export default async (config: ConfigScope | undefined) => {
     message: `What is your desired ${chalk.green(
       chalk.bold("SCOPE")
     )} entities?`,
-    initial: config?.map((item) => item.name) || choices.map((item) => item.name),
+    initial:
+      (config && config.length > 0 && config.map((item) => item.name)) ||
+      choices.map((item) => item.name),
     choices,
     sort: true,
   });
