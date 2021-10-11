@@ -3,6 +3,7 @@ import { Logger, Validator } from "sdz-agent-common";
 import ProcessScope from "./process-scope";
 import ProcessScopeDatabase from "./process-scope-database";
 import ProcessScopeFTP from "./process-scope-ftp";
+import processScopeApi from "./process-scope-api";
 
 export default class Caller {
   private config: Config;
@@ -32,7 +33,11 @@ export default class Caller {
   }
 
   getTransport() {
-    return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
+    try {
+      return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
+    } catch (e) {
+      return new processScopeApi(this.config.api, this.config.legacy);
+    }
   }
 
   async run(): Promise<void> {

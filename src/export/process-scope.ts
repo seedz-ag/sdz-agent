@@ -23,17 +23,17 @@ class ProcessScope {
     for (const scopeItem of this.scope) {
       const dto = this.readDTO(this.getScopeFileName(scopeItem));
       let results;
-      while (results = this.connector.process(scopeItem.name)) {
-        this.transport.process({
+      while ((results = await this.connector.process(scopeItem.name))) {
+        await this.transport.process({
           data: results.map((item: HydratorMapping) => Hydrator(dto, item)),
           meta: scopeItem,
         });
       }
+
       if (!process.env.ASYNC) {
         await this.transport.send();
       }
     }
-    await this.transport.process();
   }
 
   @ReadFile
