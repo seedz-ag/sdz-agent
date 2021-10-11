@@ -1,27 +1,32 @@
+import TransportSeedz from "sdz-agent-transport";
+import { ConfigAuthAPI } from "sdz-agent-types";
 export default class {
-  private config: any;
+  private config: ConfigAuthAPI;
   private legacy: boolean;
-	private promises: Promise<boolean>[];
+  private promises: Promise<boolean>[];
   private transport: any;
-	constructor(config: any, legacy: boolean) {
+  constructor(config: ConfigAuthAPI, legacy: boolean) {
     this.config = config;
     this.legacy = legacy;
+    this.promises = [];
   }
 
   getTransport() {
     if (!this.transport) {
-      // this.transport = new (this.legacy ? : );
+      this.transport = new (this.legacy ? TransportSeedz : TransportSeedz)(
+        this.config
+      );
     }
     return this.transport;
   }
 
-	async process(response: any) {
+  async process(response: any) {
     this.promises.push(
-      this.getTransport().send(response.meta.name, response.data)
+      await this.getTransport().send("auth/login", response.data)
     );
-	}
+  }
 
-	async send() {
-		await Promise.all(this.promises);
-	}
+  async send() {
+    await Promise.all(this.promises);
+  }
 }

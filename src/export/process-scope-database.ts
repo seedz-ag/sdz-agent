@@ -1,10 +1,10 @@
 import Database from "sdz-agent-database";
-import { Repository } from "sdz-agent-types";
+import { AbstractRepository } from "sdz-agent-types";
 import { ConfigDatabase } from "sdz-agent-types/types/config.type";
 
 export default class ProcessScopeDatabase {
   private config: ConfigDatabase;
-  private count: number | null = null
+  private count: number | null = null;
   private data: any = null;
   private driver: any;
   private page: number = 0;
@@ -19,15 +19,16 @@ export default class ProcessScopeDatabase {
   }
 
   async process(entity: string) {
-    const respository = this.driver.getRepository();
+    const respository: any = this.driver.getRepository();
     if (!this.count) {
-      this.count = await respository[`get${entity}` as keyof Repository]();
+      this.count = await respository[
+        `get${entity}` as keyof AbstractRepository
+      ]();
     }
-    this.data = await respository[`get${entity}` as keyof Repository]({
-      limit: 100,
-      page: this.page,
-    });
-
+    this.data = await respository[`get${entity}` as keyof AbstractRepository](
+      this.page,
+      100
+    );
     if (!this.data.length) {
       this.reset();
       return false;
