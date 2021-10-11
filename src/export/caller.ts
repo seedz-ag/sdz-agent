@@ -53,6 +53,8 @@ export default class Caller {
     this.logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
     //     this.validate();
     await this.scope.process();
+    this.logger.info("END PROCESS");
+    process.exit(1);
   }
 
   validate(): void {
