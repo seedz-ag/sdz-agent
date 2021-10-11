@@ -29,7 +29,6 @@ class ProcessScope {
           meta: scopeItem,
         });
       }
-
       if (!process.env.ASYNC) {
         await this.transport.send();
       }

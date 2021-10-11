@@ -24,7 +24,7 @@ export default class ProcessScopeFTP {
     for (const file of this.files) {
       if (fs.existsSync(file)) {
         await this.ftp.sendFile(file, file);
-        fs.unlinkSync(file);
+        fs.existsSync(file) && fs.unlinkSync(file);
       }
     }
   }
