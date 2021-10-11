@@ -11,6 +11,10 @@ export default class {
     this.promises = [];
   }
 
+  async authenticate(): Promise<boolean> {
+    return this.getTransport().authenticate();
+  }
+
   getTransport() {
     if (!this.transport) {
       this.transport = new (this.legacy ? TransportSeedz : TransportSeedz)(

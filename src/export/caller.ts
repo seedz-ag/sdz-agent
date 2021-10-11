@@ -12,14 +12,15 @@ export default class Caller {
 
   constructor(config: Config) {
     this.config = config;
+    process.env.DEBUG = config.debug ? "true" : undefined;
+  }
+  async init() {
     this.scope = new ProcessScope(
       this.config.scope,
       this.getConnector(),
-      this.getTransport()
+      await this.getTransport()
     );
-    process.env.DEBUG = config.debug ? "true" : undefined;
   }
-
   getConnector() {
     switch (this.config.connector) {
       case "database":
@@ -32,11 +33,19 @@ export default class Caller {
     }
   }
 
-  getTransport() {
+  async getTransport(): Promise<any> {
     try {
-      return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
+      const transport = new processScopeApi(
+        this.config.api,
+        this.config.legacy
+      );
+      await transport.authenticate();
+      console.log("api");
+      return transport;
+      //console.log(transport);
     } catch (e) {
-      return new processScopeApi(this.config.api, this.config.legacy);
+      console.log("ftp");
+      return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
     }
   }
 
