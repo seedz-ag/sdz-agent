@@ -1,20 +1,30 @@
 import chalk from "chalk";
-import { ConfigDatabase } from "sdz-agent-types/types/config.type";
+import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ERPs } from "sdz-agent-types/enums/erps.enum";
 import informix from "./informix";
+import oracle from "./oracle";
 
 const { Select } = require("enquirer");
 
-export default async (config: ConfigDatabase | undefined) => {
+export default async (config: ConfigDatabaseInterface| undefined, erp: ERPs) => {
+  const available = {
+    [ERPs.Linx]: ["informix"],
+    [ERPs.Protheus]: ["oracle"],
+  };
   const question = new Select({
-    choices: ["informix"],
+    choices: available[erp],
     name: "response",
     initial: config?.driver,
-    message: `What is your desired ${chalk.green(chalk.bold("DATABASE"))} connector?`,
+    message: `What is your desired ${chalk.green(
+      chalk.bold("DATABASE")
+    )} connector?`,
   });
   const response = await question.run();
 
   switch (response) {
-	  case "informix":
-      return { driver: "informix", ...await informix(config) };
+    case "informix":
+      return { driver: "informix", ...(await informix(config)) };
+    case "oracle":
+      return { driver: "oracle", ...(await oracle(config)) };
   }
 };

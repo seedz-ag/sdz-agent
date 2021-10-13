@@ -4,6 +4,7 @@ import fs from "fs";
 import ConfigJson from "../../config";
 import connector from "./connector";
 import database from "./database";
+import erp from "./erp";
 import exportMode from "./export";
 import ftp from "./ftp";
 import legacyMode from "./legacy";
@@ -34,7 +35,7 @@ const config = async () => {
 
   switch (connectorType) {
     case "database": {
-      answers.database = await database(ConfigJson?.database);
+      answers.database = await database(ConfigJson?.database, await erp(ConfigJson.erp));
       dtoType = answers.database.driver;
     }
   }
