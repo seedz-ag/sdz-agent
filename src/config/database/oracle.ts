@@ -10,7 +10,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.host,
-      message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} host?`,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} host?`,
     })
     .then((answer) => answer.response);
 
@@ -19,7 +19,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.port,
-      message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} port?`,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} port?`,
     })
     .then((answer) => answer.response);
 
@@ -28,7 +28,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.server,
-      message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} server?`,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} server?`,
     })
     .then((answer) => answer.response);
 
@@ -37,7 +37,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.schema,
-      message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} schema?`,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} schema?`,
     })
     .then((answer) => answer.response);
 
@@ -46,7 +46,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.username,
-      message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} username?`,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} username?`,
     })
     .then((answer) => answer.response);
 
@@ -55,7 +55,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "password",
       name: "response",
       initial: config?.password,
-      message: `What is your ${chalk.green(chalk.bold("INFORMIX"))} password?`,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} password?`,
     })
     .then((answer) => answer.response);
   return answers;
