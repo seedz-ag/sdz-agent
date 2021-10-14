@@ -33,9 +33,11 @@ const config = async () => {
   const connectorType = await connector();
   let dtoType = "";
 
+  answers.erp = await erp(ConfigJson.erp);
+
   switch (connectorType) {
     case "database": {
-      answers.database = await database(ConfigJson?.database, await erp(ConfigJson.erp));
+      answers.database = await database(ConfigJson?.database, answers.erp);
       dtoType = answers.database.driver;
     }
   }

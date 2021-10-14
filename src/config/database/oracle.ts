@@ -9,7 +9,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
     .prompt<QuestionResponse>({
       type: "input",
       name: "response",
-      initial: config?.host,
+      initial: config?.host || "localhost",
       message: `What is your ${chalk.green(chalk.bold("ORACLE"))} host?`,
     })
     .then((answer) => answer.response);
@@ -18,26 +18,17 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
     .prompt<QuestionResponse>({
       type: "input",
       name: "response",
-      initial: config?.port,
+      initial: config?.port || "1521",
       message: `What is your ${chalk.green(chalk.bold("ORACLE"))} port?`,
     })
     .then((answer) => answer.response);
 
-  answers.server = await enquirer
+  answers.service = await enquirer
     .prompt<QuestionResponse>({
       type: "input",
       name: "response",
-      initial: config?.server,
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} server?`,
-    })
-    .then((answer) => answer.response);
-
-  answers.schema = await enquirer
-    .prompt<QuestionResponse>({
-      type: "input",
-      name: "response",
-      initial: config?.schema,
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} schema?`,
+      initial: config?.service,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} service?`,
     })
     .then((answer) => answer.response);
 
