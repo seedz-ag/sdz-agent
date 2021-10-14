@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { ConfigDatabaseInterface } from "sdz-agent-types";
-import { ERPs } from "sdz-agent-types/enums/erps.enum";
+import  { ERPs }  from "sdz-agent-types";
 import informix from "./informix";
 import oracle from "./oracle";
 
