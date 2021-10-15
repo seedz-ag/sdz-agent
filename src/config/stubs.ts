@@ -19,7 +19,7 @@ export default (
     const dto = entity.toLocaleLowerCase();
     const file = fs
       .readFileSync(
-        `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/stubs/dto/${dto}.stub`
+        `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/dto/${dto}.stub`
       )
       .toString();
     fs.writeFileSync(`${__dirname}/../../config/dto/${dto}.json`, file);
@@ -27,13 +27,13 @@ export default (
 
   if ("database" === connector) {
     const files = fs.readdirSync(
-      `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/stubs/sql/`
+      `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/sql/`
     );
 
     for (const file of files) {
       const sql = fs
         .readFileSync(
-          `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/stubs/sql/${file}`
+          `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/sql/${file}`
         )
         .toString();
 
