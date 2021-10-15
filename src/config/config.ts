@@ -52,7 +52,7 @@ const config = async () => {
   );
 
   fs.writeFileSync(
-    `${__dirname}/../../config.json`,
+    `${process.cwd()}/config.json`,
     JSON.stringify(answers, null, "\t")
   );
 
