@@ -23,7 +23,7 @@ const callstack = async (config: Config) => {
 
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
-    await ftp1.disconnect();
+    //await ftp1.disconnect();
 
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
@@ -102,7 +102,7 @@ const callstack = async (config: Config) => {
             if (fs.existsSync(file)) {
               // Logger.info("ENVIANDO DADOS VIA SFTP");
               const ftp = new FTP(config.ftp);
-              await ftp.connect();
+             // await ftp.connect();
               await ftp.sendFile(file, entity.file);
               fs.existsSync(file) && fs.unlinkSync(file);
             }
