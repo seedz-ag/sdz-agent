@@ -3,6 +3,7 @@ import { Logger, Validator } from "sdz-agent-common";
 import ProcessScope from "./process-scope";
 import ProcessScopeDatabase from "./process-scope-database";
 import ProcessScopeFTP from "./process-scope-ftp";
+import processScopeApi from "./process-scope-api";
 
 export default class Caller {
   private config: Config;
@@ -11,14 +12,15 @@ export default class Caller {
 
   constructor(config: Config) {
     this.config = config;
+    process.env.DEBUG = config.debug ? "true" : undefined;
+  }
+  async init() {
     this.scope = new ProcessScope(
       this.config.scope,
       this.getConnector(),
-      this.getTransport()
+      await this.getTransport()
     );
-    process.env.DEBUG = config.debug ? "true" : undefined;
   }
-
   getConnector() {
     switch (this.config.connector) {
       case "database":
@@ -31,14 +33,28 @@ export default class Caller {
     }
   }
 
-  getTransport() {
-    return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
+  async getTransport(): Promise<any> {
+    try {
+      const transport = new processScopeApi(
+        this.config.api,
+        this.config.legacy
+      );
+      await transport.authenticate();
+      console.log("api");
+      return transport;
+      //console.log(transport);
+    } catch (e) {
+      console.log("ftp");
+      return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
+    }
   }
 
   async run(): Promise<void> {
     this.logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
     //     this.validate();
     await this.scope.process();
+    this.logger.info("END PROCESS");
+    process.exit(1);
   }
 
   validate(): void {
