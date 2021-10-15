@@ -45,7 +45,7 @@ const config = async () => {
   answers.schedule = await schedule(ConfigJson?.schedule);
 
   stubs(
-    scopeAnswers.scopeType,
+    answers.erp,
     connectorType,
     dtoType,
     scopeAnswers.scope.map((item: any) => item.name)
