@@ -48,7 +48,7 @@ const config = async () => {
     scopeAnswers.scopeType,
     connectorType,
     dtoType,
-    scopeAnswers.scope.map((item) => item.name)
+    scopeAnswers.scope.map((item: any) => item.name)
   );
 
   fs.writeFileSync(
