@@ -1,7 +1,7 @@
 import fs from "fs";
 
 export default (
-  dtoType: string,
+  erp: string,
   connector: string,
   driver: string,
   scope: string[]
