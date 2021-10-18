@@ -3,7 +3,7 @@ import {
   DatabaseRow,
   Entity,
   HydratorMapping,
-  Repository,
+  AbstractRepository,
 } from "sdz-agent-types";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
@@ -23,13 +23,13 @@ const callstack = async (config: Config) => {
 
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
-    await ftp1.disconnect();
+    //await ftp1.disconnect();
 
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
 
     const promises: Promise<boolean>[] = [];
-    const respository = database.getRepository();
+    const respository: any = database.getRepository();
 
     const csv = new CSV(config.legacy);
 
@@ -50,11 +50,11 @@ const callstack = async (config: Config) => {
 
           const file = `${process.cwd()}/${entity.file}`;
           const limit = config.pageSize || 1000;
-          const method = `get${entity.name}` as keyof Repository;
-          const count = `count${entity.name}` as keyof Repository;
-          let page = 1;
-          let response = await respository[method]({ limit, page }, "T");
-          const countResponse = await respository[count]({ limit, page }, "T");
+          const method = `get${entity.name}` as keyof AbstractRepository;
+          const count = `count${entity.name}` as keyof AbstractRepository;
+          let page = 0;
+          let response = await respository[method](page, limit);
+          const countResponse = await respository[count]();
           let barProgress: any = "";
           if (response && response.length) {
             // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
@@ -78,7 +78,7 @@ const callstack = async (config: Config) => {
                 response.map((row: DatabaseRow) => Hydrator(dto, row))
               );
               page++;
-              response = await respository[method]({ limit, page }, "T");
+              response = await respository[method](page, limit);
 
               let updateProgress: any = page * limit;
               let difUpdateProgress = countResponse[0].total - page * limit;
@@ -102,7 +102,7 @@ const callstack = async (config: Config) => {
             if (fs.existsSync(file)) {
               // Logger.info("ENVIANDO DADOS VIA SFTP");
               const ftp = new FTP(config.ftp);
-              await ftp.connect();
+             // await ftp.connect();
               await ftp.sendFile(file, entity.file);
               fs.existsSync(file) && fs.unlinkSync(file);
             }
@@ -112,10 +112,11 @@ const callstack = async (config: Config) => {
           reject(e);
         }
       });
-      config.async && promises.push(promise) || await Promise.resolve(promise);
+      (config.async && promises.push(promise)) ||
+        (await Promise.resolve(promise));
     }
 
-    !config.async && await Promise.all(promises);
+    !config.async && (await Promise.all(promises));
 
     ProgressBar.close();
 
