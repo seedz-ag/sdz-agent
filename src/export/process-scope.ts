@@ -20,7 +20,7 @@ class ProcessScope {
   }
 
   async process() {
-    await this.transport.init(this.scope, this.connector);
+    this.transport.init && await this.transport.init(this.scope, this.connector);
     for (const scopeItem of this.scope) {
       const dto = this.readDTO(this.getScopeFileName(scopeItem));
       let results;
