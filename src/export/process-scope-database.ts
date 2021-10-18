@@ -38,6 +38,10 @@ export default class ProcessScopeDatabase {
     return this.data;
   }
 
+  getRepository(){
+    return this.driver.getRepository()
+  }
+
   reset() {
     this.count = null;
     this.data = null;

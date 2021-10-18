@@ -42,7 +42,6 @@ export default class Caller {
       await transport.authenticate();
       console.log("api");
       return transport;
-      //console.log(transport);
     } catch (e) {
       console.log("ftp");
       return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
