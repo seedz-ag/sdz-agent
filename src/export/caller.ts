@@ -40,10 +40,10 @@ export default class Caller {
         this.config.legacy
       );
       await transport.authenticate();
-      console.log("api");
+      this.logger.info('USING API TRANSPORT')
       return transport;
     } catch (e) {
-      console.log("ftp");
+      this.logger.info('USING FTP TRANSPORT')
       return new ProcessScopeFTP(this.config.ftp, this.config.legacy);
     }
   }

@@ -1,4 +1,4 @@
-import  { TransportLegacySeedz }  from "sdz-agent-transport";
+import  { TransportLegacySeedz, TransportSeedz }  from "sdz-agent-transport";
 import { ConfigAuthAPI } from "sdz-agent-types";
 export default class {
   private config: ConfigAuthAPI;
@@ -17,7 +17,7 @@ export default class {
 
   getTransport() {
     if (!this.transport) {
-      this.transport = new (this.legacy ? TransportLegacySeedz : TransportLegacySeedz)(
+      this.transport = new (this.legacy ? TransportLegacySeedz : TransportSeedz)(
         this.config
       );
     }
@@ -30,9 +30,9 @@ export default class {
   }
 
   async process(response: any) {
-    this.promises.push(
-      this.getTransport().send(response.meta.entity, response.data)
-    );
+
+      await this.getTransport().send(response.meta.entity, response.data)
+
   }
 
   async send() {
