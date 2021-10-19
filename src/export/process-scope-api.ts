@@ -31,7 +31,7 @@ export default class {
 
   async process(response: any) {
     this.promises.push(
-      await this.getTransport().send("auth/login", response.data)
+      this.getTransport().send(response.meta.entity, response.data)
     );
   }
 
