@@ -6,6 +6,7 @@ import connector from "./connector";
 import database from "./database";
 import exportMode from "./export";
 import ftp from "./ftp";
+import api from "./api";
 import legacyMode from "./legacy";
 import schedule from "./schedule";
 import scope from "./scope";
@@ -25,6 +26,8 @@ const config = async () => {
   answers.async = await exportMode(ConfigJson?.async);
 
   answers.ftp = await ftp(ConfigJson?.ftp);
+
+  answers.api = await api(ConfigJson?.api);
 
   const scopeAnswers = await scope(ConfigJson?.scope);
   answers.scope = scopeAnswers.scope;
