@@ -11,6 +11,8 @@ import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 
+require('dotenv').config();
+
 const callstack = async (config: Config) => {
   try {
     process.env.DEBUG = config.debug ? "true" : undefined;
