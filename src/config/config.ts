@@ -26,8 +26,11 @@ const config = async () => {
   answers.async = await exportMode(ConfigJson?.async);
 
   answers.ftp = await ftp(ConfigJson?.ftp);
-
-  answers.api = await api(ConfigJson?.api);
+  
+  if(answers.legacy)
+  {
+    answers.api = await api(ConfigJson?.api);
+  }
 
   const scopeAnswers = await scope(ConfigJson?.scope);
   answers.scope = scopeAnswers.scope;
