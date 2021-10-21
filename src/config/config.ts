@@ -22,9 +22,9 @@ const config = async () => {
   log("YOU WILL WALK THROUGH SOME CONFIGURATIONS STEPS");
   log("");
 
-  answers.legacy = await legacyMode(ConfigJson?.legacy);
+  answers.legacy = true //await legacyMode(ConfigJson?.legacy);
 
-  answers.async = await exportMode(ConfigJson?.async);
+  answers.async = false //await exportMode(ConfigJson?.async);
 
   answers.ftp = await ftp(ConfigJson?.ftp);
   
@@ -39,9 +39,12 @@ const config = async () => {
   const connectorType = await connector();
   let dtoType = "";
 
+  answers.connector = connectorType;
+
   answers.erp = await erp(ConfigJson.erp);
 
   switch (connectorType) {
+    
     case "database": {
       answers.database = await database(ConfigJson?.database, answers.erp);
       dtoType = answers.database.driver;
