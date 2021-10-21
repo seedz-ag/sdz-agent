@@ -1,10 +1,9 @@
 import chalk from "chalk";
-import { QuestionResponse } from "sdz-agent-types";
 import ConfigScope from "sdz-agent-types/types/config.scope.type";
 
 const { MultiSelect, Select } = require("enquirer");
 
-export default async (config: ConfigScope | undefined) => {
+export default async (config: ConfigScope | undefined): Promise<any> => {
   const choices = [
     {
       name: "Clients",
@@ -98,31 +97,22 @@ export default async (config: ConfigScope | undefined) => {
     },
   ];
 
-  const prompt1 = new Select({
-    name: "response",
-    message: `What is your desired ${chalk.green(chalk.bold("SCOPE"))} type?`,
-    initial: "maximum",
-    choices: ["minimum", "maximum", "custom"],
-  });
-
-  const scopeType = await prompt1.run();
-
-  const prompt2 = new MultiSelect({
+  const prompt1 = new MultiSelect({
     name: "response",
     message: `What is your desired ${chalk.green(
       chalk.bold("SCOPE")
     )} entities?`,
-    initial: config?.map((item) => item.name) || choices.map((item) => item.name),
-    choices,
+    initial:
+      (config && config.length > 0 && config.map((item) => item.name)) ||
+      choices.map((item) => item.name),
+    choices: choices,
     sort: true,
   });
-
-  const scope = await prompt2.run();
+  const scope = await prompt1.run();
 
   return {
     scope: choices
       .filter((item) => scope.includes(item.name))
       .map((item) => ({ file: item.file, name: item.name, entity: item.entity })),
-    scopeType,
   };
 };

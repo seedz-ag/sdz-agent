@@ -4,6 +4,7 @@ import fs from "fs";
 import ConfigJson from "../../config";
 import connector from "./connector";
 import database from "./database";
+import erp from "./erp";
 import exportMode from "./export";
 import ftp from "./ftp";
 import api from "./api";
@@ -38,9 +39,11 @@ const config = async () => {
   const connectorType = await connector();
   let dtoType = "";
 
+  answers.erp = await erp(ConfigJson.erp);
+
   switch (connectorType) {
     case "database": {
-      answers.database = await database(ConfigJson?.database);
+      answers.database = await database(ConfigJson?.database, answers.erp);
       dtoType = answers.database.driver;
     }
   }
@@ -48,14 +51,14 @@ const config = async () => {
   answers.schedule = await schedule(ConfigJson?.schedule);
 
   stubs(
-    scopeAnswers.scopeType,
+    answers.erp,
     connectorType,
     dtoType,
-    scopeAnswers.scope.map((item) => item.name)
+    scopeAnswers.scope.map((item: any) => item.name)
   );
 
   fs.writeFileSync(
-    `${__dirname}/../../config.json`,
+    `${process.cwd()}/config.json`,
     JSON.stringify(answers, null, "\t")
   );
 
