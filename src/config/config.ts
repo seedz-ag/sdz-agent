@@ -60,12 +60,13 @@ const config = async () => {
     scopeAnswers.scope.map((item: any) => item.name)
   );
 
-  const dir = process.env.DOCKER ? `/opt/sdz-agent/docker/config.json` : `/opt/sdz-agent/config.json`;
+  const dir = process.env.DOCKER ? `/docker/config.json` : `/config.json`;
 
   fs.writeFileSync(
-    `${dir}`,
+    `${process.cwd()}${dir}`,
     JSON.stringify(answers, null, "\t")
   );
+
 
   log("");
   log("CONGRATULATIONS, CONFIGURATION COMPLETED!");
