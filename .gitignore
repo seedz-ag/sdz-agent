@@ -1,5 +1,6 @@
 config/dto/*
 config/sql/*
+docker/*
 # Logs
 logs
 *.log
