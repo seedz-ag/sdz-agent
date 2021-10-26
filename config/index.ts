@@ -5,7 +5,7 @@ import { Config } from "sdz-agent-types";
 const load = (file: string): Partial<Config> => {
   let json: Partial<Config> = {};
   try {
-    const dir = !process.env.DOCKER ? `/docker/config` : `/config`;
+    const dir = process.env.DOCKER ? `/docker/config` : `/config`;
     const buffer = fs.readFileSync(`${process.cwd()}${dir}.json`);
 
     json = JSON.parse(buffer.toString());
