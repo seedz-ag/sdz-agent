@@ -5,8 +5,8 @@ import { Server } from "http";
 import { QuestionResponse } from "sdz-agent-types";
 import { ConfigDatabase } from "sdz-agent-types/types/config.type";
 
-const createSQLHosts = ({ host, port, server }: { [key: string]: any }) => {
-  let INFORMIXDIR = `${__dirname}/../../../node_modules/informixdb/installer/onedb-odbc-driver`;
+export const createSQLHosts = ({ host, port, server }: { [key: string]: any }) => {
+  let INFORMIXDIR = `${process.cwd()}/node_modules/informixdb/installer/onedb-odbc-driver`;
   if (process.env.INFORMIXDIR) {
     INFORMIXDIR = process.env.INFORMIXDIR;
   }
