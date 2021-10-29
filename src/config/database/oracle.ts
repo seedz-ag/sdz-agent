@@ -23,6 +23,15 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
     })
     .then((answer) => answer.response);
 
+  answers.schema = await enquirer
+    .prompt<QuestionResponse>({
+      type: "input",
+      name: "response",
+      initial: config?.schema,
+      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} schema?`,
+    })
+    .then((answer) => answer.response);
+
   answers.service = await enquirer
     .prompt<QuestionResponse>({
       type: "input",
