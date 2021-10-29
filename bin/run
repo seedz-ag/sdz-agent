@@ -1,4 +1,4 @@
 #!/bin/bash
 export LD_LIBRARY_PATH=/opt/sdz-agent/node_modules/sdz-agent-database-oracle/instantclient_21_3/ 
 export INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driver
-./bin/call
+./bin/call $1
