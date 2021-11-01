@@ -1,15 +1,15 @@
 {
-  "0": "id",
-  "1": "nf",
-  "2": "cnpjconcessionaria",
-  "3": "cepcliente",
-  "4": "cpfvendedor",
-  "5": "categoria",
-  "6": "produto",
-  "7": "quantidade",
-  "8": "pvalor",
-  "9": "cpfcliente",
-  "10": "data",
-  "11": "hora",
-  "12": "tipo"
+  "id": "0",
+  "nf": "1",
+  "cnpjconcessionaria": "2",
+  "cepcliente": "3",
+  "cpfvendedor": "4",
+  "categoria": "5",
+  "produto": "6",
+  "quantidade": "7",
+  "pvalor": "8",
+  "cpfcliente": "9",
+  "data": "10",
+  "hora": "11",
+  "tipo": "12"
 }

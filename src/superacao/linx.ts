@@ -10,7 +10,7 @@ class Linx {
 
 	private database: any;
   private csv: CSV;
-  private dto: any;
+  private dto: HydratorMapping;
 	private ftp: FTP;
   private transport: TransportSeedz;
 
@@ -48,7 +48,10 @@ class Linx {
   /**
    * Setters
    */
-
+  @ReadFile
+  readFile(json: string): HydratorMapping {
+    return JSON.parse(json);
+  }
   setDatabase(database: Database): this {
     this.database = database;
     return this;
@@ -59,11 +62,11 @@ class Linx {
     return this;
   }
 
-  @ReadFile
-  setDTO(file: string): this {
-    this.dto = JSON.parse(file);
+  setDTO(json: string): this {
+    this.dto = this.readFile(json);
     return this;
   }
+
 
   setFTP(ftp: FTP): this {
     this.ftp = ftp;
@@ -92,7 +95,6 @@ class Linx {
         const csv = await this.getCSV().read(fileName, { skipRows:0, maxRows: 100, delimiter: ";" }) as any[];
         for (const row of csv) {
           const dto =  Hydrator(this.getDTO(), row);
-          console.log(dto);
           this.getTransport().send('superacao', Hydrator(this.getDTO(), row));
         }
       }
