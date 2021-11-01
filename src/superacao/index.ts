@@ -1,16 +1,16 @@
 import { Hydrator } from "sdz-agent-common";
 import CSV from "sdz-agent-data";
-import { Config, Connector, } from "sdz-agent-types";
+import { Config, Connector} from "sdz-agent-types";
 import FTP from "sdz-agent-sftp";
-import MySQL from "sdz-agent-database-mysql";
 import { TransportSeedz } from "sdz-agent-transport";
 import Linx from "./linx";
+import Database from "sdz-agent-database";
 
     
 require("dotenv").config();
 
 export default class Superacao {
-  private connection: Connector;
+  private connection: Database;
   private csv: CSV;
   private ftp: FTP;
   private transport: TransportSeedz;
@@ -19,7 +19,7 @@ export default class Superacao {
     this.csv = new CSV(config.legacy);
     this.ftp = new FTP(config.ftp);
     this.transport = new TransportSeedz(config.api);
-    this.connection = new MySQL.Connector(config.database);
+    this.connection = new Database(config.database);
   }
 
   async process() {
