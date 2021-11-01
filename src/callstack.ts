@@ -63,7 +63,7 @@ const callstack = async (config: Config) => {
             if (!process.env.COMMAND_LINE) {
               barProgress = ProgressBar.create(
                 entity.file,
-                countResponse[0].total,
+                countResponse,
                 0,
                 {
                   color: `\u001b[33m`,
@@ -83,20 +83,20 @@ const callstack = async (config: Config) => {
               response = await respository[method](page, limit);
 
               let updateProgress: any = page * limit;
-              let difUpdateProgress = countResponse[0].total - page * limit;
+              let difUpdateProgress = countResponse - page * limit;
               if (difUpdateProgress < limit) {
                 if (!process.env.COMMAND_LINE) {
-                  updateProgress = parseFloat(countResponse[0].total);
+                  updateProgress = parseFloat(countResponse);
                   barProgress.update(updateProgress, {
                     event: "DONE",
-                    count: `${updateProgress}/${countResponse[0].total}`,
+                    count: `${updateProgress}/${countResponse}`,
                   });
                 }
               }
               if (!process.env.COMMAND_LINE) {
                 barProgress.increment();
                 barProgress.update(updateProgress, {
-                  count: `${updateProgress}/${countResponse[0].total}`,
+                  count: `${updateProgress}/${countResponse}`,
                 });
               }
             }
