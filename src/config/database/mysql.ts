@@ -10,7 +10,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.host || "localhost",
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} host?`,
+      message: `What is your ${chalk.green(chalk.bold("MySQL"))} host?`,
     })
     .then((answer) => answer.response);
 
@@ -18,8 +18,8 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
     .prompt<QuestionResponse>({
       type: "input",
       name: "response",
-      initial: config?.port || "1521",
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} port?`,
+      initial: config?.port || "3306",
+      message: `What is your ${chalk.green(chalk.bold("MySQL"))} port?`,
     })
     .then((answer) => answer.response);
 
@@ -28,16 +28,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.schema,
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} schema?`,
-    })
-    .then((answer) => answer.response);
-
-  answers.service = await enquirer
-    .prompt<QuestionResponse>({
-      type: "input",
-      name: "response",
-      initial: config?.service,
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} service?`,
+      message: `What is your ${chalk.green(chalk.bold("MySQL"))} database?`,
     })
     .then((answer) => answer.response);
 
@@ -46,7 +37,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "input",
       name: "response",
       initial: config?.username,
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} username?`,
+      message: `What is your ${chalk.green(chalk.bold("MySQL"))} username?`,
     })
     .then((answer) => answer.response);
 
@@ -55,7 +46,7 @@ export default async (config: ConfigDatabaseInterface | undefined) => {
       type: "password",
       name: "response",
       initial: config?.password,
-      message: `What is your ${chalk.green(chalk.bold("ORACLE"))} password?`,
+      message: `What is your ${chalk.green(chalk.bold("MySQL"))} password?`,
     })
     .then((answer) => answer.response);
   return answers;

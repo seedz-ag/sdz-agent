@@ -1,38 +1,4 @@
-#!/usr/bin/node
-const fs = require('fs');
-const path = require('path');
-const { stdout, stderr, exit } = require('process');
-const project = path.join(__dirname, '../tsconfig.json');
-const dev = fs.existsSync(project);
-const { exec } = require('child_process');
-const { Logger } = require('sdz-agent-common');
-
-if (dev) {
-  require('ts-node').register({ project });
-}
-
-
-const isConfig = !!process.argv.filter(n => ["-C", "--config"].some(n2 => n === n2)).length;
-const isConfigDTO = !!process.argv.filter(n => ["-D", "--config-dto"].some(n2 => n === n2)).length;
-const isSchedule = !!process.argv.filter(n => ["-S", "--schedule"].some(n2 => n === n2)).length;
-const isUpdate = !!process.argv.filter(n => ["-U", "--update"].some(n2 => n === n2)).length;
-
-switch (true) {
-  case isConfig:
-    require(`../src/config/config.ts`);
-    break;
-  case isConfigDTO:
-    require(`../src/config/dto.ts`);
-    break;
-  case isSchedule:
-    process.env.COMMAND_LINE = true;
-    require(`../src/schedule.ts`);
-    break;
-  case isUpdate:
-    exec("git pull", (error, stdout, stderr) => {
-      Logger.info(stdout)
-    });
-    break
-  default:
-    require(`../src/bootstrap.ts`);
-}
+#!/bin/bash
+export LD_LIBRARY_PATH=/opt/sdz-agent/node_modules/sdz-agent-database-oracle/instantclient_21_3/ 
+export INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driver
+./bin/call $1

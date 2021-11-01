@@ -9,7 +9,7 @@ const { Select } = require("enquirer");
 export default async (config: ConfigDatabaseInterface| undefined, erp: ERPs) => {
   const available = {
     [ERPs.Linx]: ["informix"],
-    [ERPs.Protheus]: ["mssql", "oracle"],
+    [ERPs.Protheus]: ["mssql", "oracle", "mysql"],
   };
   const question = new Select({
     choices: available[erp],
@@ -24,6 +24,8 @@ export default async (config: ConfigDatabaseInterface| undefined, erp: ERPs) => 
   switch (response) {
     case "informix":
       return { driver: "informix", ...(await informix(config)) };
+    case "mysql":
+      return { driver: "mysql", ...(await mssql(config)) };
     case "mssql":
       return { driver: "mssql", ...(await mssql(config)) };
     case "oracle":
