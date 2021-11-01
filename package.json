@@ -13,6 +13,7 @@
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
+    "sdz-agent-database-mysql": "https://github.com/seedz-ag/sdz-agent-database-mysql.git",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
     "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport",
     "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git"

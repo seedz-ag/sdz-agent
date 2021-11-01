@@ -1,10 +1,10 @@
 import { Hydrator } from "sdz-agent-common";
 import CSV from "sdz-agent-data";
+import { Connector, HydratorMapping } from "sdz-agent-types";
+import Database from "./database";
 import FTP from "sdz-agent-sftp";
 import { TransportSeedz } from "sdz-agent-transport";
-import { HydratorMapping } from "sdz-agent-types";
-import ReadFile from "sdz-agent-types/decorators/read-file";
-import Database from "./database";
+import { ReadFile } from "sdz-agent-types/decorators";
 
 class Linx {
 
@@ -14,10 +14,10 @@ class Linx {
 	private ftp: FTP;
   private transport: TransportSeedz;
 
-	constructor(connection: Database, csv: CSV, ftp: FTP, transport: TransportSeedz) {
+	constructor(connection: Connector, csv: CSV, ftp: FTP, transport: TransportSeedz) {
     this.setConnection(connection);
     this.setCSV(csv);
-    this.setDTO('dto-linx.json');
+    this.setDTO(`${process.cwd()}/src/superacao/dto-linx.json`);
     this.setFTP(ftp);
     this.setTransport(transport);
   }
@@ -89,12 +89,11 @@ class Linx {
       for (const integration of integrations) {
         const fileName = `${integration['filial']}.csv`;
         await this.getFTP().getFile(`${integration['grupo']}/${fileName}`, fileName);
-        const csv = await this.getCSV().read(fileName, { delimiter: ";" }) as any[];
+        const csv = await this.getCSV().read(fileName, { skipRows:0, maxRows: 100, delimiter: ";" }) as any[];
         for (const row of csv) {
-          this.getTransport().process(Hydrator(this.getDTO(), row));
+          this.getTransport().send('superacao', Hydrator(this.getDTO(), row));
         }
       }
-      this.getTransport().send();
     } catch {}
   }
 
