@@ -1,0 +1,15 @@
+{
+  "cnpjconcessionaria": "CnpjConcessionaria",
+  "cpfvendedor": "CpfVendedor",
+  "valor": "Valor",
+  "data": "Data",
+  "cepcliente": "CepCliente",
+  "cpfcliente": "CpfCliente",
+  "quantidade": "Quantidade",
+  "hora": "Hora",
+  "tipo": "Tipo",
+  "categoria": "Categoria",
+  "produto": "Produto",
+  "nf": "NumerNota",
+  "id": "uuid"
+}
