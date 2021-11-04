@@ -18,9 +18,9 @@ class Protheus extends Base {
   private composeHeaders(integration: any): AxiosRequestHeaders {
     const headers: AxiosRequestHeaders = {
       Authorization: `Basic ${Buffer.from(
-        `${Buffer.from(integration["user"], 'base64').toString("ascii")}:${Buffer.from(
-          integration["pass"], 'base64'
-        ).toString("ascii")}`
+        `${Buffer.from(integration["user"], "base64").toString(
+          "ascii"
+        )}:${Buffer.from(integration["pass"], "base64").toString("ascii")}`
       ).toString("base64")}`,
       emp: integration["emp"],
       pass: integration["pass"],
@@ -56,14 +56,11 @@ class Protheus extends Base {
             })
           ).data?.Vendas || [];
         for (const row of response) {
-          const dto = Hydrator(this.getDTO(), row);
-          this.getTransport().send(
-            "superacao",
-            Hydrator(this.getDTO(), {
-              ...row,
-              Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
-            })
-          );
+          const dto = Hydrator(this.getDTO(), {
+            ...row,
+            Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
+          });
+          this.getTransport().send("superacao", dto);
         }
       }
     } catch {}
