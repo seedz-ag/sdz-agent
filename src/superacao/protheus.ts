@@ -17,11 +17,11 @@ class Protheus extends Base {
    */
   private composeHeaders(integration: any): AxiosRequestHeaders {
     const headers: AxiosRequestHeaders = {
-      Authorization: `Basic ${new Buffer(
-        new Buffer(integration["user"]).toString("ascii")
-      ).toString("base64")}:${new Buffer(integration["pass"]).toString(
-        "ascii"
-      )}`,
+      Authorization: `Basic ${Buffer.from(
+        `${Buffer.from(integration["user"]).toString("ascii")}:${Buffer.from(
+          integration["pass"]
+        ).toString("ascii")}`
+      ).toString("base64")}`,
       emp: integration["emp"],
       pass: integration["pass"],
       user: integration["user"],
@@ -61,7 +61,7 @@ class Protheus extends Base {
             "superacao",
             Hydrator(this.getDTO(), {
               ...row,
-              Data: Moment(row["Data"]).format("YYYY-MM-DD"),
+              Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
             })
           );
         }
