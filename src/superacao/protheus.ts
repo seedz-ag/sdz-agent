@@ -18,8 +18,8 @@ class Protheus extends Base {
   private composeHeaders(integration: any): AxiosRequestHeaders {
     const headers: AxiosRequestHeaders = {
       Authorization: `Basic ${Buffer.from(
-        `${Buffer.from(integration["user"]).toString("ascii")}:${Buffer.from(
-          integration["pass"]
+        `${Buffer.from(integration["user"], 'base64').toString("ascii")}:${Buffer.from(
+          integration["pass"], 'base64'
         ).toString("ascii")}`
       ).toString("base64")}`,
       emp: integration["emp"],
