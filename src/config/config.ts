@@ -60,10 +60,10 @@ const config = async () => {
     scopeAnswers.scope.map((item: any) => item.name)
   );
 
-  const dir = process.env.DOCKER ? `/docker/config.json` : `/config.json`;
+  const dir = process.env.CONFIGDIR || `${process.cwd()}/config`;
 
   fs.writeFileSync(
-    `${process.cwd()}${dir}`,
+    `${dir}/config.json`,
     JSON.stringify(answers, null, "\t")
   );
 

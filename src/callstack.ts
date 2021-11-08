@@ -14,7 +14,9 @@ import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 require('dotenv').config();
 
 const callstack = async (config: Config) => {
+
   try {
+  
     process.env.DEBUG = config.debug ? "true" : undefined;
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
@@ -41,11 +43,11 @@ const callstack = async (config: Config) => {
           // Logger.info(
           //   `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
           // );
-
+          const baseDir = process.env.CONFIGDIR;
           const dto = JSON.parse(
             fs
               .readFileSync(
-                `${process.cwd()}/config/dto/${entity.name.toLocaleLowerCase()}.json`
+                `${baseDir}/dto/${entity.name.toLocaleLowerCase()}.json`
               )
               .toString()
           ) as HydratorMapping;
