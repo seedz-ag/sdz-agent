@@ -6,39 +6,46 @@ export default (
   driver: string,
   scope: string[]
 ) => {
-  let dir = `${__dirname}/../../config/dto`;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+  const baseDir = process.env.CONFIGDIR || `${process.cwd()}/config`;
+  
+  if(!fs.existsSync(baseDir)) {
+    fs.mkdirSync(baseDir, {recursive: true});	
   }
-  dir = `${__dirname}/../../config/sql`;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+
+  const sqlDir = `${baseDir}/sql`;
+  if (!fs.existsSync(sqlDir)) {
+    fs.mkdirSync(sqlDir);
+  }
+
+  const dtoDir = `${baseDir}/dto`;
+  if (!fs.existsSync(dtoDir)) {
+    fs.mkdirSync(dtoDir);
   }
 
   for (const entity of scope) {
     const dto = entity.toLocaleLowerCase();
     const file = fs
       .readFileSync(
-        `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/dto/${dto}.stub`
+        `${process.cwd()}/node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/dto/${dto}.stub`
       )
       .toString();
-    fs.writeFileSync(`${__dirname}/../../config/dto/${dto}.json`, file);
+    fs.writeFileSync(`${dtoDir}/${dto}.json`, file);
   }
 
   if ("database" === connector) {
     const files = fs.readdirSync(
-      `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/sql/`
+      `${process.cwd()}/node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/sql/`
     );
 
     for (const file of files) {
       const sql = fs
         .readFileSync(
-          `${__dirname}/../../node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/sql/${file}`
+          `${process.cwd()}/node_modules/sdz-agent-${connector}-${driver}/src/${erp}/stubs/sql/${file}`
         )
         .toString();
 
       fs.writeFileSync(
-        `${__dirname}/../../config/sql/${file.replace(".stub", "")}.sql`,
+        `${sqlDir}/${file.replace(".stub", "")}.sql`,
         sql
       );
     }
