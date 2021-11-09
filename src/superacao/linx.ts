@@ -1,106 +1,90 @@
-import { Hydrator } from "sdz-agent-common";
+import Base from "./base";
 import CSV from "sdz-agent-data";
-import { HydratorMapping } from "sdz-agent-types";
-import FTP from "sdz-agent-sftp";
-import { TransportSeedz } from "sdz-agent-transport";
-import { ReadFile } from "sdz-agent-types/decorators";
 import Database from "sdz-agent-database";
+import FTP from "sdz-agent-sftp";
+import { Hydrator } from "sdz-agent-common";
+import { TransportSeedz } from "sdz-agent-transport";
 
-class Linx {
-
-	private database: any;
+class Linx extends Base {
   private csv: CSV;
-  private dto: HydratorMapping;
-	private ftp: FTP;
-  private transport: TransportSeedz;
+  private ftp: FTP;
 
-	constructor(database: Database, csv: CSV, ftp: FTP, transport: TransportSeedz) {
-    this.setDatabase(database);
+  constructor(
+    database: Database,
+    csv: CSV,
+    ftp: FTP,
+    transport: TransportSeedz
+  ) {
+    super(database, transport);
     this.setCSV(csv);
     this.setDTO(`${process.cwd()}/src/superacao/dto-linx.json`);
     this.setFTP(ftp);
-    this.setTransport(transport);
   }
 
   /**
    * Getters
    */
-   getDatabase(): Database {
-    return this.database;
-  }
-
   getCSV(): CSV {
     return this.csv;
-  }
-
-  getDTO(): HydratorMapping  {
-    return this.dto;
   }
 
   getFTP(): FTP {
     return this.ftp;
   }
-
-  getTransport(): TransportSeedz {
-    return this.transport;
-  }
-
   /**
    * Setters
    */
-  @ReadFile
-  readFile(json: string): HydratorMapping {
-    return JSON.parse(json);
-  }
-  setDatabase(database: Database): this {
-    this.database = database;
-    return this;
-  }
-
   setCSV(csv: CSV): this {
     this.csv = csv;
     return this;
   }
-
-  setDTO(json: string): this {
-    this.dto = this.readFile(json);
-    return this;
-  }
-
 
   setFTP(ftp: FTP): this {
     this.ftp = ftp;
     return this;
   }
 
-  setTransport(transport: TransportSeedz): this {
-    this.transport = transport;
-    return this;
-  }
-
   /**
-   * Functions 
+   * Functions
    */
 
-	async getList(): Promise<any[]> {
-    return await this.getDatabase().getConnector().execute("SELECT i.grupo, i.id, d.filial FROM   jd_setup_integration i JOIN jd_setup_integration_detail d ON d.jd_setup_integration = i.id WHERE  i.tipo = 'lynx'");
+  async getList(): Promise<any[]> {
+    return await this.getDatabase()
+      .getConnector()
+      .execute(
+        "SELECT i.grupo, i.id, d.filial FROM   jd_setup_integration i JOIN jd_setup_integration_detail d ON d.jd_setup_integration = i.id WHERE  i.tipo = 'lynx'"
+      );
   }
 
   async process() {
     try {
       const integrations = await this.getList();
       for (const integration of integrations) {
-        const fileName = `${integration['filial']}.csv`;
-        await this.getFTP().getFile(`${integration['grupo']}/${fileName}`, fileName);
-        const csv = await this.getCSV().read(fileName, { skipRows:0, maxRows: 100, delimiter: ";" }) as any[];
-        for (const row of csv) {
-          const dto =  Hydrator(this.getDTO(), row);
-          this.getTransport().send('superacao', Hydrator(this.getDTO(), row));
+        const fileName = `${integration["filial"]}.csv`;
+        await this.getFTP().getFile(
+          `${integration["grupo"]}/${fileName}`,
+          fileName
+        );
+        let csv;
+        let skipRows = 0;
+        while (true) {
+          csv = (await this.getCSV().read(fileName, {
+            headers: false,
+            skipRows,
+            maxRows: 100,
+            delimiter: ";",
+          })) as any[];
+          if (!csv.length) break;
+          for (const row of csv) {
+            const dto = Hydrator(this.getDTO(), row);
+            this.getTransport().send("superacao", Hydrator(this.getDTO(), row));
+          }
+          skipRows += 100;
+          // console.log(`${skipRows} rows processed`);
         }
       }
     } catch {}
   }
-
 }
 
 export default Linx;
