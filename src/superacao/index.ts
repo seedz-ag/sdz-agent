@@ -1,12 +1,12 @@
-import { Hydrator } from "sdz-agent-common";
 import CSV from "sdz-agent-data";
-import { Config, Connector} from "sdz-agent-types";
-import FTP from "sdz-agent-sftp";
-import { TransportSeedz } from "sdz-agent-transport";
-import Linx from "./linx";
+import { Config } from "sdz-agent-types";
 import Database from "sdz-agent-database";
+import FTP from "sdz-agent-sftp";
+import Linx from "./linx";
+import { Logger } from "sdz-agent-common";
+import Protheus from "./protheus";
+import { TransportSeedz } from "sdz-agent-transport";
 
-    
 require("dotenv").config();
 
 export default class Superacao {
@@ -15,7 +15,7 @@ export default class Superacao {
   private ftp: FTP;
   private transport: TransportSeedz;
 
-  constructor(config:Config) {
+  constructor(config: Config) {
     this.csv = new CSV(config.legacy);
     this.ftp = new FTP(config.ftp);
     this.transport = new TransportSeedz(config.api);
@@ -23,8 +23,14 @@ export default class Superacao {
   }
 
   async process() {
+    Logger.info("STARTING PROCESS SEEDZ SUPERACAO");
+    Logger.info("STARTING PROCESSING LINX");
     const linx = new Linx(this.connection, this.csv, this.ftp, this.transport);
     await linx.process();
+    Logger.info("END PROCESS LINX");
+    Logger.info("STARTING PROCESSING PROTHEUS");
+    const protheus = new Protheus(this.connection, this.transport);
+    await protheus.process();
+    Logger.info("END PROCESS PROTHEUS");
   }
-
 }

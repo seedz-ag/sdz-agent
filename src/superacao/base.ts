@@ -1,5 +1,4 @@
 import Database from "sdz-agent-database";
-import FTP from "sdz-agent-sftp";
 import { HydratorMapping } from "sdz-agent-types";
 import { ReadFile } from "sdz-agent-types/decorators";
 import { TransportSeedz } from "sdz-agent-transport";
