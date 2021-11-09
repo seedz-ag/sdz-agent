@@ -26,28 +26,25 @@ export default new Promise((resolve, reject) => {
     resolve(config);
   }
   const client = new WebSocketClient();
-    client.on("connectFailed", function (error) {
+  client.on("connectFailed", function (error) {
+    resolve(config);
+  });
+  client.on("connect", function (connection) {
+    connection.on("message", (message): void => {
+      if (message.type === "utf8" && message.utf8Data) {
+        const json = JSON.parse(message.utf8Data);
+        if (fs.existsSync(configFile)) {
+          fs.unlinkSync(configFile);
+        }
+        fs.writeFileSync(configFile, message.utf8Data);
+        resolve(json);
+      }
       resolve(config);
     });
-    client.on("connect", function (connection) {
-      connection.on("message", (message): void => {
-        if (message.type === "utf8" && message.utf8Data) {
-          const json = JSON.parse(message.utf8Data);
-          try {
-            fs.unlinkSync(configFile);
-          } catch (e: any) {
-            console.log("NO LOCAL CONFIG FILE");
-          }
-          fs.writeFileSync(configFile, message.utf8Data);
-          resolve(json);
-        }
-        resolve(config);
-      });
-      connection.on("error", (error) => {
-        resolve(config);
-      });
-      connection.sendUTF(JSON.stringify({ action: "get-config" }));
+    connection.on("error", (error) => {
+      resolve(config);
     });
-    client.connect(process.env.WS_SERVER_URL as string, "echo-protocol");
-  }
+    connection.sendUTF(JSON.stringify({ action: "get-config" }));
+  });
+  client.connect(process.env.WS_SERVER_URL as string, "echo-protocol");
 });
