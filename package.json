@@ -15,12 +15,14 @@
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
     "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport",
-    "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git"
+    "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git",
+    "websocket": "^1.0.34"
   },
   "devDependencies": {
     "@types/cli-progress": "^3.9.2",
     "@types/node": "^16.6.1",
     "@types/shelljs": "^0.8.9",
+    "@types/websocket": "^1.0.4",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.2"
   },
