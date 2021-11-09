@@ -1,4 +1,3 @@
-import erp from "config/erp";
 import fs from "fs";
 import { Config } from "sdz-agent-types";
 import { client as WebSocketClient } from "websocket";
