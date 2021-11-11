@@ -4,7 +4,7 @@ import { Logger } from "sdz-agent-common";
 import call from "./utils/call";
 
 const job = "./src/job";
-const watcher = watch(["./config.json", "./config/dto/**"], {
+const watcher = watch(["./config/**", "./docker/**"], {
   ignoreInitial: false,
 });
 
