@@ -22,7 +22,7 @@ const job = () => {
 
 process.on("message", (message: string) => {
   if ("START_JOB" === message) {
-    Logger.info("INICIALIZANDO O AGENDADOR.");
+    Logger.info("CLOSING THE SCHEDULER.");
     job();
   }
 });
