@@ -22,7 +22,7 @@ const job = () => {
 
 process.on("message", (message: string) => {
   if ("START_JOB" === message) {
-    Logger.info("CLOSING THE SCHEDULER.");
+    Logger.info("STARTING SCHEDULER.");
     job();
   }
 });

@@ -12,7 +12,7 @@ let child = call(job);
 child.send("START_JOB");
 
 watcher.on("change", () => {
-  Logger.info("STARTING SCHEDULER");
+  Logger.info("CLOSING THE SCHEDULER.");
   child.kill();
   child = call(job);
   child.send("START_JOB");
