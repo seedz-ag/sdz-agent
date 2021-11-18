@@ -10,6 +10,7 @@
     "cli-progress": "^3.9.1",
     "dotenv": "^10.0.0",
     "enquirer": "^2.3.6",
+    "express": "^4.17.1",
     "node-schedule": "^2.0.0",
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
@@ -19,6 +20,7 @@
     "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git"
   },
   "devDependencies": {
+    "@types/appdynamics": "^21.8.0",
     "@types/cli-progress": "^3.9.2",
     "@types/node": "^16.6.1",
     "@types/shelljs": "^0.8.9",
