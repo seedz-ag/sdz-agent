@@ -19,8 +19,33 @@ class ProcessScope {
     return `${process.cwd()}/config/dto/${scopeItem.name.toLocaleLowerCase()}.json`;
   }
 
+  async one(entity: string) {
+    this.transport.init &&
+      (await this.transport.init(this.scope, this.connector));
+    const scopeItem = this.scope.find(
+      (item) => entity.toLocaleLowerCase() === item.name.toLocaleLowerCase()
+    );
+    
+    if (!scopeItem) {
+      return;
+    }
+    
+    const dto = this.readDTO(this.getScopeFileName(scopeItem));
+    let results;
+    while ((results = await this.connector.process(scopeItem.name))) {
+      await this.transport.process({
+        data: results.map((item: HydratorMapping) => Hydrator(dto, item)),
+        meta: scopeItem,
+      });
+    }
+    if (!process.env.ASYNC) {
+      await this.transport.send();
+    }
+  }
+
   async process() {
-    this.transport.init && await this.transport.init(this.scope, this.connector);
+    this.transport.init &&
+      (await this.transport.init(this.scope, this.connector));
     for (const scopeItem of this.scope) {
       const dto = this.readDTO(this.getScopeFileName(scopeItem));
       let results;

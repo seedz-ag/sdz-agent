@@ -1,6 +1,7 @@
 import Database from "sdz-agent-database";
 import { AbstractRepository } from "sdz-agent-types";
 import { ConfigDatabase } from "sdz-agent-types/types/config.type";
+import { APM } from "sdz-agent-types/dist/decorators";
 
 export default class ProcessScopeDatabase {
   private config: ConfigDatabase;
@@ -14,11 +15,15 @@ export default class ProcessScopeDatabase {
     this.driver = new Database(this.config);
   }
 
+  @APM((global as any).appd, "CALLER > DATABASE")
+  apm(transaction: string) {}
+
   incrementPage() {
     this.page++;
   }
 
   async process(entity: string) {
+    this.apm(`${entity.toLocaleUpperCase()}`);
     const respository: any = this.driver.getRepository();
     if (!this.count) {
       this.count = await respository[
@@ -35,6 +40,7 @@ export default class ProcessScopeDatabase {
     }
 
     this.incrementPage();
+    this.apm(`${entity.toLocaleUpperCase()}`);
     return this.data;
   }
 

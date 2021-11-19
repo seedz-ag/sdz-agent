@@ -1,6 +1,7 @@
 require("dotenv").config();
+
 import { appDynamics } from "sdz-agent-common";
-const appd = appDynamics(require("appdynamics"));
+(global as any).appd = appDynamics(require("appdynamics"));
 
 import Caller from "./export/caller";
 
@@ -11,17 +12,18 @@ const express = require("express"),
 
 app.set("port", process.env.PORT || 3000);
 
-const caller = new Caller(require("../config").default, appd);
+const caller = new Caller(require("../config").default);
 
 app.get("/init", async (req: any, res: any) => {
-	const initTransaction = appd.startTransaction("[CALLER > INIT]");
+	const initTransaction = (global as any).appd?.startTransaction("[CALLER > INIT]");
 	await caller.init();
 	initTransaction.end();
 	res.end();
 });
 
 app.get("/:entity", async (req: any, res: any) => {
-	console.log(req.params.entity);
+  await caller.runOnce(req.params.entity);
+  res.end();
 });
 
 const server = http.createServer(app);
