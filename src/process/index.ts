@@ -18,6 +18,16 @@ export default class Process {
   }
 
   // FUNCS
+  async dump(name: string) {
+    const entity = this.getEntities().find(entity => name.toLocaleLowerCase() === entity.name.toLocaleLowerCase());
+
+    if (!entity) {
+      throw new Error('Entity not found in scope.');
+    }
+
+    console.log(entity);
+  }
+
   async validateFTP() {
     Logger.info("VALIDATING CLIENT FTP");
     await this.ftp.connect();

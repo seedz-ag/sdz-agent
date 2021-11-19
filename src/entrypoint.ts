@@ -2,7 +2,7 @@ require("dotenv").config();
 import { appDynamics } from "sdz-agent-common";
 const appd = appDynamics(require("appdynamics"));
 
-import Process from "./process";
+import Caller from "./export/caller";
 
 const express = require("express"),
   path = require("path"),
@@ -11,12 +11,12 @@ const express = require("express"),
 
 app.set("port", process.env.PORT || 3000);
 
-const p = new Process(require("../config"));
+const caller = new Caller(require("../config").default, appd);
 
 app.get("/init", async (req: any, res: any) => {
-	const transaction = appd.startTransaction("/init [VALIDATE FTP]");
-	await p.validateFTP();
-	transaction.end();
+	const initTransaction = appd.startTransaction("[CALLER > INIT]");
+	await caller.init();
+	initTransaction.end();
 	res.end();
 });
 
