@@ -11,7 +11,7 @@ import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 
-require('dotenv').config();
+require("dotenv").config();
 
 const appd = (global as any).appd;
 const transactions: any = {};
@@ -34,12 +34,10 @@ const apm = (msg: string, type: string | null = "info"): void => {
   if (type) {
     (Logger as any)[type](`${msg}.`);
   }
-}
+};
 
 const callstack = async (config: Config) => {
-
   try {
-  
     process.env.DEBUG = config.debug ? "true" : undefined;
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
@@ -52,9 +50,9 @@ const callstack = async (config: Config) => {
     apm("VALIDATING CLIENT FTP");
     //await ftp1.disconnect();
 
-    apm("INIT DATABASE")
+    apm("INIT DATABASE");
     const database = new Database(config.database);
-    apm("INIT DATABASE")
+    apm("INIT DATABASE");
     const entities: Entity[] = config.scope;
 
     const promises: Promise<boolean>[] = [];
@@ -82,24 +80,19 @@ const callstack = async (config: Config) => {
           const method = `get${entity.name}` as keyof AbstractRepository;
           const count = `count${entity.name}` as keyof AbstractRepository;
           let page = 0;
-          apm(`DUMPING ${entity}`, null);
+          apm(`DUMPING ${entity.name.toLocaleUpperCase()}`, null);
           let response = await respository[method](page, limit);
           const countResponse = await respository[count]();
           let barProgress: any = "";
           if (response && response.length) {
             // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
             if (!process.env.COMMAND_LINE) {
-              barProgress = ProgressBar.create(
-                entity.file,
-                countResponse,
-                0,
-                {
-                  color: `\u001b[33m`,
-                  event: "WRITING",
-                  text: entity.file,
-                  unit: "Records",
-                }
-              );
+              barProgress = ProgressBar.create(entity.file, countResponse, 0, {
+                color: `\u001b[33m`,
+                event: "WRITING",
+                text: entity.file,
+                unit: "Records",
+              });
             }
 
             while (0 < response.length) {
@@ -128,16 +121,16 @@ const callstack = async (config: Config) => {
                 });
               }
             }
-            apm(`DUMPING ${entity}`, null);
+            apm(`DUMPING ${entity.name.toLocaleUpperCase()}`, null);
 
             if (fs.existsSync(file)) {
               // Logger.info("ENVIANDO DADOS VIA SFTP");
               const ftp = new FTP(config.ftp);
-             // await ftp.connect();
-              apm(`SENDING ${entity}`);
+              // await ftp.connect();
+              apm(`SENDING ${entity.name.toUpperCase()}`, null);
               await ftp.sendFile(file, entity.file);
               fs.existsSync(file) && fs.unlinkSync(file);
-              apm(`SENDING ${entity}`);
+              apm(`SENDING ${entity.name.toLocaleUpperCase()}`, null);
             }
           }
           resolve(true);

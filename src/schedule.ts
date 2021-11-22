@@ -3,17 +3,20 @@ import { Logger } from "sdz-agent-common";
 
 import call from "./utils/call";
 
+const entrypoint = "./src/entrypoint";
 const job = "./src/job";
 const watcher = watch(["./config/**", "./docker/**"], {
   ignoreInitial: false,
 });
 
-let child = call(job);
-child.send("START_JOB");
+let child1 = call(entrypoint);
+child1.send("START_SERVER");
+let child2 = call(job);
+child2.send("START_JOB");
 
 watcher.on("change", () => {
   Logger.info("CLOSING THE SCHEDULER.");
-  child.kill();
-  child = call(job);
-  child.send("START_JOB");
+  child2.kill();
+  child2 = call(job);
+  child2.send("START_JOB");
 });
