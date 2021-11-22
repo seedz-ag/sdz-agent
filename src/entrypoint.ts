@@ -14,7 +14,7 @@ app.set("port", process.env.PORT || 3000);
 
 const caller = new Caller(config);
 
-app.get("/init", async (req: any, res: any) => {
+app.get("/callstack", async (req: any, res: any) => {
   const callstack = require("./callstack");
   await callstack(config);
   res.end();
