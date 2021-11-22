@@ -5,14 +5,20 @@ import { appDynamics } from "sdz-agent-common";
 
 import Caller from "./export/caller";
 
-const express = require("express"),
-  path = require("path"),
+const config = require("../config").default,
+  express = require("express"),
   http = require("http"),
   app = express();
 
 app.set("port", process.env.PORT || 3000);
 
-const caller = new Caller(require("../config").default);
+const caller = new Caller(config);
+
+app.get("/init", async (req: any, res: any) => {
+  const callstack = require("./callstack");
+  await callstack(config);
+  res.end();
+});
 
 app.get("/init", async (req: any, res: any) => {
 	const initTransaction = (global as any).appd?.startTransaction("[CALLER > INIT]");

@@ -13,6 +13,29 @@ import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 
 require('dotenv').config();
 
+const appd = (global as any).appd;
+const transactions: any = {};
+
+const apm = (msg: string, type: string | null = "info"): void => {
+  if (!appd) {
+    if (!transactions[msg] && type) {
+      transactions[msg] = msg;
+      (Logger as any)[type](`${msg}.`);
+      return;
+    }
+  }
+
+  if (transactions[msg]) {
+    transactions[msg].end();
+    return;
+  }
+
+  transactions[msg] = appd.startTransaction(`[CALLSTACK > ${msg}]`);
+  if (type) {
+    (Logger as any)[type](`${msg}.`);
+  }
+}
+
 const callstack = async (config: Config) => {
 
   try {
@@ -23,13 +46,15 @@ const callstack = async (config: Config) => {
 
     //validate(config);
 
-    Logger.info("VALIDATING CLIENT FTP");
-
+    apm("VALIDATING CLIENT FTP");
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
+    apm("VALIDATING CLIENT FTP");
     //await ftp1.disconnect();
 
+    apm("INIT DATABASE")
     const database = new Database(config.database);
+    apm("INIT DATABASE")
     const entities: Entity[] = config.scope;
 
     const promises: Promise<boolean>[] = [];
@@ -57,6 +82,7 @@ const callstack = async (config: Config) => {
           const method = `get${entity.name}` as keyof AbstractRepository;
           const count = `count${entity.name}` as keyof AbstractRepository;
           let page = 0;
+          apm(`DUMPING ${entity}`, null);
           let response = await respository[method](page, limit);
           const countResponse = await respository[count]();
           let barProgress: any = "";
@@ -102,13 +128,16 @@ const callstack = async (config: Config) => {
                 });
               }
             }
+            apm(`DUMPING ${entity}`, null);
 
             if (fs.existsSync(file)) {
               // Logger.info("ENVIANDO DADOS VIA SFTP");
               const ftp = new FTP(config.ftp);
              // await ftp.connect();
+              apm(`SENDING ${entity}`);
               await ftp.sendFile(file, entity.file);
               fs.existsSync(file) && fs.unlinkSync(file);
+              apm(`SENDING ${entity}`);
             }
           }
           resolve(true);
