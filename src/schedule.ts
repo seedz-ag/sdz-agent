@@ -10,13 +10,14 @@ const watcher = watch(["./config/**", "./docker/**"], {
 });
 
 let child1 = call(entrypoint);
-child1.send("START_SERVER");
 let child2 = call(job);
-child2.send("START_JOB");
+//child2.send("START_JOB");
 
 watcher.on("change", () => {
   Logger.info("CLOSING THE SCHEDULER.");
+  child1.kill();
   child2.kill();
+  child1 = call(entrypoint);
   child2 = call(job);
   child2.send("START_JOB");
 });

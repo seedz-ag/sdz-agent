@@ -21,12 +21,12 @@ const apm = (msg: string, type: string | null = "info"): void => {
     if (!transactions[msg] && type) {
       transactions[msg] = msg;
       (Logger as any)[type](`${msg}.`);
-      return;
     }
+    return;
   }
 
   if (transactions[msg]) {
-    transactions[msg].end();
+    !!transactions[msg].end && transactions[msg].end();
     return;
   }
 
@@ -41,7 +41,6 @@ const callstack = async (config: Config) => {
     process.env.DEBUG = config.debug ? "true" : undefined;
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
-
     //validate(config);
 
     apm("VALIDATING CLIENT FTP");
@@ -147,8 +146,8 @@ const callstack = async (config: Config) => {
     ProgressBar.close();
 
     Logger.info("ENDING PROCESS");
-
-    process.exit(1);
+    !process.env.COMMAND_LINE && process.exit(1);
+    
   } catch (e: any) {
     Logger.error(e.message);
     console.log(e);
