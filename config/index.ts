@@ -1,6 +1,7 @@
 import fs from "fs";
 import { Config } from "sdz-agent-types";
-import { client as WebSocketClient } from "websocket";
+import { io } from "socket.io-client";
+
 import { createSQLHosts } from "../src/config/database/informix";
 
 process.env.CONFIGDIR = `${process.cwd()}/${
@@ -24,26 +25,23 @@ export default new Promise((resolve, reject) => {
   if (!process.env.WS_SERVER_URL) {
     resolve(config);
   }
-  const client = new WebSocketClient();
-  client.on("connectFailed", function (error) {
-    resolve(config);
-  });
-  client.on("connect", function (connection) {
-    connection.on("message", (message): void => {
-      if (message.type === "utf8" && message.utf8Data) {
-        const json = JSON.parse(message.utf8Data);
-        if (fs.existsSync(configFile)) {
-          fs.unlinkSync(configFile);
-        }
-        fs.writeFileSync(configFile, message.utf8Data);
-        resolve(json);
+  
+  const socket = io(`${process.env.WS_SERVER_URL}`);
+  const credentials = {
+    client_id: '',
+    client_secret: '',
+  };
+  socket.on('connect', function () {
+    console.log('Connected to Seedz-Agent-WS');
+    socket.emit('getConfig', { credentials }, (response:any) => {
+      if (fs.existsSync(configFile)) {
+        fs.unlinkSync(configFile);
       }
-      resolve(config);
+fs.writeFileSync(configFile, JSON.stringify(response, null, "\t"));
+      resolve(response); 
     });
-    connection.on("error", (error) => {
-      resolve(config);
+    socket.emit('getAPMEnvironment', { credentials }, (response:any) => {
+      console.log('APMEnv:', response);
     });
-    connection.sendUTF(JSON.stringify({ action: "get-config" }));
   });
-  client.connect(process.env.WS_SERVER_URL as string, "echo-protocol");
 });
