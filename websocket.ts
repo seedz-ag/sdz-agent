@@ -1,56 +1,52 @@
-import { server as WebSocketServer } from "websocket";
-import http from "http";
+import { Socket } from "socket.io-client";
 
-var server = http.createServer(function (request, response) {
-  console.log(new Date() + " Received request for " + request.url);
-  response.writeHead(404);
-  response.end();
+const express = require("express");
+const socket = require("socket.io");
+
+// App setup
+const PORT = 8080;
+const app = express();
+const server = app.listen(PORT, function () {
+  console.log(`Listening on port ${PORT}`);
+  console.log(`http://localhost:${PORT}`);
 });
 
-server.listen(8080, function () {
-  console.log(new Date() + " Server is listening on port 8080");
-});
+// Static files
+app.use(express.static("public"));
 
-const wsServer = new WebSocketServer({
-  httpServer: server,
-  // You should not use autoAcceptConnections for production
-  // applications, as it defeats all standard cross-origin protection
-  // facilities built into the protocol and the browser.  You should
-  // *always* verify the connection's origin and decide whether or not
-  // to accept it.
-  autoAcceptConnections: false,
-});
+// Socket setup
+const io = socket(server, { pingInterval: 1000 });
 
-function originIsAllowed(origin: any) {
-  // put logic here to detect whether the specified origin is allowed.
-  return true;
-}
+let list: any[] = [];
 
-wsServer.on("request", function (request) {
-  if (!originIsAllowed(request.origin)) {
-    // Make sure we only accept requests from an allowed origin
-    request.reject();
-    console.log(
-      new Date() + " Connection from origin " + request.origin + " rejected."
-    );
-    return;
-  }
-
-  var connection = request.accept("echo-protocol", request.origin);
-  console.log(new Date() + " Connection accepted.");
-
-  connection.on("message", (message) => {
-    if (message.type === "utf8") {
-      const params: any = JSON.parse(message.utf8Data);
-      switch (params.action) {
-        case "get-config":
-          return connection.sendUTF(JSON.stringify({ config: "config" }, null, "\t"));
-      }
-    }
+io.on("connection", function (socket: Socket) {
+  socket.on("client-connect", function (client_id) {
+    console.log("client-connect", client_id);
+    (socket as any).client_id = client_id;
+    list = [...list, { client_id, socket_id: socket.id }];
   });
-  connection.on("close", function (reasonCode, description) {
-    console.log(
-      new Date() + " Peer " + connection.remoteAddress + " disconnected."
-    );
+  socket.on("disconnect", function () {
+    console.log("client-disconnect");
+    list = list.filter(item => item.client_id !== (socket as any).client_id);
+  });
+  socket.on("get-config", function (data, fn) {
+    console.log("get-config", data);
+    fn({});
+  });
+  socket.on("get-env", function (data) {
+    console.log("get-env", data);
+  });
+
+  socket.on("get-active-clients", function (fn) {
+    console.log("get-active-clients", list);
+    fn(list);
+  });
+
+  socket.on("execute-query", function (socket_id, query) {
+    io.sockets.sockets
+      .get(socket_id)
+      .emit(`execute-query`, query, function (cb: any) {
+        console.log(cb);
+      });
   });
 });
