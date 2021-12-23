@@ -28,8 +28,11 @@ export default class WebSocketClient {
   connect() {
     return new Promise((resolve) => {
       this.socket.on("connect", () => {
-        console.log("connect");
-        this.socket.emit("client-connect", this.CREDENTIALS.client_id);
+        const id = {
+          client_id: this.CREDENTIALS.client_id,
+          name: (this.config as any).name,
+        }
+        this.socket.emit("client-connect", id);
         this.listen();
         resolve(true);
       });
