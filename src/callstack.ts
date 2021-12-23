@@ -35,7 +35,7 @@ const callstack = async (config: Config) => {
     const promises: Promise<boolean>[] = [];
     const respository: any = database.getRepository();
 
-    const csv = new CSV(config.legacy);
+    const csv = new CSV(config.legacy, config.fileSize);
 
     for (const entity of entities) {
       const promise = new Promise<boolean>(async (resolve, reject) => {
