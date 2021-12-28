@@ -16,6 +16,7 @@ const isConfig = !!process.argv.filter(n => ["-C", "--config"].some(n2 => n === 
 const isConfigDTO = !!process.argv.filter(n => ["-D", "--config-dto"].some(n2 => n === n2)).length;
 const isSchedule = !!process.argv.filter(n => ["-S", "--schedule"].some(n2 => n === n2)).length;
 const isUpdate = !!process.argv.filter(n => ["-U", "--update"].some(n2 => n === n2)).length;
+const isquery = !!process.argv.filter(n => ["-Q", "--query"].some(n2 => n === n2)).length;
 
 switch (true) {
   case isConfig:
@@ -33,6 +34,11 @@ switch (true) {
       Logger.info(stdout)
     });
     break
+    case isquery:
+      exec("git pull", (error, stdout, stderr) => {
+        Logger.info(stdout)
+      });
+      break
   default:
     require(`../src/bootstrap.ts`);
 }

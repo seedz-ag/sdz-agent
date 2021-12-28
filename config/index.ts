@@ -23,9 +23,9 @@ const load = (file: string): Partial<Config> => {
 export default new Promise((resolve, reject) => {
   const config = load(`config`) as Config;
   if (!process.env.WS_SERVER_URL) {
-    resolve(config);
+    
   }
-  
+  resolve(config);
   const socket = io(`${process.env.WS_SERVER_URL}`);
   const credentials = {
     client_id: '',
