@@ -15,7 +15,8 @@
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
     "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport",
-    "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git"
+    "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git",
+    "yargs": "^17.3.1"
   },
   "devDependencies": {
     "@types/cli-progress": "^3.9.2",

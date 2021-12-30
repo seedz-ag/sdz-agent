@@ -6,29 +6,27 @@ const project = path.join(__dirname, '../tsconfig.json');
 const dev = fs.existsSync(project);
 const { exec } = require('child_process');
 const { Logger } = require('sdz-agent-common');
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
 
 if (dev) {
   require('ts-node').register({ project });
 }
 
-
-const isConfig = !!process.argv.filter(n => ["-C", "--config"].some(n2 => n === n2)).length;
-const isConfigDTO = !!process.argv.filter(n => ["-D", "--config-dto"].some(n2 => n === n2)).length;
-const isSchedule = !!process.argv.filter(n => ["-S", "--schedule"].some(n2 => n === n2)).length;
-const isUpdate = !!process.argv.filter(n => ["-U", "--update"].some(n2 => n === n2)).length;
+const { argv } = yargs(hideBin(process.argv));
 
 switch (true) {
-  case isConfig:
+  case (argv.C || argv.config):
     require(`../src/config/config.ts`);
     break;
-  case isConfigDTO:
+  case (argv.D || argv.configDto):
     require(`../src/config/dto.ts`);
     break;
-  case isSchedule:
+  case (argv.S || argv.schedule):
     process.env.COMMAND_LINE = true;
     require(`../src/schedule.ts`);
     break;
-  case isUpdate:
+  case (argv.U || argv.update):
     exec("git pull", (error, stdout, stderr) => {
       Logger.info(stdout)
     });
