@@ -5,6 +5,8 @@ import executeQuery from "./execute-query";
 import getConfig from "./get-config";
 import run from "./run";
 
+import { exec } from "child_process";
+
 const client = (config: Config) => {
   const socket = io(`${process.env.WS_SERVER_URL}`);
   const credentials = {
@@ -23,7 +25,7 @@ export default class WebSocketClient {
   }
 
   async executeQuery(query: string, cb: any) {
-    return await executeQuery(query, cb); 
+    return await executeQuery(query, cb);
   }
 
   connect() {
@@ -32,7 +34,7 @@ export default class WebSocketClient {
         const id = {
           client_id: this.CREDENTIALS.client_id,
           name: (this.config as any).name,
-        }
+        };
         this.socket.emit("client-connect", id);
         this.listen();
         resolve(true);
@@ -63,4 +65,13 @@ export default class WebSocketClient {
     await run(this.socket, this.CREDENTIALS);
   }
 
+  async update(cb: any): Promise<void> {
+    exec("git pull", (error, stdout, stderr) => {
+      if (error) {
+        cb(stderr);
+        return;
+      }
+      cb(stdout);
+    });
+  }
 }
