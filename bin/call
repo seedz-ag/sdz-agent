@@ -30,11 +30,6 @@ switch (true) {
       Logger.info(stdout)
     });
     break
-    case isquery:
-      exec("git pull", (error, stdout, stderr) => {
-        Logger.info(stdout)
-      });
-      break
   default:
     require(`../src/bootstrap.ts`);
 }
