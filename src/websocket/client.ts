@@ -4,8 +4,7 @@ import { io, Socket } from "socket.io-client";
 import executeQuery from "./execute-query";
 import getConfig from "./get-config";
 import run from "./run";
-
-import { exec } from "child_process";
+import update from "./update";
 
 const client = (config: Config) => {
   const socket = io(`${process.env.WS_SERVER_URL}`);
@@ -66,12 +65,6 @@ export default class WebSocketClient {
   }
 
   async update(cb: any): Promise<void> {
-    exec("git pull", (error, stdout, stderr) => {
-      if (error) {
-        cb(stderr);
-        return;
-      }
-      cb(stdout);
-    });
+    await update(cb);
   }
 }
