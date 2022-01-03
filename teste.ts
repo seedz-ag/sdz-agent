@@ -14,8 +14,13 @@ require("dotenv").config();
     console.log(data);
   });
   ws.getSocket().emit(
-    "execute-query",
+    "run",
     ws.getSocket().id,
-    "SELECT * FROM clientes limit 2;"
+    "run"
   );
+  // ws.getSocket().emit(
+  //   "execute-query",
+  //   ws.getSocket().id,
+  //   "SELECT * FROM clientes limit 2;"
+  // );
 })();
