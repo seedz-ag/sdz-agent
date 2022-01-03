@@ -3,6 +3,7 @@ import { io, Socket } from "socket.io-client";
 
 import executeQuery from "./execute-query";
 import getConfig from "./get-config";
+import run from "./run";
 
 const client = (config: Config) => {
   const socket = io(`${process.env.WS_SERVER_URL}`);
@@ -41,6 +42,7 @@ export default class WebSocketClient {
 
   private listen() {
     this.socket.on(`execute-query`, this.executeQuery);
+    this.socket.on(`run`, this.run);
   }
 
   async getConfig() {
@@ -55,6 +57,10 @@ export default class WebSocketClient {
 
   getSocket(): Socket {
     return this.socket;
+  }
+
+  async run(): Promise<void> {
+    await run(this.socket, this.CREDENTIALS);
   }
 
 }
