@@ -13,7 +13,7 @@ const job = () => {
       if (child) {
         child.kill();
       }
-      child = fork("./src/bootstrap.ts", [], {
+      child = fork("./src/bootstrap.ts", process.argv, {
         execArgv: ["-r", "ts-node/register"],
       });
     }
