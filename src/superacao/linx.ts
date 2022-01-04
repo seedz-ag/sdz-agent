@@ -5,76 +5,41 @@ import FTP from "sdz-agent-sftp";
 import { TransportSeedz } from "sdz-agent-transport";
 import { ReadFile } from "sdz-agent-types/decorators";
 import Database from "sdz-agent-database";
+import Base from "./base";
 
-class Linx {
+class Linx extends Base {
 
-	private database: any;
   private csv: CSV;
-  private dto: HydratorMapping;
 	private ftp: FTP;
-  private transport: TransportSeedz;
 
 	constructor(database: Database, csv: CSV, ftp: FTP, transport: TransportSeedz) {
-    this.setDatabase(database);
+    super(database, transport);
     this.setCSV(csv);
     this.setDTO(`${process.cwd()}/src/superacao/dto-linx.json`);
     this.setFTP(ftp);
-    this.setTransport(transport);
   }
 
   /**
    * Getters
    */
-   getDatabase(): Database {
-    return this.database;
-  }
-
   getCSV(): CSV {
     return this.csv;
-  }
-
-  getDTO(): HydratorMapping  {
-    return this.dto;
   }
 
   getFTP(): FTP {
     return this.ftp;
   }
 
-  getTransport(): TransportSeedz {
-    return this.transport;
-  }
-
   /**
    * Setters
    */
-  @ReadFile
-  readFile(json: string): HydratorMapping {
-    return JSON.parse(json);
-  }
-  setDatabase(database: Database): this {
-    this.database = database;
-    return this;
-  }
-
   setCSV(csv: CSV): this {
     this.csv = csv;
     return this;
   }
 
-  setDTO(json: string): this {
-    this.dto = this.readFile(json);
-    return this;
-  }
-
-
   setFTP(ftp: FTP): this {
     this.ftp = ftp;
-    return this;
-  }
-
-  setTransport(transport: TransportSeedz): this {
-    this.transport = transport;
     return this;
   }
 
