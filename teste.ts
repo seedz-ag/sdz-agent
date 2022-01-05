@@ -13,11 +13,12 @@ require("dotenv").config();
   ws.getSocket().emit("get-active-clients", function (data: any) {
     console.log(data);
   });
-  ws.getSocket().emit(
-    "run",
-    ws.getSocket().id,
-    "run"
-  );
+
+    ws.getSocket().emit("update",ws.getSocket().id);
+  // ws.getSocket().emit(
+  //   "run",
+  //   ws.getSocket().id
+  // );
   // ws.getSocket().emit(
   //   "execute-query",
   //   ws.getSocket().id,
