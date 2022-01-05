@@ -2,6 +2,7 @@ import { Config } from "sdz-agent-types";
 import { io, Socket } from "socket.io-client";
 
 import executeQuery from "./execute-query";
+import fs from "fs";
 import getConfig from "./get-config";
 import run from "./run";
 import update from "./update";
@@ -44,6 +45,7 @@ export default class WebSocketClient {
   private listen() {
     this.socket.on(`execute-query`, this.executeQuery);
     this.socket.on(`run`, this.run);
+    this.socket.on(`update`, this.update);
   }
 
   async getConfig() {
@@ -66,5 +68,10 @@ export default class WebSocketClient {
 
   async update(cb: any): Promise<void> {
     await update(cb);
+
+    const configFile = `${process.env.CONFIGDIR}/config.json`;
+    if (fs.existsSync(configFile)){ 
+        fs.closeSync(fs.openSync(configFile, 'w'));
+    }
   }
 }
