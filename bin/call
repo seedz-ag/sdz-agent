@@ -21,6 +21,10 @@ switch (true) {
   case (argv.D || argv.configDto):
     require(`../src/config/dto.ts`);
     break;
+  case (argv.Q || argv.query):
+    const query = require(`../src/websocket/execute-query`);
+    (async () => await query(argv.Q || argv.query))();
+    break;
   case (argv.S || argv.schedule):
     process.env.COMMAND_LINE = true;
     require(`../src/schedule.ts`);

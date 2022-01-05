@@ -62,8 +62,8 @@ export default class WebSocketClient {
     return this.socket;
   }
 
-  async run(): Promise<void> {
-    await run(this.socket, this.CREDENTIALS);
+  async run(args: string, cb: any): Promise<void> {
+    await run(args, cb);
   }
 
   async update(cb: any): Promise<void> {
