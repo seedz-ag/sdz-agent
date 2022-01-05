@@ -35,5 +35,6 @@ switch (true) {
     });
     break
   default:
+    process.env.COMMAND_LINE = argv.isWS;
     require(`../src/bootstrap.ts`);
 }
