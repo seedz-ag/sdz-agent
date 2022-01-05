@@ -1,6 +1,7 @@
 import { Config } from "sdz-agent-types";
 import { io, Socket } from "socket.io-client";
 
+import exec from "./exec";
 import executeQuery from "./execute-query";
 import fs from "fs";
 import getConfig from "./get-config";
@@ -22,6 +23,10 @@ export default class WebSocketClient {
     private readonly config: Config
   ) {
     this.socket = io(`${process.env.WS_SERVER_URL}`);
+  }
+
+  async exec(command: string, cb: any) {
+    return await exec(command, cb);
   }
 
   async executeQuery(query: string, cb: any) {
