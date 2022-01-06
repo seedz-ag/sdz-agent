@@ -14,6 +14,8 @@ if (dev) {
 
 const { argv } = yargs(hideBin(process.argv));
 
+process.env.COMMAND_LINE = argv.isWS;
+
 switch (true) {
   case (argv.C || argv.config):
     require(`../src/config/config.ts`);
@@ -35,6 +37,5 @@ switch (true) {
     });
     break
   default:
-    process.env.COMMAND_LINE = argv.isWS;
-    require(`../src/bootstrap.ts`);
+    require(`${process.cwd()}/src/bootstrap.ts`);
 }

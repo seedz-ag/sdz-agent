@@ -1,7 +1,8 @@
 import fs from "fs";
+import { Config } from "sdz-agent-types";
 import { Socket } from "socket.io-client";
 
-export default async (socket: Socket, CREDENTIALS: any) => {
+export default async (socket: Socket, CREDENTIALS: any): Promise<Config> => {
   return new Promise((resolve) => {
     socket.emit("get-config", CREDENTIALS, (response: any) => {
       const file = `${process.cwd()}/config/config.json`;

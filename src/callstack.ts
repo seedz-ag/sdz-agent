@@ -11,12 +11,10 @@ import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 
-require('dotenv').config();
+require("dotenv").config();
 
 const callstack = async (config: Config) => {
-
   try {
-  
     process.env.DEBUG = config.debug ? "true" : undefined;
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
@@ -63,17 +61,12 @@ const callstack = async (config: Config) => {
           if (response && response.length) {
             // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
             if (!process.env.COMMAND_LINE) {
-              barProgress = ProgressBar.create(
-                entity.file,
-                countResponse,
-                0,
-                {
-                  color: `\u001b[33m`,
-                  event: "WRITING",
-                  text: entity.file,
-                  unit: "Records",
-                }
-              );
+              barProgress = ProgressBar.create(entity.file, countResponse, 0, {
+                color: `\u001b[33m`,
+                event: "WRITING",
+                text: entity.file,
+                unit: "Records",
+              });
             }
 
             while (0 < response.length) {
@@ -102,25 +95,25 @@ const callstack = async (config: Config) => {
                 });
               }
             }
-            
 
             const newFile = entity.file.split(/\.(?=[^\.]+$)/);
             const files = fs.readdirSync(`${process.cwd()}`).filter((file) => {
-            if(file.includes(newFile[0])){
-              return true;
-            }
-           });
-          
+              if (file.includes(newFile[0])) {
+                return true;
+              }
+            });
+
             for (const newFiles of files) {
-            if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
-              // Logger.info("ENVIANDO DADOS VIA SFTP");
-              const ftp = new FTP(config.ftp);
-             // await ftp.connect();
-              await ftp.sendFile(`${process.cwd()}/${newFiles}`, newFiles);
-              fs.existsSync(`${process.cwd()}/${newFiles}`) && fs.unlinkSync(`${process.cwd()}/${newFiles}`);
+              if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
+                // Logger.info("ENVIANDO DADOS VIA SFTP");
+                const ftp = new FTP(config.ftp);
+                // await ftp.connect();
+                await ftp.sendFile(`${process.cwd()}/${newFiles}`, newFiles);
+                fs.existsSync(`${process.cwd()}/${newFiles}`) &&
+                  fs.unlinkSync(`${process.cwd()}/${newFiles}`);
+              }
             }
           }
-        }
           resolve(true);
         } catch (e) {
           reject(e);
@@ -136,10 +129,9 @@ const callstack = async (config: Config) => {
 
     Logger.info("ENDING PROCESS");
 
-    process.exit(1);
+    process.exitCode = 0;
   } catch (e: any) {
     Logger.error(e.message);
-    console.log(e);
   }
 };
 

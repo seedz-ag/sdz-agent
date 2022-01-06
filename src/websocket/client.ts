@@ -7,21 +7,17 @@ import fs from "fs";
 import getConfig from "./get-config";
 import run from "./run";
 import update from "./update";
+import { Logger } from "sdz-agent-common";
 
-const client = (config: Config) => {
-  const socket = io(`${process.env.WS_SERVER_URL}`);
-  const credentials = {
-    client_id: "",
-    client_secret: "",
-  };
-};
-
-export default class WebSocketClient {
+export default new class WebSocketClient {
+  private config: Config;
+  private connected: boolean = false;
+  private CREDENTIALS: any;
+  private isListenning: boolean = false;
+  private logger;
   private socket: Socket;
-  constructor(
-    private readonly CREDENTIALS: any,
-    private readonly config: Config
-  ) {
+  constructor() {
+    this.logger = Logger;
     this.socket = io(`${process.env.WS_SERVER_URL}`);
   }
 
@@ -33,16 +29,25 @@ export default class WebSocketClient {
     return await executeQuery(query, cb);
   }
 
-  connect() {
+  connect(credentials: any) {
+    this.CREDENTIALS = credentials;
     return new Promise((resolve) => {
       this.socket.on("connect", () => {
+        this.connected = true;
+        this.logger.info('Connected to SdzAgentWS');
         const id = {
           client_id: this.CREDENTIALS.client_id,
-          name: (this.config as any).name,
+          client_name: this.CREDENTIALS.name,
         };
         this.socket.emit("client-connect", id);
-        this.listen();
+        if (!this.isListenning) {
+          this.listen();
+        }
         resolve(true);
+      });
+      this.socket.on("disconnect", () => {
+        this.connected = false;
+        this.logger.info('Disconnected to SdzAgentWS');
       });
     });
   }
@@ -51,9 +56,10 @@ export default class WebSocketClient {
     this.socket.on(`execute-query`, this.executeQuery);
     this.socket.on(`run`, this.run);
     this.socket.on(`update`, this.update);
+    this.isListenning = true;
   }
 
-  async getConfig() {
+  async getConfig(): Promise<Config> {
     return await getConfig(this.socket, this.CREDENTIALS);
   }
 
@@ -67,6 +73,10 @@ export default class WebSocketClient {
     return this.socket;
   }
 
+  isConnected(): boolean {
+    return this.connected;
+  }
+
   async run(args: string, cb: any): Promise<void> {
     await run(args, cb);
   }
@@ -75,8 +85,8 @@ export default class WebSocketClient {
     await update(cb);
 
     const configFile = `${process.env.CONFIGDIR}/config.json`;
-    if (fs.existsSync(configFile)){ 
-        fs.closeSync(fs.openSync(configFile, 'w'));
+    if (fs.existsSync(configFile)) {
+      fs.closeSync(fs.openSync(configFile, "w"));
     }
   }
 }
