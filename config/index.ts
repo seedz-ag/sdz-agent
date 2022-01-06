@@ -1,6 +1,6 @@
 import fs from "fs";
 import { Config } from "sdz-agent-types";
-import { io } from "socket.io-client";
+import ws from "../src/websocket/client";
 
 import { createSQLHosts } from "../src/config/database/informix";
 
@@ -20,28 +20,17 @@ const load = (file: string): Partial<Config> => {
   return json;
 };
 
-export default new Promise((resolve, reject) => {
+export default new Promise((resolve) => {
   const config = load(`config`) as Config;
   if (!process.env.WS_SERVER_URL) {
-    
+    resolve(config);
   }
+
+  if (!ws.isConnected()) {
+    ws.connect({ client_id: "XPTO" });
+    const response = ws.getConfig();
+    response && resolve(response);
+  }
+
   resolve(config);
-  const socket = io(`${process.env.WS_SERVER_URL}`);
-  const credentials = {
-    client_id: '',
-    client_secret: '',
-  };
-  socket.on('connect', function () {
-    console.log('Connected to Seedz-Agent-WS');
-    socket.emit('getConfig', { credentials }, (response:any) => {
-      if (fs.existsSync(configFile)) {
-        fs.unlinkSync(configFile);
-      }
-fs.writeFileSync(configFile, JSON.stringify(response, null, "\t"));
-      resolve(response); 
-    });
-    socket.emit('getAPMEnvironment', { credentials }, (response:any) => {
-      console.log('APMEnv:', response);
-    });
-  });
 });
