@@ -35,11 +35,7 @@ export default new class WebSocketClient {
       this.socket.on("connect", () => {
         this.connected = true;
         this.logger.info('Connected to SdzAgentWS');
-        const id = {
-          client_id: this.CREDENTIALS.client_id,
-          client_name: this.CREDENTIALS.name,
-        };
-        this.socket.emit("client-connect", id);
+        this.socket.emit("client-connect", credentials);
         if (!this.isListenning) {
           this.listen();
         }

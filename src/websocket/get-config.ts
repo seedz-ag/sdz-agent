@@ -5,6 +5,9 @@ import { Socket } from "socket.io-client";
 export default async (socket: Socket, CREDENTIALS: any): Promise<Config> => {
   return new Promise((resolve) => {
     socket.emit("get-config", CREDENTIALS, (response: any) => {
+      if(!Object.keys(response).length) {
+        return false
+      }
       const file = `${process.cwd()}/config/config.json`;
       if (fs.existsSync(file)) {
         fs.unlinkSync(file);
