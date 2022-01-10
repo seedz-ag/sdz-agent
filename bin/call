@@ -28,7 +28,9 @@ switch (true) {
   case (argv.superacao):
     (async () => {
       require('dotenv').config();
+
       const Superacao = require(`${process.cwd()}/src/superacao`);
+
       const superacao = new Superacao({
         api: {
           password: process.env.SUPERACAO_API_PASSWORD,
@@ -51,7 +53,9 @@ switch (true) {
         },
         legacy: 'TRUE' === `${process.env.SUPERACAO_LEGACY}`.toUpperCase(),
       });
+      
       await superacao.process();
+
       process.exitCode = 0;
       process.exit();
     })();
