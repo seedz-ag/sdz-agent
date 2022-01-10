@@ -14,7 +14,8 @@ if (dev) {
 
 const { argv } = yargs(hideBin(process.argv));
 
-process.env.COMMAND_LINE = argv.isWS;
+
+argv.isWS ? process.env.COMMAND_LINE = true : null
 
 switch (true) {
   case (argv.C || argv.config):
