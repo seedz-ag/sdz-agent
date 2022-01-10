@@ -1,3 +1,4 @@
+import argv from "args";
 import CSV from "sdz-agent-data";
 import { Config } from "sdz-agent-types";
 import Database from "sdz-agent-database";
@@ -30,18 +31,27 @@ export default class Superacao {
       this.connection = new Database(config.database);
       return this;
     }
-    throw new Error('Invalid Config');
+    throw new Error("Invalid Config");
   }
 
   async process(): Promise<void> {
     Logger.info("STARTING PROCESS SEEDZ SUPERACAO");
-    Logger.info("STARTING PROCESSING LINX");
-    const linx = new Linx(this.connection, this.csv, this.ftp, this.transport);
-    await linx.process();
-    Logger.info("END PROCESS LINX");
-    Logger.info("STARTING PROCESSING PROTHEUS");
-    const protheus = new Protheus(this.connection, this.transport);
-    await protheus.process();
-    Logger.info("END PROCESS PROTHEUS");
+    if (['ALL', 'LYNX'].includes(`${(argv as any).types}`.toUpperCase())) {
+      Logger.info("STARTING PROCESSING LINX");
+      const linx = new Linx(
+        this.connection,
+        this.csv,
+        this.ftp,
+        this.transport
+      );
+      await linx.process();
+      Logger.info("END PROCESS LINX");
+    }
+    if (['ALL', 'PROTHEUS'].includes(`${(argv as any).types}`.toUpperCase())) {
+      Logger.info("STARTING PROCESSING PROTHEUS");
+      const protheus = new Protheus(this.connection, this.transport);
+      await protheus.process();
+      Logger.info("END PROCESS PROTHEUS");
+    }
   }
 }
