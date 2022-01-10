@@ -37,6 +37,12 @@ const { argv } = yargs(hideBin(process.argv))
         default: true
       })
   })
+  .command('superacao', 'Runs the Superacao integration', (yargs) => {
+    return yargs
+      .positional('superacao', {
+        default: true
+      })
+  })
   .command('update', 'Updates the agent', (yargs) => {
     return yargs
       .positional('U', {
