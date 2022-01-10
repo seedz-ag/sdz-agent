@@ -55,12 +55,16 @@ class Protheus extends Base {
               url: integration["endpoint"],
             })
           ).data?.Vendas || [];
-        for (const row of response) {
-          const dto = Hydrator(this.getDTO(), {
-            ...row,
-            Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
-          });
-          this.getTransport().send("superacao", dto);
+        if (response.length) {
+          this.getTransport().send(
+            "notaFiscalItem",
+            response.map((row: any) =>
+              Hydrator(this.getDTO(), {
+                ...row,
+                Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
+              })
+            )
+          );
         }
       }
     } catch {}
