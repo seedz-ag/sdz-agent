@@ -35,7 +35,7 @@ const callstack = async (config: Config) => {
     const promises: Promise<boolean>[] = [];
     const respository: any = database.getRepository();
 
-    const csv = new CSV(config.legacy);
+    const csv = new CSV(config.legacy, config.fileSize);
 
     for (const entity of entities) {
       const promise = new Promise<boolean>(async (resolve, reject) => {
@@ -102,15 +102,25 @@ const callstack = async (config: Config) => {
                 });
               }
             }
+            
 
-            if (fs.existsSync(file)) {
+            const newFile = entity.file.split(/\.(?=[^\.]+$)/);
+            const files = fs.readdirSync(`${process.cwd()}`).filter((file) => {
+            if(file.includes(newFile[0])){
+              return true;
+            }
+           });
+          
+            for (const newFiles of files) {
+            if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
               // Logger.info("ENVIANDO DADOS VIA SFTP");
               const ftp = new FTP(config.ftp);
              // await ftp.connect();
-              await ftp.sendFile(file, entity.file);
-              fs.existsSync(file) && fs.unlinkSync(file);
+              await ftp.sendFile(`${process.cwd()}/${newFiles}`, newFiles);
+              fs.existsSync(`${process.cwd()}/${newFiles}`) && fs.unlinkSync(`${process.cwd()}/${newFiles}`);
             }
           }
+        }
           resolve(true);
         } catch (e) {
           reject(e);
