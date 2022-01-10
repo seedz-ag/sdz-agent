@@ -29,6 +29,9 @@ const { argv } = yargs(hideBin(process.argv))
       return yargs.positional("types", {
         choices: ["all", "lynx", "protheus"],
         default: "all",
+      })
+      .positional("superacao", {
+        default: true
       });
     }
   )
