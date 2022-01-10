@@ -29,9 +29,9 @@ switch (true) {
     (async () => {
       require('dotenv').config();
 
-      const Superacao = require(`${process.cwd()}/src/superacao`);
-
-      const superacao = new Superacao({
+      const Superacao = require(`${process.cwd()}/src/superacao`).default;
+      const superacao = new Superacao(
+        {
         api: {
           password: process.env.SUPERACAO_API_PASSWORD,
           username: process.env.SUPERACAO_API_USERNAME,
@@ -52,7 +52,8 @@ switch (true) {
           username: process.env.SUPERACAO_FTP_USERNAME,
         },
         legacy: 'TRUE' === `${process.env.SUPERACAO_LEGACY}`.toUpperCase(),
-      });
+      }
+      );
       
       await superacao.process();
 
