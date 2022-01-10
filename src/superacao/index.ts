@@ -15,16 +15,22 @@ export default class Superacao {
   private ftp: FTP;
   private transport: TransportSeedz;
 
-  constructor(config: Config) {
+  constructor(config: Partial<Config>) {
     this.configure(config);
   }
 
-  configure(config: Config): this {
-    this.csv = new CSV(config.legacy);
-    this.ftp = new FTP(config.ftp);
-    this.transport = new TransportSeedz(config.api);
-    this.connection = new Database(config.database);
-    return this;
+  configure(config: Partial<Config>): this {
+    if (config.api && config.database && config.ftp) {
+      this.csv = new CSV(config.legacy as boolean);
+      this.ftp = new FTP(config.ftp);
+      this.transport = new TransportSeedz(`${config.api.url}`, {
+        client_id: config.api.username,
+        client_secret: config.api.password,
+      });
+      this.connection = new Database(config.database);
+      return this;
+    }
+    throw new Error('Invalid Config');
   }
 
   async process(): Promise<void> {
