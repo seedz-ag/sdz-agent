@@ -1,4 +1,4 @@
-import argv from "args";
+import argv from "../args";
 import CSV from "sdz-agent-data";
 import { Config } from "sdz-agent-types";
 import Database from "sdz-agent-database";
@@ -27,6 +27,9 @@ export default class Superacao {
       this.transport = new TransportSeedz(`${config.api.url}`, {
         client_id: config.api.username,
         client_secret: config.api.password,
+      });
+      this.transport.setUriMap({
+        notaFiscalItem: 'invoice-items'
       });
       this.connection = new Database(config.database);
       return this;
