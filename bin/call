@@ -25,6 +25,37 @@ switch (true) {
     process.env.COMMAND_LINE = true;
     require(`../src/schedule.ts`);
     break;
+  case (argv.superacao):
+    (async () => {
+      require('dotenv').config();
+      const Superacao = require(`${process.cwd()}/src/superacao`);
+      const superacao = new Superacao({
+        api: {
+          password: process.env.SUPERACAO_API_PASSWORD,
+          username: process.env.SUPERACAO_API_USERNAME,
+        },
+        database: {
+          driver: process.env.SUPERACAO_DATABASE_DRIVER,
+          host: process.env.SUPERACAO_DATABASE_HOST,
+          schema: process.env.SUPERACAO_DATABASE_SCHEMA,
+          password: process.env.SUPERACAO_DATABASE_PASSWORD,
+          port: process.env.SUPERACAO_DATABASE_PORT,
+          server: process.env.SUPERACAO_DATABASE_SERVER,
+          username: process.env.SUPERACAO_DATABASE_USERNAME,
+        },
+        ftp: {
+          host: process.env.SUPERACAO_FTP_HOST,
+          password: process.env.SUPERACAO_FTP_PASSWORD,
+          port: process.env.SUPERACAO_FTP_PORT,
+          username: process.env.SUPERACAO_FTP_USERNAME,
+        },
+        legacy: 'TRUE' === `${process.env.SUPERACAO_LEGACY}`.toUpperCase(),
+      });
+      await superacao.process();
+      process.exitCode = 0;
+      process.exit();
+    })();
+    break;
   case (argv.U || argv.update):
     exec("git pull", (error, stdout, stderr) => {
       Logger.info(stdout)

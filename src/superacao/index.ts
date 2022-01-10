@@ -16,13 +16,18 @@ export default class Superacao {
   private transport: TransportSeedz;
 
   constructor(config: Config) {
+    this.configure(config);
+  }
+
+  configure(config: Config): this {
     this.csv = new CSV(config.legacy);
     this.ftp = new FTP(config.ftp);
     this.transport = new TransportSeedz(config.api);
     this.connection = new Database(config.database);
+    return this;
   }
 
-  async process() {
+  async process(): Promise<void> {
     Logger.info("STARTING PROCESS SEEDZ SUPERACAO");
     Logger.info("STARTING PROCESSING LINX");
     const linx = new Linx(this.connection, this.csv, this.ftp, this.transport);
