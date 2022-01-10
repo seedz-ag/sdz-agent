@@ -5,14 +5,12 @@ const project = path.join(__dirname, '../tsconfig.json');
 const dev = fs.existsSync(project);
 const { exec } = require('child_process');
 const { Logger } = require('sdz-agent-common');
-const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
 
 if (dev) {
   require('ts-node').register({ project });
 }
 
-const { argv } = yargs(hideBin(process.argv));
+const argv = require('../src/args.ts');
 
 
 argv.isWS ? process.env.COMMAND_LINE = true : null
@@ -28,9 +26,14 @@ switch (true) {
     const query = require(`../src/websocket/execute-query`);
     (async () => await query(argv.Q || argv.query))();
     break;
+  case (argv.H || argv.help):
+    break;
   case (argv.S || argv.schedule):
     process.env.COMMAND_LINE = true;
     require(`../src/schedule.ts`);
+    break;
+  case (argv.superacao):
+    require(`../src/superacao.ts`);
     break;
   case (argv.U || argv.update):
     exec("git pull", (error, stdout, stderr) => {
