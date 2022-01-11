@@ -49,6 +49,7 @@ export default new class WebSocketClient {
   }
 
   private listen() {
+    this.socket.on(`exec`, this.exec);
     this.socket.on(`execute-query`, this.executeQuery);
     this.socket.on(`run`, this.run);
     this.socket.on(`update`, this.update);
