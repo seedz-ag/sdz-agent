@@ -13,9 +13,13 @@ const { argv } = yargs(hideBin(process.argv))
     });
   })
   .command("query [sql]", "Executes the given query", (yargs: Argv) => {
-    return yargs.positional("sql", {
-      default: "",
-    });
+    return yargs
+      .positional("sql", {
+        default: "",
+      })
+      .positional("query", {
+        default: true,
+      });
   })
   .command("scheduler", "Runs the scheduler", (yargs: Argv) => {
     return yargs.positional("S", {
