@@ -12,7 +12,8 @@ if (dev) {
 
 const argv = require('../src/args.ts');
 
-process.env.COMMAND_LINE = argv.isWS;
+
+argv.isWS ? process.env.COMMAND_LINE = true : null
 
 switch (true) {
   case (argv.C || argv.config):

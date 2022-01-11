@@ -128,8 +128,7 @@ const callstack = async (config: Config) => {
     ProgressBar.close();
 
     Logger.info("ENDING PROCESS");
-
-    process.exitCode = 0;
+    process.exit(0)
   } catch (e: any) {
     Logger.error(e.message);
   }
