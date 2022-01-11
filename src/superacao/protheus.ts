@@ -7,6 +7,13 @@ import { TransportSeedz } from "sdz-agent-transport";
 import Base from "./base";
 
 class Protheus extends Base {
+
+  /**
+   * Create a new instance
+   * 
+   * @param {Database} database 
+   * @param {TransportSeedz} transport 
+   */
   constructor(database: Database, transport: TransportSeedz) {
     super(database, transport);
     this.setDTO(`${process.cwd()}/src/superacao/dto-protheus.json`);
