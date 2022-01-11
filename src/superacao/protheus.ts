@@ -52,19 +52,25 @@ class Protheus extends Base {
           (
             await Axios.request({
               headers,
+              maxContentLength: 100000000,
+              maxBodyLength: 1000000000,
               url: integration["endpoint"],
             })
           ).data?.Vendas || [];
         if (response.length) {
-          this.getTransport().send(
-            "notaFiscalItem",
-            response.map((row: any) =>
-              Hydrator(this.getDTO(), {
-                ...row,
-                Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
-              })
+          this.getTransport()
+            .send(
+              "notaFiscal",
+              response.map((row: any) =>
+                Hydrator(this.getDTO(), {
+                  ...row,
+                  Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
+                })
+              )
             )
-          );
+            .catch((e: any) => {
+              console.log(e.response.data);
+            });
         }
       }
     } catch {}

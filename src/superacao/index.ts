@@ -29,7 +29,7 @@ export default class Superacao {
         client_secret: config.api.password,
       });
       this.transport.setUriMap({
-        notaFiscalItem: 'invoice-items'
+        notaFiscal: 'invoice-items'
       });
       this.connection = new Database(config.database);
       return this;
