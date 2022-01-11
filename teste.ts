@@ -4,17 +4,16 @@ import ConfigJson from "./config";
 
 
 require("dotenv").config();
-
 (async () => {
-
-  const ws = new WebSocketClient({ client_id: 1 }, await ConfigJson as Config);
-  await ws.connect();
+  const ws = WebSocketClient;
+  await ws.connect({'client_id': process.env.CLIENT_ID, 'client_name':  process.env.CLIENT_NAME, 'client_secret':  process.env.CLIENT_SECRET});
+  // ws.getSocket().emit("get-config", function (data: any) {
+  //      console.log(data);
+  //    });
   // console.log(await ws.getConfig());
-  ws.getSocket().emit("get-active-clients", function (data: any) {
-    console.log(data);
-  });
-
-    ws.getSocket().emit("update",ws.getSocket().id);
+  // ws.getSocket().emit("get-active-clients", function (data: any) {
+  //   console.log(data);
+  // });
   // ws.getSocket().emit(
   //   "run",
   //   ws.getSocket().id
