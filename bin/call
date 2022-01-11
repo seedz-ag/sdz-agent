@@ -10,8 +10,7 @@ if (dev) {
   require('ts-node').register({ project });
 }
 
-const argv = require('../src/args.ts');
-
+const argv = require('../src/args.ts').default;
 
 argv.isWS ? process.env.COMMAND_LINE = true : null
 
@@ -22,9 +21,10 @@ switch (true) {
   case (argv.D || argv.configDto):
     require(`../src/config/dto.ts`);
     break;
-  case (argv.Q || argv.query):
-    const query = require(`../src/websocket/execute-query`);
+  case (!!argv.Q || argv.query):
+    const query = require(`../src/websocket/execute-query`).default;
     (async () => await query(argv.Q || argv.query))();
+    
     break;
   case (argv.H || argv.help):
     break;
