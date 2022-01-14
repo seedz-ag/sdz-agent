@@ -70,7 +70,7 @@ class Protheus extends Base {
             })
           ).data?.Vendas || [];
         if (response.length) {
-          this.getTransport()
+          await this.getTransport()
             .send(
               "notaFiscal",
               response.map((row: any) =>
