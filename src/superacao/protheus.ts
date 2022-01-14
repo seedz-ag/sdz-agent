@@ -1,4 +1,6 @@
 import Axios, { AxiosRequestHeaders } from "axios";
+Axios.defaults.timeout =  2000;
+
 import Moment from "moment";
 import { Hydrator } from "sdz-agent-common";
 import Database from "sdz-agent-database";
@@ -62,6 +64,9 @@ class Protheus extends Base {
               maxContentLength: 100000000,
               maxBodyLength: 1000000000,
               url: integration["endpoint"],
+            }).catch((e) => {
+               // console.log('Error', e);
+              return { data: [] };
             })
           ).data?.Vendas || [];
         if (response.length) {
