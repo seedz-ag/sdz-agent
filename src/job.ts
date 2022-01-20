@@ -13,7 +13,7 @@ const job = () => {
       if (child) {
         child.kill();
       }
-      child = fork("./src/bootstrap.ts", [], {
+      child = fork("./src/bootstrap.ts", process.argv, {
         execArgv: ["-r", "ts-node/register"],
       });
     }
@@ -22,7 +22,7 @@ const job = () => {
 
 process.on("message", (message: string) => {
   if ("START_JOB" === message) {
-    Logger.info("INICIALIZANDO O AGENDADOR.");
+    Logger.info("STARTING SCHEDULER.");
     job();
   }
 });
