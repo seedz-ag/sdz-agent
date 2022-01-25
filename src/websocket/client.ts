@@ -9,7 +9,7 @@ import run from "./run";
 import update from "./update";
 import { Logger } from "sdz-agent-common";
 
-export default new class WebSocketClient {
+export default new (class WebSocketClient {
   private config: Config;
   private connected: boolean = false;
   private CREDENTIALS: any;
@@ -21,12 +21,14 @@ export default new class WebSocketClient {
     this.socket = io(`${process.env.WS_SERVER_URL}`);
   }
 
-  async exec(command: string, cb: any) {
-    return await exec(command, cb);
+  async exec(...args: string[]) {
+    const requesterId = args.pop() || ''
+    this.response(requesterId, await exec(...args));
   }
 
-  async executeQuery(query: string, cb: any) {
-    return await executeQuery(query, cb);
+  async executeQuery(...args: string[]) {
+    const requesterId = args.pop() || '';
+    this.response(requesterId, await executeQuery(args.pop() || ''));
   }
 
   connect(credentials: any) {
@@ -34,8 +36,7 @@ export default new class WebSocketClient {
     return new Promise((resolve) => {
       this.socket.on("connect", () => {
         this.connected = true;
-        this.logger.info('Connected to SdzAgentWS');
-        this.socket.emit("client-connect", credentials);
+        this.logger.info("Connected to SdzAgentWS");
         if (!this.isListenning) {
           this.listen();
         }
@@ -43,16 +44,16 @@ export default new class WebSocketClient {
       });
       this.socket.on("disconnect", () => {
         this.connected = false;
-        this.logger.info('Disconnected to SdzAgentWS');
+        this.logger.info("Disconnected to SdzAgentWS");
       });
     });
   }
 
   private listen() {
-    this.socket.on(`exec`, this.exec);
-    this.socket.on(`execute-query`, this.executeQuery);
-    this.socket.on(`run`, this.run);
-    this.socket.on(`update`, this.update);
+    this.socket.on(`exec`, this.exec.bind(this));
+    this.socket.on(`execute-query`, this.executeQuery.bind(this));
+    this.socket.on(`run`, this.run.bind(this));
+    this.socket.on(`update`, this.update.bind(this));
     this.isListenning = true;
   }
 
@@ -74,16 +75,22 @@ export default new class WebSocketClient {
     return this.connected;
   }
 
-  async run(args: string, cb: any): Promise<void> {
-    await run(args, cb);
+  async run(...args: string[]): Promise<void> {
+    const requesterId = args.pop() || '';
+    this.response(requesterId, await run(...args));
   }
 
-  async update(cb: any): Promise<void> {
-    await update(cb);
+  async response(requesterId: string, data: any): Promise<void> {
+    this.getSocket().emit("sdz-response", requesterId, ...data);
+  }
+
+  async update(...args: string[]): Promise<void> {
+    const requesterId = args.pop() || '';
+    await this.response(requesterId, await update());
 
     const configFile = `${process.env.CONFIGDIR}/config.json`;
     if (fs.existsSync(configFile)) {
       fs.closeSync(fs.openSync(configFile, "w"));
     }
   }
-}
+})();

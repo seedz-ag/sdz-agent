@@ -1,14 +1,9 @@
 import { exec } from "child_process";
 
-export default async (command: string, cb: any): Promise<boolean> => {
+export default async (...args: string[]): Promise<string> => {
   return new Promise(async (resolve) => {
-    await exec(command, (error, stdout, stderr) => {
-      if (error) {
-        cb(stderr);
-        return;
-      }
-      cb(stdout);
+    await exec(args.pop() || "", (error, stdout, stderr) => {
+      resolve((error && stderr) || stdout);
     });
-    resolve(true);
   });
 };
