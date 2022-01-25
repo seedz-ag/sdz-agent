@@ -1,14 +1,9 @@
 import { exec } from "child_process";
 
-export default async (cb: any): Promise<boolean> => {
+export default async (): Promise<string> => {
   return new Promise(async (resolve) => {
     await exec("git pull", (error, stdout, stderr) => {
-      if (error) {
-        cb(stderr);
-        return;
-      }
-      cb(stdout);
+      resolve((error && stderr) || stdout);
     });
-    resolve(true);
   });
 };
