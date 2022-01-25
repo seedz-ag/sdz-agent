@@ -18,22 +18,26 @@ export default new (class WebSocketClient {
   private socket: Socket;
   constructor() {
     this.logger = Logger;
-    this.socket = io(`${process.env.WS_SERVER_URL}`);
   }
 
   async exec(...args: string[]) {
-    const requesterId = args.pop() || ''
-    this.response(requesterId, await exec(...args));
+    const requesterId = args.pop() || "";
+    this.response(requesterId, [await exec(...args)]);
   }
 
   async executeQuery(...args: string[]) {
-    const requesterId = args.pop() || '';
-    this.response(requesterId, await executeQuery(args.pop() || ''));
+    const requesterId = args.pop() || "";
+    this.response(requesterId, [await executeQuery(args.pop() || "")]);
   }
 
   connect(credentials: any) {
     this.CREDENTIALS = credentials;
     return new Promise((resolve) => {
+      this.socket = io(`${process.env.WS_SERVER_URL}`, {
+        query: {
+          token: credentials.client_id,
+        },
+      });
       this.socket.on("connect", () => {
         this.connected = true;
         this.logger.info("Connected to SdzAgentWS");
@@ -50,10 +54,10 @@ export default new (class WebSocketClient {
   }
 
   private listen() {
-    this.socket.on(`exec`, this.exec.bind(this));
-    this.socket.on(`execute-query`, this.executeQuery.bind(this));
-    this.socket.on(`run`, this.run.bind(this));
-    this.socket.on(`update`, this.update.bind(this));
+    this.socket.on(`sdz-exec`, this.exec.bind(this));
+    this.socket.on(`sdz-execute-query`, this.executeQuery.bind(this));
+    this.socket.on(`sdz-run`, this.run.bind(this));
+    this.socket.on(`sdz-update`, this.update.bind(this));
     this.isListenning = true;
   }
 
@@ -76,8 +80,8 @@ export default new (class WebSocketClient {
   }
 
   async run(...args: string[]): Promise<void> {
-    const requesterId = args.pop() || '';
-    this.response(requesterId, await run(...args));
+    const requesterId = args.pop() || "";
+    this.response(requesterId, [await run(...args)]);
   }
 
   async response(requesterId: string, data: any): Promise<void> {
@@ -85,8 +89,8 @@ export default new (class WebSocketClient {
   }
 
   async update(...args: string[]): Promise<void> {
-    const requesterId = args.pop() || '';
-    await this.response(requesterId, await update());
+    const requesterId = args.pop() || "";
+    await this.response(requesterId, [await update()]);
 
     const configFile = `${process.env.CONFIGDIR}/config.json`;
     if (fs.existsSync(configFile)) {
