@@ -30,14 +30,16 @@ export default new (class WebSocketClient {
     this.response(requesterId, [await executeQuery(args.pop() || "")]);
   }
 
-  connect(credentials: any) {
-    this.CREDENTIALS = credentials;
+  connect(token: string) {
     return new Promise((resolve) => {
       this.socket = io(`${process.env.WS_SERVER_URL}`, {
         query: {
-          token: credentials.client_id,
+          token,
         },
+        upgrade: false,
+        transports: ["websocket"],
       });
+      
       this.socket.on("connect", () => {
         this.connected = true;
         this.logger.info("Connected to SdzAgentWS");
@@ -46,6 +48,7 @@ export default new (class WebSocketClient {
         }
         resolve(true);
       });
+
       this.socket.on("disconnect", () => {
         this.connected = false;
         this.logger.info("Disconnected to SdzAgentWS");
