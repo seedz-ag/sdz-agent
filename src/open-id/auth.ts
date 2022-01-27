@@ -1,6 +1,5 @@
 import { Client, Issuer, TokenSet } from "openid-client";
-require("dotenv").config();
-
+import moment from "moment";
 export class OpenIdClient {
   private clientId: string;
   private clientSecret: string;
@@ -67,16 +66,17 @@ export class OpenIdClient {
       grant_type: "client_credentials",
     });
     this.setToken(String(response.access_token));
+    console.log(response);
     await this.refresh(response);
     return this;
   }
 
   private async refresh(response: TokenSet): Promise<this> {
-    clearTimeout(this.timeout);
-    this.timeout = setTimeout(async () => {
-      const response = await this.getOpenIdClient().refresh(this.getToken());
-      this.setToken(String(response.access_token));
-    }, Number(response.expires_at) * 99);
+    // clearTimeout(this.timeout);
+    // this.timeout = setTimeout(async () => {
+    //   const response = await this.getOpenIdClient().refresh(this.getToken());
+    //   this.setToken(String(response.access_token));
+    // }, moment(response.expires_at, 'x').diff(moment(), 'seconds')*99);
     return this;
   }
 }
