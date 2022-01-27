@@ -10,6 +10,7 @@
     "dotenv": "^10.0.0",
     "enquirer": "^2.3.6",
     "node-schedule": "^2.0.0",
+    "openid-client": "^5.1.2",
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@types/cli-progress": "^3.9.2",
     "@types/node": "^16.6.1",
+    "@types/openid-client": "^3.7.0",
     "@types/shelljs": "^0.8.9",
     "@types/socket.io-client": "^3.0.0",
     "@types/websocket": "^1.0.4",
