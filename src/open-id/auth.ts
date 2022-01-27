@@ -66,17 +66,16 @@ export class OpenIdClient {
       grant_type: "client_credentials",
     });
     this.setToken(String(response.access_token));
-    console.log(response);
     await this.refresh(response);
     return this;
   }
 
   private async refresh(response: TokenSet): Promise<this> {
-    // clearTimeout(this.timeout);
-    // this.timeout = setTimeout(async () => {
-    //   const response = await this.getOpenIdClient().refresh(this.getToken());
-    //   this.setToken(String(response.access_token));
-    // }, moment(response.expires_at, 'x').diff(moment(), 'seconds')*99);
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(async () => {
+      const response = await this.getOpenIdClient().refresh(this.getToken());
+      this.setToken(String(response.access_token));
+    }, moment(response.expires_at, 'X').diff(moment(), 'seconds') * 999);
     return this;
   }
 }
