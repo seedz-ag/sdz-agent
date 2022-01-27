@@ -8,6 +8,7 @@ import getConfig from "./get-config";
 import run from "./run";
 import update from "./update";
 import { Logger } from "sdz-agent-common";
+import  OpenIdClient  from "../open-id";
 
 export default new (class WebSocketClient {
   private config: Config;
@@ -16,6 +17,7 @@ export default new (class WebSocketClient {
   private isListenning: boolean = false;
   private logger;
   private socket: Socket;
+  private token: string;
   constructor() {
     this.logger = Logger;
   }
@@ -30,16 +32,18 @@ export default new (class WebSocketClient {
     this.response(requesterId, [await executeQuery(args.pop() || "")]);
   }
 
-  connect(token: string) {
+  connect() {
+    
     return new Promise((resolve) => {
+
       this.socket = io(`${process.env.WS_SERVER_URL}`, {
         query: {
-          token,
+          token: this.getToken(),
         },
         upgrade: false,
         transports: ["websocket"],
       });
-      
+
       this.socket.on("connect", () => {
         this.connected = true;
         this.logger.info("Connected to SdzAgentWS");
@@ -100,4 +104,14 @@ export default new (class WebSocketClient {
       fs.closeSync(fs.openSync(configFile, "w"));
     }
   }
+
+  getToken(): string {
+    return this.token;
+  }
+
+  setToken(token: string): this {
+    this.token = token;
+    return this;
+  }
+
 })();
