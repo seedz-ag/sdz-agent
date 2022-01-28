@@ -10,6 +10,7 @@ import Database from "sdz-agent-database";
 import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
+import ws from "./websocket/client";
 
 require("dotenv").config();
 
@@ -26,7 +27,7 @@ const callstack = async (config: Config) => {
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
     //await ftp1.disconnect();
-
+    // console.log(config.database)
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
 
@@ -42,13 +43,16 @@ const callstack = async (config: Config) => {
           //   `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
           // );
           const baseDir = process.env.CONFIGDIR;
-          const dto = JSON.parse(
-            fs
-              .readFileSync(
-                `${baseDir}/dto/${entity.name.toLocaleLowerCase()}.json`
-              )
-              .toString()
-          ) as HydratorMapping;
+          // const dto = JSON.parse(
+          //   fs
+          //     .readFileSync(
+          //       `${baseDir}/dto/${entity.name.toLocaleLowerCase()}.json`
+          //     )
+          //     .toString()
+          // ) as HydratorMapping;
+          
+          const dto =  await ws.getDTO(entity.name.toLocaleLowerCase());
+          const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
 
           const file = `${process.cwd()}/${entity.file}`;
           const limit = config.pageSize || 1000;

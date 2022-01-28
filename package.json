@@ -16,7 +16,7 @@
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
-    "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport",
+    "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport.git",
     "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git",
     "socket.io-client": "^4.4.0",
     "websocket": "^1.0.34",

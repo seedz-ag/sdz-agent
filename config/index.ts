@@ -1,8 +1,8 @@
 import fs from "fs";
 import { Config } from "sdz-agent-types";
 import ws from "../src/websocket/client";
-
 import { createSQLHosts } from "../src/config/database/informix";
+import OpenIdClient from "../src/open-id";
 
 process.env.CONFIGDIR = `${process.cwd()}/${
   process.env.DOCKER ? "docker/" : ""
@@ -27,9 +27,17 @@ export default new Promise(async (resolve) => {
     resolve(config);
   }
   if (!ws.isConnected()) {
-    ws.connect({ client_id: process.env.CLIENT_ID, client_secret: process.env.CLIENT_SECRET, client_name: process.env.CLIENT_NAME });
-    const response =  ws.getConfig();
+    OpenIdClient.addSubscriber(ws.setToken.bind(ws));
+    if(!OpenIdClient.getToken()) {
+    await (await OpenIdClient.connect()).grant();
+    } 
+    else {
+      ws.setToken(String(OpenIdClient.getToken().access_token));
+    }
+    await ws.connect();
+    const response = await ws.getConfig();
     response && resolve(response);
   }
+  
   resolve(config);
 });
