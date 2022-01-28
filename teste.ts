@@ -1,26 +1,17 @@
-import { Config } from "sdz-agent-types";
 import WebSocketClient from "./src/websocket/client";
-import ConfigJson from "./config";
-
+import OpenIdClient from "./src/open-id";
+import { from, Observable } from "rxjs";
 
 require("dotenv").config();
 (async () => {
+
   const ws = WebSocketClient;
-  await ws.connect({'client_id': process.env.CLIENT_ID, 'client_name':  process.env.CLIENT_NAME, 'client_secret':  process.env.CLIENT_SECRET});
-  // ws.getSocket().emit("get-config", function (data: any) {
-  //      console.log(data);
-  //    });
-  // console.log(await ws.getConfig());
-  // ws.getSocket().emit("get-active-clients", function (data: any) {
-  //   console.log(data);
-  // });
-  // ws.getSocket().emit(
-  //   "run",
-  //   ws.getSocket().id
-  // );
-  // ws.getSocket().emit(
-  //   "execute-query",
-  //   ws.getSocket().id,
-  //   "SELECT * FROM clientes limit 2;"
-  // );
+  OpenIdClient.addSubscriber(ws.setToken.bind(ws));
+  await (await OpenIdClient.connect()).grant();
+  // await OpenIdClient.refresh();
+  console.log("connect");
+  await ws.connect();
+  ws.getSocket().emit("sdz-response", "websocket_service", "ok")
+
+
 })();

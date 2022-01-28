@@ -6,11 +6,17 @@ export class OpenIdClient {
   private issuerURL: string;
   private openIdClient: Client;
   private timeout: NodeJS.Timeout;
-  private token: string;
+  private token: TokenSet;
+  private subscriber: any = [];
+
   constructor(issuerURL: string, clientId: string, clientSecret: string) {
     this.setClientId(clientId);
     this.setClientSecret(clientSecret);
     this.setIssuerURL(issuerURL);
+  }
+  public addSubscriber(subscriber: any): this {
+    this.subscriber.push(subscriber);
+    return this;
   }
   // GETTERS AND SETTERS
   public getClientId(): string {
@@ -25,7 +31,7 @@ export class OpenIdClient {
   public getOpenIdClient(): Client {
     return this.openIdClient;
   }
-  public getToken(): string {
+  public getToken(): TokenSet {
     return this.token;
   }
   public setClientId(clientId: string): this {
@@ -44,7 +50,7 @@ export class OpenIdClient {
     this.openIdClient = client;
     return this;
   }
-  public setToken(token: string): this {
+  public setToken(token: TokenSet): this {
     this.token = token;
     return this;
   }
@@ -62,20 +68,22 @@ export class OpenIdClient {
   }
 
   public async grant(): Promise<this> {
+
     const response = await this.getOpenIdClient().grant({
       grant_type: "client_credentials",
     });
-    this.setToken(String(response.access_token));
-    await this.refresh(response);
+    this.setToken(response);
+    this.subscriber.forEach((subscriber: any) => {
+      subscriber(this.getToken().access_token)
+    });
+    await this.refresh();
     return this;
   }
 
-  private async refresh(response: TokenSet): Promise<this> {
+  public async refresh(): Promise<this> {
+    console.log("refresh");
     clearTimeout(this.timeout);
-    this.timeout = setTimeout(async () => {
-      const response = await this.getOpenIdClient().refresh(this.getToken());
-      this.setToken(String(response.access_token));
-    }, moment(response.expires_at, 'X').diff(moment(), 'seconds') * 999);
+    this.timeout = setTimeout(this.grant.bind(this), moment(this.getToken().expires_at, 'X').diff(moment(), 'seconds') * 999);
     return this;
   }
 }

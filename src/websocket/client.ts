@@ -1,14 +1,15 @@
-import { Config } from "sdz-agent-types";
+import { Config, HydratorMapping } from "sdz-agent-types";
 import { io, Socket } from "socket.io-client";
 
 import exec from "./exec";
 import executeQuery from "./execute-query";
 import fs from "fs";
 import getConfig from "./get-config";
+import getDTO from "./get-dto";
+import getSQL from "./get-sql";
 import run from "./run";
 import update from "./update";
 import { Logger } from "sdz-agent-common";
-import  OpenIdClient  from "../open-id";
 
 export default new (class WebSocketClient {
   private config: Config;
@@ -69,13 +70,21 @@ export default new (class WebSocketClient {
   }
 
   async getConfig(): Promise<Config> {
-    return await getConfig(this.socket, this.CREDENTIALS);
+    return await getConfig(this.socket);
+  }
+
+  async getDTO(entity: string): Promise<HydratorMapping> {
+    return await getDTO(this.socket, entity);
   }
 
   async getEnv() {
-    this.socket.emit("getAPMEnvironment", this.CREDENTIALS, (response: any) => {
+    this.socket.emit("getAPMEnvironment", (response: any) => {
       console.log("APMEnv:", response);
     });
+  }
+
+  async getSQL(entity: string): Promise<Config> {
+    return await getSQL(this.socket, entity);
   }
 
   getSocket(): Socket {
