@@ -1,47 +1,74 @@
 import chalk from "chalk";
 import fs from "fs";
 
-import configJson from "../../config";
 import connector from "./connector";
 import database from "./database";
+import api from "./api";
 import erp from "./erp";
 import ftp from "./ftp";
-import api from "./api";
+import legacy from "./legacy";
 import schedule from "./schedule";
 import scope from "./scope";
 import stubs from "./stubs";
-import { Config } from "sdz-agent-types";
+import { Config, ConfigAuthOpenId } from "sdz-agent-types";
+import auth from "./auth";
+import { gzip } from "zlib";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const log = (msg: string) => console.log(chalk.green(msg));
 
 !(async () => {
   try {
     await (async () => {
-      const answers: any = {};
-      const config = (await configJson) as Config;
-
       log("SEEDZ INTEGRATION AGENT");
       log("YOU WILL WALK THROUGH SOME CONFIGURATIONS STEPS");
       log("");
 
-      answers.legacy = true; //await legacyMode(config?.legacy);
+      const answers: any = {};
+      let OpenIdClient;
+      let WSClient;
+
+      answers.legacy = await legacy(false);
+
+      if (!answers.legacy) {
+        const env: Partial<ConfigAuthOpenId> = { ...(await auth()) };
+        const envKeys = Object.keys(env);
+        if (envKeys.length) {
+          let newENV = fs.readFileSync(`${process.cwd()}/.env`).toString();
+          for (const key of envKeys) {
+            process.env[key] = env[key as keyof ConfigAuthOpenId];
+            console.log(process.env[key]);
+            newENV = newENV.replace(
+              new RegExp(`${key}.*`, "gi"),
+              `${key}=${env[key as keyof ConfigAuthOpenId]}`
+            );
+          }
+          fs.writeFileSync(`${process.cwd()}/.env`, newENV);
+
+          console.log(env);
+        }
+
+        OpenIdClient = require("../open-id").default;
+        WSClient = require("../websocket/client").default;
+        await OpenIdClient.connect();
+        OpenIdClient.addSubscriber(WSClient.setToken.bind(WSClient));
+        await OpenIdClient.grant();
+        await WSClient.connect();
+      }
+
+      const config = await (answers.legacy
+        ? require("../../config").default
+        : WSClient.getConfig());
 
       answers.async = false; //await exportMode(config?.async);
+
       answers.fileSize = 5;
 
       answers.pageSize = 1000;
 
       answers.ftp = await ftp(config?.ftp);
-
-      if (answers.legacy) {
-        answers.api = await api(config?.api);
-      }
-
-      answers.ftp = await ftp(config?.ftp);
-
-      if (answers.legacy) {
-        answers.api = await api(config?.api);
-      }
 
       const scopeAnswers = await scope(config?.scope);
       answers.scope = scopeAnswers.scope;
@@ -69,15 +96,20 @@ const log = (msg: string) => console.log(chalk.green(msg));
         scopeAnswers.scope.map((item: any) => item.name)
       );
 
-      const dir = process.env.CONFIGDIR || `${process.cwd()}/config`;
-
-      fs.writeFileSync(
-        `${dir}/config.json`,
-        JSON.stringify(answers, null, "\t")
-      );
+      if (answers.legacy) {
+        const dir = process.env.CONFIGDIR || `${process.cwd()}/config`;
+        fs.writeFileSync(
+          `${dir}/config.json`,
+          JSON.stringify(answers, null, "\t")
+        );
+      } else {
+        WSClient.saveConfig(answers);
+      }
 
       log("");
       log("CONGRATULATIONS, CONFIGURATION COMPLETED!");
     })();
-  } catch {}
+  } catch {
+    log("CONFIG FAILED.");
+  }
 })();

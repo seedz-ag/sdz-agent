@@ -10,6 +10,7 @@ import getSQL from "./get-sql";
 import run from "./run";
 import update from "./update";
 import { Logger } from "sdz-agent-common";
+import saveConfig from "./save-config";
 
 export default new (class WebSocketClient {
   private config: Config;
@@ -102,6 +103,10 @@ export default new (class WebSocketClient {
 
   async response(requesterId: string, data: any): Promise<void> {
     this.getSocket().emit("sdz-response", requesterId, ...data);
+  }
+
+  async saveConfig(config: Config): Promise<void> {
+    await saveConfig(this.getSocket(), config);
   }
 
   async update(...args: string[]): Promise<void> {
