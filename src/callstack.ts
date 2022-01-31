@@ -24,10 +24,7 @@ const callstack = async (config: Config) => {
 
     // validate(config);
 
-    Logger.info("VALIDATING CLIENT FTP");
 
-    const ftp1 = new FTP(config.ftp);
-    await ftp1.connect();
     // await ftp1.disconnect();
     // console.log(config.database)
 
@@ -37,6 +34,11 @@ const callstack = async (config: Config) => {
     );
     transport.setUriMap({
       faturamento: "invoices",
+      faturamentoItem: "invoice-items",
+      estoque: "inventories",
+      item: "items",
+      itemGrupo: "groups",
+      itemBranding: "brands",
     });
     if (
       !config.legacy &&
@@ -52,6 +54,14 @@ const callstack = async (config: Config) => {
         transport.setToken(String(OpenIdClient.getToken().access_token));
       }
     }
+    else 
+    {
+      Logger.info("VALIDATING CLIENT FTP");
+
+      const ftp1 = new FTP(config.ftp);
+      await ftp1.connect();
+    }
+
 
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
@@ -68,7 +78,6 @@ const callstack = async (config: Config) => {
 
           const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
           const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
-
           const file = `${process.cwd()}/${entity.file}`;
           const limit = config.pageSize || 1000;
           const method = `get${entity.name}` as keyof AbstractRepository;
@@ -79,17 +88,17 @@ const callstack = async (config: Config) => {
           let barProgress: any = "";
           if (response && response.length) {
             if (!process.env.COMMAND_LINE) {
-              barProgress = ProgressBar.create(entity.file, countResponse, 0, {
+              barProgress = ProgressBar.create(entity.name, countResponse, 0, {
                 color: `\u001b[33m`,
                 event: "WRITING",
-                text: entity.file,
+                text: entity.name,
                 unit: "Records",
               });
             }
 
             while (0 < response.length) {
               if (OpenIdClient.getToken()) {
-                transport.send(
+                await transport.send(
                   entity.entity,
                   response.map((row: DatabaseRow) => Hydrator(dto, row))
                 );
