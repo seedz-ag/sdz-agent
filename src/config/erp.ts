@@ -5,7 +5,7 @@ const { Select } = require("enquirer");
 
 export default async (erp?: ERPs): Promise<ERPs> => {
   const question = new Select({
-    choices: [ERPs.Linx, ERPs.Protheus],
+    choices: [ERPs.Agrotitan, ERPs.Linx, ERPs.Protheus],
     initial: erp,
     message: `What is your desired ${chalk.green(chalk.bold("ERP"))}?`,
   });
