@@ -22,12 +22,13 @@ const callstack = async (config: Config) => {
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
 
-    //validate(config);
+    // validate(config);
+
     Logger.info("VALIDATING CLIENT FTP");
 
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
-    //await ftp1.disconnect();
+    // await ftp1.disconnect();
     // console.log(config.database)
 
     let transport = new TransportSeedz(
@@ -35,12 +36,7 @@ const callstack = async (config: Config) => {
       String(process.env.API_URL)
     );
     transport.setUriMap({
-      inventories: "inventories",
-      invoices: "invoices",
-      "invoices-item": "invoice-items",
-      items: "items",
-      "items-branding": "brands",
-      "items-group": "groups",
+      faturamento: "invoices",
     });
     if (
       !config.legacy &&
@@ -48,9 +44,13 @@ const callstack = async (config: Config) => {
       process.env["CLIENT_SECRET"] &&
       process.env["ISSUER_URL"]
     ) {
-      !!OpenIdClient.getToken() && (await OpenIdClient.connect());
-      OpenIdClient.addSubscriber(transport.setToken.bind(transport));
-      await OpenIdClient.grant();
+      if (!OpenIdClient.getToken()) {
+        await OpenIdClient.connect();
+        OpenIdClient.addSubscriber(transport.setToken.bind(transport));
+        await OpenIdClient.grant();
+      } else {
+        transport.setToken(String(OpenIdClient.getToken().access_token));
+      }
     }
 
     const database = new Database(config.database);
