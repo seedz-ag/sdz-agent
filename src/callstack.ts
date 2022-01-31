@@ -11,6 +11,8 @@ import fs from "fs";
 import FTP from "sdz-agent-sftp";
 import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
 import ws from "./websocket/client";
+import OpenIdClient from "./open-id";
+import { TransportSeedz } from "sdz-agent-transport";
 
 require("dotenv").config();
 
@@ -21,13 +23,36 @@ const callstack = async (config: Config) => {
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
 
     //validate(config);
-
     Logger.info("VALIDATING CLIENT FTP");
 
     const ftp1 = new FTP(config.ftp);
     await ftp1.connect();
     //await ftp1.disconnect();
     // console.log(config.database)
+
+    let transport = new TransportSeedz(
+      String(process.env.ISSUER_URL),
+      String(process.env.API_URL)
+    );
+    transport.setUriMap({
+      inventories: "inventories",
+      invoices: "invoices",
+      "invoices-item": "invoice-items",
+      items: "items",
+      "items-branding": "brands",
+      "items-group": "groups",
+    });
+    if (
+      !config.legacy &&
+      process.env["CLIENT_ID"] &&
+      process.env["CLIENT_SECRET"] &&
+      process.env["ISSUER_URL"]
+    ) {
+      !!OpenIdClient.getToken() && (await OpenIdClient.connect());
+      OpenIdClient.addSubscriber(transport.setToken.bind(transport));
+      await OpenIdClient.grant();
+    }
+
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
 
@@ -39,19 +64,9 @@ const callstack = async (config: Config) => {
     for (const entity of entities) {
       const promise = new Promise<boolean>(async (resolve, reject) => {
         try {
-          // Logger.info(
-          //   `BUSCANDO DADOS NO REPOSITORIO ${entity.name.toLocaleUpperCase()}`
-          // );
           const baseDir = process.env.CONFIGDIR;
-          // const dto = JSON.parse(
-          //   fs
-          //     .readFileSync(
-          //       `${baseDir}/dto/${entity.name.toLocaleLowerCase()}.json`
-          //     )
-          //     .toString()
-          // ) as HydratorMapping;
-          
-          const dto =  await ws.getDTO(entity.name.toLocaleLowerCase());
+
+          const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
           const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
 
           const file = `${process.cwd()}/${entity.file}`;
@@ -63,7 +78,6 @@ const callstack = async (config: Config) => {
           const countResponse = await respository[count]();
           let barProgress: any = "";
           if (response && response.length) {
-            // Logger.info("CRIANDO ARQUIVO PARA TRANSMISSAO");
             if (!process.env.COMMAND_LINE) {
               barProgress = ProgressBar.create(entity.file, countResponse, 0, {
                 color: `\u001b[33m`,
@@ -74,10 +88,17 @@ const callstack = async (config: Config) => {
             }
 
             while (0 < response.length) {
-              await csv.write(
-                file,
-                response.map((row: DatabaseRow) => Hydrator(dto, row))
-              );
+              if (OpenIdClient.getToken()) {
+                transport.send(
+                  entity.entity,
+                  response.map((row: DatabaseRow) => Hydrator(dto, row))
+                );
+              } else {
+                await csv.write(
+                  file,
+                  response.map((row: DatabaseRow) => Hydrator(dto, row))
+                );
+              }
               page++;
               response = await respository[method](page, limit);
 
@@ -100,21 +121,25 @@ const callstack = async (config: Config) => {
               }
             }
 
-            const newFile = entity.file.split(/\.(?=[^\.]+$)/);
-            const files = fs.readdirSync(`${process.cwd()}`).filter((file) => {
-              if (file.includes(newFile[0])) {
-                return true;
-              }
-            });
+            if (!OpenIdClient.getToken()) {
+              const newFile = entity.file.split(/\.(?=[^\.]+$)/);
+              const files = fs
+                .readdirSync(`${process.cwd()}`)
+                .filter((file) => {
+                  if (file.includes(newFile[0])) {
+                    return true;
+                  }
+                });
 
-            for (const newFiles of files) {
-              if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
-                // Logger.info("ENVIANDO DADOS VIA SFTP");
-                const ftp = new FTP(config.ftp);
-                // await ftp.connect();
-                await ftp.sendFile(`${process.cwd()}/${newFiles}`, newFiles);
-                fs.existsSync(`${process.cwd()}/${newFiles}`) &&
-                  fs.unlinkSync(`${process.cwd()}/${newFiles}`);
+              for (const newFiles of files) {
+                if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
+                  // Logger.info("ENVIANDO DADOS VIA SFTP");
+                  const ftp = new FTP(config.ftp);
+                  // await ftp.connect();
+                  await ftp.sendFile(`${process.cwd()}/${newFiles}`, newFiles);
+                  fs.existsSync(`${process.cwd()}/${newFiles}`) &&
+                    fs.unlinkSync(`${process.cwd()}/${newFiles}`);
+                }
               }
             }
           }
@@ -132,7 +157,7 @@ const callstack = async (config: Config) => {
     ProgressBar.close();
 
     Logger.info("ENDING PROCESS");
-    process.exit(0)
+    process.exit(0);
   } catch (e: any) {
     Logger.error(e.message);
   }
