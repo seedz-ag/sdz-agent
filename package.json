@@ -4,6 +4,7 @@
   "license": "Apache",
   "dependencies": {
     "@types/node-schedule": "^1.3.2",
+    "axios": "^0.24.0",
     "child_process": "^1.0.2",
     "chokidar": "^3.5.2",
     "cli-progress": "^3.9.1",
@@ -15,6 +16,7 @@
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
+    "sdz-agent-database-mysql": "https://github.com/seedz-ag/sdz-agent-database-mysql.git",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
     "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport.git",
     "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git",

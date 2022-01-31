@@ -24,7 +24,6 @@ switch (true) {
   case (!!argv.Q || argv.query):
     const query = require(`../src/websocket/execute-query`).default;
     (async () => await query(argv.Q || argv.query))();
-    
     break;
   case (argv.H || argv.help):
     break;
