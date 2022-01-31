@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { ConfigDatabaseInterface, ERPs } from "sdz-agent-types";
+import firebird from "./firebird";
 import informix from "./informix";
 import mssql from "./mssql";
 import oracle from "./oracle";
@@ -8,6 +9,7 @@ const { Select } = require("enquirer");
 
 export default async (config: ConfigDatabaseInterface| undefined, erp: ERPs) => {
   const available = {
+    [ERPs.Agrotitan]: ["firebird"],
     [ERPs.Linx]: ["informix"],
     [ERPs.Protheus]: ["mssql", "oracle", "mysql"],
   };
@@ -22,6 +24,8 @@ export default async (config: ConfigDatabaseInterface| undefined, erp: ERPs) => 
   const response = await question.run();
 
   switch (response) {
+    case "firebird":
+      return { driver: "firebird", ...(await firebird(config)) };
     case "informix":
       return { driver: "informix", ...(await informix(config)) };
     case "mysql":
