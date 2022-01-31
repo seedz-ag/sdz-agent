@@ -26,17 +26,25 @@ const { argv } = yargs(hideBin(process.argv))
       default: true,
     });
   })
-  .command("superacao", "Runs the Superacao integration", (yargs: Argv) => {
-    return yargs.positional("superacao", {
-      default: true,
-    });
-  })
+  .command(
+    "superacao [types]",
+    "Runs the Superacao integration",
+    (yargs: Argv) => {
+      return yargs.positional("types", {
+        choices: ["all", "lynx", "protheus"],
+        default: "all",
+      })
+      .positional("superacao", {
+        default: true
+      });
+    }
+  )
   .command("update", "Updates the agent", (yargs: Argv) => {
     return yargs.positional("U", {
       default: true,
     });
   })
-  .epilog("for more information visit https://github.com/seedz/sdz-agent")
+  .epilog("for more information visit https://github.com/seedz-ag/sdz-agent")
   .showHelpOnFail(false, "whoops, something went wrong! run with --help")
   .options({
     config: {
@@ -70,7 +78,6 @@ const { argv } = yargs(hideBin(process.argv))
       required: false,
     },
   })
-
   .usage("This is the SdzAgent command line program\n\nUsage: $0 [options]")
   .version("version", "1.0.0")
   .alias("version", "V");
