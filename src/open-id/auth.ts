@@ -68,7 +68,6 @@ export class OpenIdClient {
   }
 
   public async grant(): Promise<this> {
-
     const response = await this.getOpenIdClient().grant({
       grant_type: "client_credentials",
     });
@@ -81,7 +80,6 @@ export class OpenIdClient {
   }
 
   public async refresh(): Promise<this> {
-    console.log("refresh");
     clearTimeout(this.timeout);
     this.timeout = setTimeout(this.grant.bind(this), moment(this.getToken().expires_at, 'X').diff(moment(), 'seconds') * 999);
     return this;
