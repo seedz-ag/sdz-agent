@@ -5,10 +5,8 @@ import configJson from "../../config";
 import connector from "./connector";
 import database from "./database";
 import erp from "./erp";
-import exportMode from "./export";
 import ftp from "./ftp";
 import api from "./api";
-import legacyMode from "./legacy";
 import schedule from "./schedule";
 import scope from "./scope";
 import stubs from "./stubs";
@@ -20,7 +18,7 @@ const log = (msg: string) => console.log(chalk.green(msg));
   try {
     await (async () => {
       const answers: any = {};
-      const config = await (configJson) as Config;
+      const config = (await configJson) as Config;
 
       log("SEEDZ INTEGRATION AGENT");
       log("YOU WILL WALK THROUGH SOME CONFIGURATIONS STEPS");
@@ -29,6 +27,15 @@ const log = (msg: string) => console.log(chalk.green(msg));
       answers.legacy = true; //await legacyMode(config?.legacy);
 
       answers.async = false; //await exportMode(config?.async);
+      answers.fileSize = 5;
+
+      answers.pageSize = 1000;
+
+      answers.ftp = await ftp(config?.ftp);
+
+      if (answers.legacy) {
+        answers.api = await api(config?.api);
+      }
 
       answers.ftp = await ftp(config?.ftp);
 
