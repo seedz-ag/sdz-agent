@@ -22,12 +22,6 @@ const callstack = async (config: Config) => {
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
 
-    // validate(config);
-
-
-    // await ftp1.disconnect();
-    // console.log(config.database)
-
     let transport = new TransportSeedz(
       String(process.env.ISSUER_URL),
       String(process.env.API_URL)
@@ -77,7 +71,9 @@ const callstack = async (config: Config) => {
           const baseDir = process.env.CONFIGDIR;
 
           const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
+          //console.log('dto', dto)
           const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
+          //console.log('sql', sql)
           const file = `${process.cwd()}/${entity.file}`;
           const limit = config.pageSize || 1000;
           const method = `get${entity.name}` as keyof AbstractRepository;
@@ -166,10 +162,11 @@ const callstack = async (config: Config) => {
     ProgressBar.close();
 
     Logger.info("ENDING PROCESS");
-    process.exit(0);
+    !process.env.COMMAND_LINE && process.exit(0);
   } catch (e: any) {
     Logger.error(e.message);
   }
+  return true
 };
 
 const validate = (config: Config) => {
