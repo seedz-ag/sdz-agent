@@ -35,10 +35,11 @@ export default new (class WebSocketClient {
   }
 
   connect() {
-    
+
     return new Promise((resolve) => {
 
       this.socket = io(`${process.env.WS_SERVER_URL}`, {
+        path: "/integration/agentws",
         query: {
           token: this.getToken(),
         },
@@ -55,7 +56,7 @@ export default new (class WebSocketClient {
         resolve(true);
       });
 
-      this.socket.on("disconnect", () => {
+      this.socket.on("disconnect", (reason) => {
         this.connected = false;
         this.logger.info("Disconnected to SdzAgentWS");
       });
@@ -98,7 +99,7 @@ export default new (class WebSocketClient {
 
   async run(...args: string[]): Promise<void> {
     const requesterId = args.pop() || "";
-    this.response(requesterId, [await run(...args)]);
+    this.response(requesterId, [await run(await this.getConfig(), args[1])]);
   }
 
   async response(requesterId: string, data: any): Promise<void> {

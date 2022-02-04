@@ -6,7 +6,7 @@ export default async (socket: Socket): Promise<Config> => {
   return new Promise((resolve) => {
     socket.emit("get-config", (response: any) => {
       if(!Object.keys(response).length) {
-        return false
+        return resolve(response);
       }
       const file = `${process.cwd()}/config/config.json`;
       if (fs.existsSync(file)) {
