@@ -31,7 +31,7 @@ export default new (class WebSocketClient {
 
   async executeQuery(...args: string[]) {
     const requesterId = args.pop() || "";
-    this.response(requesterId, [await executeQuery(args.pop() || "")]);
+    this.response(requesterId, [await executeQuery(await this.getConfig(), args[1] || "")]);
   }
 
   connect() {
