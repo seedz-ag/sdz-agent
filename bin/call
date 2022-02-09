@@ -41,6 +41,5 @@ switch (true) {
     break
   default:
     process.env.COMMAND_LINE = argv.isWS;
-    //require(`${process.cwd()}/src/bootstrap.ts`);
-    require(`${process.cwd()}/teste.ts`)
+    require(`${process.cwd()}/src/bootstrap.ts`);
 }

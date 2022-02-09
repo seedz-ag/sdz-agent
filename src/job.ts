@@ -26,7 +26,6 @@ const job = async () => {
         catch (e) {
           resolve(false)
         }
-    
       });
     }
   );
