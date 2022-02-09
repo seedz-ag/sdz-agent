@@ -26,6 +26,7 @@ const callstack = async (config: Config) => {
       String(process.env.ISSUER_URL),
       String(process.env.API_URL)
     );
+
     transport.setUriMap({
       faturamento: "invoices",
       faturamentoItem: "invoice-items",
@@ -34,8 +35,8 @@ const callstack = async (config: Config) => {
       itemGrupo: "groups",
       itemBranding: "brands",
     });
+
     if (
-      !config.legacy &&
       process.env["CLIENT_ID"] &&
       process.env["CLIENT_SECRET"] &&
       process.env["ISSUER_URL"]
@@ -44,18 +45,18 @@ const callstack = async (config: Config) => {
         await OpenIdClient.connect();
         OpenIdClient.addSubscriber(transport.setToken.bind(transport));
         await OpenIdClient.grant();
-      } else {
+      }
+      if (!config.legacy)
+      {
         transport.setToken(String(OpenIdClient.getToken().access_token));
       }
     }
-    else 
-    {
-      Logger.info("VALIDATING CLIENT FTP");
 
+    if(config.legacy) {
+      Logger.info("VALIDATING CLIENT FTP");
       const ftp1 = new FTP(config.ftp);
       await ftp1.connect();
     }
-
 
     const database = new Database(config.database);
     const entities: Entity[] = config.scope;
@@ -64,6 +65,7 @@ const callstack = async (config: Config) => {
     const respository: any = database.getRepository();
 
     const csv = new CSV(config.legacy, config.fileSize);
+    const ftpFiles: string[][] = [];
 
     for (const entity of entities) {
       const promise = new Promise<boolean>(async (resolve, reject) => {
@@ -71,9 +73,7 @@ const callstack = async (config: Config) => {
           const baseDir = process.env.CONFIGDIR;
 
           const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
-          //console.log('dto', dto)
           const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
-          //console.log('sql', sql)
           const file = `${process.cwd()}/${entity.file}`;
           const limit = config.pageSize || 1000;
           const method = `get${entity.name}` as keyof AbstractRepository;
@@ -93,7 +93,7 @@ const callstack = async (config: Config) => {
             }
 
             while (0 < response.length) {
-              if (OpenIdClient.getToken()) {
+              if (!config.legacy && OpenIdClient.getToken()) {
                 await transport.send(
                   entity.entity,
                   response.map((row: DatabaseRow) => Hydrator(dto, row))
@@ -126,7 +126,7 @@ const callstack = async (config: Config) => {
               }
             }
 
-            if (!OpenIdClient.getToken()) {
+            if (config.legacy) {
               const newFile = entity.file.split(/\.(?=[^\.]+$)/);
               const files = fs
                 .readdirSync(`${process.cwd()}`)
@@ -138,12 +138,7 @@ const callstack = async (config: Config) => {
 
               for (const newFiles of files) {
                 if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
-                  // Logger.info("ENVIANDO DADOS VIA SFTP");
-                  const ftp = new FTP(config.ftp);
-                  // await ftp.connect();
-                  await ftp.sendFile(`${process.cwd()}/${newFiles}`, newFiles);
-                  fs.existsSync(`${process.cwd()}/${newFiles}`) &&
-                    fs.unlinkSync(`${process.cwd()}/${newFiles}`);
+                  ftpFiles.push([`${process.cwd()}/${newFiles}`, newFiles]);
                 }
               }
             }
@@ -155,6 +150,12 @@ const callstack = async (config: Config) => {
       });
       (config.async && promises.push(promise)) ||
         (await Promise.resolve(promise));
+    }
+    const ftp = new FTP(config.ftp);
+    for (const file of ftpFiles) {
+    await ftp.sendFile(file[0], file[1]);
+    fs.existsSync(file[0]) &&
+    fs.unlinkSync(file[0]);
     }
 
     !config.async && (await Promise.all(promises));
