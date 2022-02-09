@@ -1,0 +1,15 @@
+{
+  "cnpjOrigemDados": "CnpjConcessionaria",
+  "cpfVendedor": "CpfVendedor",
+  "valorUnitarioItem": "Valor",
+  "dataEmissao": "Data",
+  "cepCliente": "CepCliente",
+  "cpfCliente": "CpfCliente",
+  "quantidadeItem": "Quantidade",
+  "hora": "Hora",
+  "tipo": "Tipo",
+  "categoria": "Categoria",
+  "descricaoItem": "Produto",
+  "notaFiscalOrigem": "NumerNota",
+  "id": "uuid"
+}

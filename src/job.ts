@@ -1,20 +1,31 @@
+import bootstrap from "./callstack";
 import { ChildProcess, fork } from "child_process";
 import { scheduleJob } from "node-schedule";
 import { Logger } from "sdz-agent-common";
 import extractScheduleConfig from "./utils/extract-schedule-config";
+import config from "../config";
+import { Config } from "sdz-agent-types";
 
 let child: ChildProcess;
 
-const job = () => {
-  const schedule = extractScheduleConfig();
+const job = async () => {
+  const schedule = await extractScheduleConfig();
   scheduleJob(
     `${schedule.minute} ${schedule.hour} ${schedule.dayOfMonth} ${schedule.month} ${schedule.dayOfWeek}`,
     () => {
-      if (child) {
-        child.kill();
-      }
-      child = fork("./src/bootstrap.ts", process.argv, {
-        execArgv: ["-r", "ts-node/register"],
+      // if (child) {
+      //   child.kill();
+      // }
+      // child = fork("./src/bootstrap.ts", process.argv, {
+      //   execArgv: ["-r", "ts-node/register"],
+      // });
+      return new Promise(async (resolve) => {
+        try {
+          resolve(await bootstrap(await config as Config));
+        }
+        catch (e) {
+          resolve(false)
+        }
       });
     }
   );
