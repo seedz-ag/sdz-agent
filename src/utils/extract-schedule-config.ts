@@ -1,6 +1,7 @@
+import { Config } from "sdz-agent-types";
 import config from "../../config";
 
-export default () => ({
+export default async () => ({
   ...{
     minute: "*",
     hour: "*",
@@ -8,5 +9,5 @@ export default () => ({
     dayOfMonth: "*",
     month: "*",
   },
-  ...(config.schedule || {}),
+  ...((await config as Config).schedule || {}),
 });
