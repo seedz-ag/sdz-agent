@@ -3,7 +3,6 @@ import OpenIdClient from "./src/open-id";
 
 require("dotenv").config();
 (async () => {
-
   const ws = WebSocketClient;
   OpenIdClient.addSubscriber(ws.setToken.bind(ws));
   await (await OpenIdClient.connect()).grant();
