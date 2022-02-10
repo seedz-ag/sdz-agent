@@ -68,6 +68,7 @@ const callstack = async (config: Config) => {
     const ftpFiles: string[][] = [];
 
     for (const entity of entities) {
+      Logger.info(entity.name.toLocaleUpperCase());
       const promise = new Promise<boolean>(async (resolve, reject) => {
         try {
           const baseDir = process.env.CONFIGDIR;
@@ -153,7 +154,10 @@ const callstack = async (config: Config) => {
     }
     const ftp = new FTP(config.ftp);
     for (const file of ftpFiles) {
-    await ftp.sendFile(file[0], file[1]);
+     if(fs.existsSync(file[0]))
+     {
+      await ftp.sendFile(file[0], file[1]);
+     } 
     fs.existsSync(file[0]) &&
     fs.unlinkSync(file[0]);
     }
