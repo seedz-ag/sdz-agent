@@ -2,7 +2,7 @@ version: '2'
 services:
   sdz-agent:
     image: seedzag/sdz-agent:latest
-    command: supervisord
+#    command: supervisord
     working_dir: /opt/sdz-agent/
     volumes:
       - ./:/opt/sdz-agent/docker
