@@ -26,6 +26,10 @@ const config = async () => {
 
   answers.async = false //await exportMode(ConfigJson?.async);
 
+  answers.fileSize = 5;
+
+  answers.pageSize = 1000;
+
   answers.ftp = await ftp(ConfigJson?.ftp);
   
   if(answers.legacy)
