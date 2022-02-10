@@ -8,7 +8,7 @@ export default async (socket: Socket, entity: string): Promise<HydratorMapping> 
       if(!Object.keys(response).length) {
         return resolve(response);
       }
-      const file = `${process.cwd()}/config/dto/${entity}.json`;
+      const file = `${process.cwd()}/${process.env.DOCKER ? "docker/" : "" }config/dto/${entity}.json`;
       if (fs.existsSync(file)) {
         fs.unlinkSync(file);
       }
