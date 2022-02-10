@@ -8,7 +8,7 @@ export default async (socket: Socket): Promise<Config> => {
       if(!Object.keys(response).length) {
         return resolve(response);
       }
-      const file = `${process.cwd()}/config/config.json`;
+      const file = `${process.cwd()}/${process.env.DOCKER ? "docker/" : "" }config/config.json`;
       if (fs.existsSync(file)) {
         fs.unlinkSync(file);
       }
