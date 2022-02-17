@@ -39,7 +39,7 @@ export default class Superacao {
 
   async process(): Promise<void> {
     Logger.info("STARTING PROCESS SEEDZ SUPERACAO");
-    if (['ALL', 'LYNX'].includes(`${(argv as any).types}`.toUpperCase())) {
+    if (['ALL', 'LINX'].includes(`${(argv as any).types}`.toUpperCase())) {
       Logger.info("STARTING PROCESSING LINX");
       const linx = new Linx(
         this.connection,
