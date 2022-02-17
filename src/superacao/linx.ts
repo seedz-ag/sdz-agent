@@ -77,10 +77,9 @@ class Linx extends Base {
           if (!csv.length) break;
           for (const row of csv) {
             const dto = Hydrator(this.getDTO(), row);
-            this.getTransport().send("superacao", Hydrator(this.getDTO(), row));
+            this.getTransport().send("superacao", dto);
           }
           skipRows += 100;
-          // console.log(`${skipRows} rows processed`);
         }
       }
     } catch {}
