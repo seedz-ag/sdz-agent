@@ -24,7 +24,7 @@ export default class Superacao {
     if (config.api && config.database && config.ftp) {
       this.csv = new CSV(config.legacy as boolean);
       this.ftp = new FTP(config.ftp);
-      this.transport = new TransportSeedz(`${config.api.url}`, {
+      this.transport = new TransportSeedz(`${config.issuerUrl}`, `${config.api.url}`, {
         client_id: config.api.username,
         client_secret: config.api.password,
       });
