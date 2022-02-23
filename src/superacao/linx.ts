@@ -1,9 +1,11 @@
+import { readFileSync, unlinkSync, writeFileSync } from "fs";
 import Base from "./base";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
 import FTP from "sdz-agent-sftp";
 import { Hydrator } from "sdz-agent-common";
 import { TransportSeedz } from "sdz-agent-transport";
+import { Logger } from "sdz-agent-common";
 
 class Linx extends Base {
   private csv: CSV;
@@ -13,9 +15,10 @@ class Linx extends Base {
     database: Database,
     csv: CSV,
     ftp: FTP,
-    transport: TransportSeedz
+    transport: TransportSeedz,
+    credentials: any[]
   ) {
-    super(database, transport);
+    super(database, transport, credentials);
     this.setCSV(csv);
     this.setDTO(`${process.cwd()}/src/superacao/dto-linx.json`);
     this.setFTP(ftp);
@@ -60,29 +63,53 @@ class Linx extends Base {
     try {
       const integrations = await this.getList();
       for (const integration of integrations) {
+        Logger.info(`Buscando: `, integration);
         const fileName = `${integration["filial"]}.csv`;
-        await this.getFTP().getFile(
-          `${integration["grupo"]}/${fileName}`,
-          fileName
-        );
-        let csv;
-        let skipRows = 0;
-        while (true) {
-          csv = (await this.getCSV().read(fileName, {
-            headers: false,
-            skipRows,
-            maxRows: 100,
-            delimiter: ";",
-          })) as any[];
-          if (!csv.length) break;
-          for (const row of csv) {
-            const dto = Hydrator(this.getDTO(), row);
-            this.getTransport().send("superacao", dto);
+        if (
+          await this.getFTP().getFile(
+            `${integration["grupo"]}/${fileName}`,
+            fileName
+          )
+        ) {
+          let page = 0;
+          while (true) {
+            try {
+              const file = readFileSync(fileName).toString().split("\n");
+              const size = 10000;
+              const csv = (await this.getCSV().read(fileName, {
+                quote: "``",
+                delimiter: ";",
+                headers: false,
+                skipRows: 0,
+                maxRows: size,
+              } as any)) as any[];
+              if (!csv.length) {
+                break;
+              }
+              const data = this.groupBy(
+                csv.map((row) => Hydrator(this.getDTO(), row)),
+                "cnpjOrigemDados"
+              );
+              for (const key of Object.keys(data)) {
+                if (await this.changeCredentials(key)) {
+                  Logger.info(`Enviando de ${key}: `, data[key].length);
+                  await this.getTransport().send("notaFiscal", data[key]);
+                } else {
+                  Logger.error(`Credencial não encontrada para: `, key);
+                }
+              }
+              writeFileSync(fileName, file.slice(size - 1).join("\n"));
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            } catch (e) {
+              console.log(e);
+            }
           }
-          skipRows += 100;
+          unlinkSync(fileName);
         }
       }
-    } catch {}
+    } catch (e: any) {
+      console.log(e.response);
+    }
   }
 }
 
