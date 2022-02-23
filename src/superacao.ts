@@ -25,6 +25,7 @@ require("dotenv").config();
       port: `${process.env.SUPERACAO_FTP_PORT}` as unknown as number,
       username: `${process.env.SUPERACAO_FTP_USERNAME}`,
     },
+    mongoUrl: `${process.env.SUPERACAO_MONGO_URL}`,
     issuerUrl: `${process.env.ISSUER_URL}`,
     legacy: "TRUE" === `${`${process.env.SUPERACAO_LEGACY}`.toUpperCase()}`,
   });
