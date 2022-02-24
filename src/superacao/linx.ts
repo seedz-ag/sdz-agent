@@ -87,7 +87,13 @@ class Linx extends Base {
                 break;
               }
               const data = this.groupBy(
-                csv.map((row) => Hydrator(this.getDTO(), row)),
+                csv.map((row) => {
+                  const dto: any = Hydrator(this.getDTO(), row);
+                  return {
+                    ...dto,
+                    cnpjOrigemDados: `${dto.cnpjOrigemDados}`.split(',').shift(),
+                  }
+                }),
                 "cnpjOrigemDados"
               );
               for (const key of Object.keys(data)) {
