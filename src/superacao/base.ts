@@ -1,6 +1,6 @@
 import Database from "sdz-agent-database";
 import { HydratorMapping } from "sdz-agent-types";
-import { ReadFile } from "sdz-agent-types/decorators";
+import { ReadFile } from "sdz-agent-types/dist/decorators";
 import { TransportSeedz } from "sdz-agent-transport";
 
 class Base {
