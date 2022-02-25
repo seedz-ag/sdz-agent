@@ -18,4 +18,4 @@ ENV INFORMIXDIR=/home/node/app/node_modules/informixdb/installer/onedb-odbc-driv
 
 COPY . .
 
-CMD [ "/usr/local/bin/ts-node", "./src/superacao.ts" ]
+CMD [ "/usr/local/bin/ts-node", "./src/superacao.ts", "--types=all" ]
