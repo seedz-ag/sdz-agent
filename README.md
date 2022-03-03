@@ -10,7 +10,7 @@ HD: 20GB
 
 ### Instalacão
 
-Essse projeto usa o `Node 12.14`, `Yarn 1.x`, `Cmake 3.x`, `g++ 9.x` certifique que a maquina contém essas versões instaladas.
+Esse projeto usa o `Node 12.14`, `Yarn 1.x`, `Cmake 3.x`, `g++ 9.x` certifique que a maquina contém essas versões instaladas.
 É necessário configuar o arquivo `config.json` na raiz do projeto com os dados referentes a autenticacão na plataforma.
 É necessário que seja realizada configuracão dos Dtos dentro de `config/dto`.
 Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em ambientes Linux, e `run /bin/run.cmd` em ambientes Windows.
