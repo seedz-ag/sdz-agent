@@ -1,5 +1,7 @@
 @ECHO OFF
 
+npm i -g windows-build-tools --vs2015
+
 SET SERVICENAME=SDZ-AGENT
 SET NSSM="%CD%\bin\node-windows-service\nssm\nssm.exe"
 ECHO  %NSSM% stop %SERVICENAME%
