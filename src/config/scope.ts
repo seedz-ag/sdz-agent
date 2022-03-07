@@ -1,9 +1,9 @@
 import chalk from "chalk";
-import ConfigScope from "sdz-agent-types/types/config.scope.type";
+import { Config } from "sdz-agent-types";
 
 const { MultiSelect, Select } = require("enquirer");
 
-export default async (config: ConfigScope | undefined): Promise<any> => {
+export default async (config: Config["scope"] | undefined): Promise<any> => {
   const choices = [
     {
       name: "Clients",
@@ -103,7 +103,7 @@ export default async (config: ConfigScope | undefined): Promise<any> => {
       chalk.bold("SCOPE")
     )} entities?`,
     initial:
-      (config && config.length > 0 && config.map((item) => item.name)) ||
+      (config && config.length > 0 && config.map(({ name }: {[key:string]: string}) => name)) ||
       choices.map((item) => item.name),
     choices: choices,
     sort: true,
