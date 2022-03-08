@@ -1,0 +1,9 @@
+@ECHO OFF
+
+SET SERVICENAME=MY_SERVICE
+SET NSSM="%CD%\windows\node-windows-service\nssm\nssm.exe"
+
+ECHO REMOVING SERVICE %SERVICENAME%
+
+%NSSM% stop %SERVICENAME%
+%NSSM% remove %SERVICENAME% confirm
