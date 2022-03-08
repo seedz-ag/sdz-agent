@@ -1,12 +1,12 @@
 trigger:
-  - master
+  - feature/superacao
 
 resources:
   repositories:
     - repository: template
       type: git
       name: Devops/pipeline-templates
-      ref: main
+      ref: v2
 
 extends:
-  template: node/node.github.v1.yml@template
+  template: node/node.github.generic.v1.yml@template
