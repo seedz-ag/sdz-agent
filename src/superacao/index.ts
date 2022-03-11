@@ -58,7 +58,7 @@ export default class Superacao {
         .toArray();
       const credentials = await this.mongo
         .db(process.env.SUPERACAO_MONGO_IDENTITY_DATABASE)
-        .collection("clients")
+        .collection("client")
         .find({ _id: { $in: groups.map(({ ref }: any) => ref) } })
         .project({ _id: true, client_id: true, client_secret: true })
         .toArray();
