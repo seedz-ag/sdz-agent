@@ -91,8 +91,10 @@ class Linx extends Base {
                   const dto: any = Hydrator(this.getDTO(), row);
                   return {
                     ...dto,
-                    cnpjOrigemDados: `${dto.cnpjOrigemDados}`.split(',').shift(),
-                  }
+                    cnpjOrigemDados: `${dto.cnpjOrigemDados}`
+                      .split(/(,\,)/g)
+                      .shift(),
+                  };
                 }),
                 "cnpjOrigemDados"
               );
