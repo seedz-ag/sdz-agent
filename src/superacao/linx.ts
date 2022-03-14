@@ -108,8 +108,8 @@ class Linx extends Base {
               }
               writeFileSync(fileName, file.slice(size - 1).join("\n"));
               await new Promise((resolve) => setTimeout(resolve, 100));
-            } catch (e) {
-              console.log(e);
+            } catch (e: any) {
+              console.log(e.response && e.response.statusText);
             }
           }
           unlinkSync(fileName);
