@@ -92,7 +92,7 @@ class Linx extends Base {
                   return {
                     ...dto,
                     cnpjOrigemDados: `${dto.cnpjOrigemDados}`
-                      .split(/(,\.)/g)
+                      .split(/(,|\.)/g)
                       .shift(),
                   };
                 }),
@@ -103,20 +103,30 @@ class Linx extends Base {
                   Logger.info(`Enviando de ${key}: `, data[key].length);
                   await this.getTransport().send("notaFiscal", data[key]);
                 } else {
-                  Logger.error(`Credencial não encontrada para: `, key);
+                  Logger.warning(`Credencial não encontrada para: `, key);
                 }
               }
               writeFileSync(fileName, file.slice(size - 1).join("\n"));
-              await new Promise((resolve) => setTimeout(resolve, 100));
+              await new Promise((resolve) => setTimeout(resolve, 150));
             } catch (e: any) {
-              console.log(e.response && e.response.statusText);
+              this.handleError(e);
             }
           }
           unlinkSync(fileName);
         }
       }
     } catch (e: any) {
-      console.log(e.response);
+      this.handleError(e);
+    }
+  }
+
+  private handleError(e: any) {
+    if (e.response) {
+      Logger.error(e.response.data);
+    } else if (e.request) {
+      Logger.error(e.request);
+    } else {
+      Logger.error(e.message);
     }
   }
 }
