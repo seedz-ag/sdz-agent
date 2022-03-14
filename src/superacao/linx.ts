@@ -92,7 +92,7 @@ class Linx extends Base {
                   return {
                     ...dto,
                     cnpjOrigemDados: `${dto.cnpjOrigemDados}`
-                      .split(/(,\,)/g)
+                      .split(/(,\.)/g)
                       .shift(),
                   };
                 }),
