@@ -52,22 +52,34 @@ export default class Superacao {
     if (!this.credentials) {
       const groups = await this.mongo
         .db(process.env.SUPERACAO_MONGO_AGENT_DATABASE)
-        .collection("groups")
+        .collection("tenant")
         .find({})
-        .project({ members: true, name: true, ref: true })
+        .project({ identification: true, name: true, stores: true })
         .toArray();
+
       const credentials = await this.mongo
         .db(process.env.SUPERACAO_MONGO_IDENTITY_DATABASE)
         .collection("client")
-        .find({ _id: { $in: groups.map(({ ref }: any) => ref) } })
-        .project({ _id: true, client_id: true, client_secret: true })
+        .find({ tenantId: { $in: groups.map(({ _id }: any) => _id) } })
+        .project({
+          _id: true,
+          client_id: true,
+          client_secret: true,
+          tenantId: true,
+        })
         .toArray();
+
       this.credentials = groups.map((group) => {
         return {
-          ...group,
           credential: credentials.find(
-            (credential) => credential._id.toString() === group.ref.toString()
+            (credential) =>
+              credential.tenantId.toString() === group._id.toString()
           ),
+          name: group.name,
+          members: [
+            group.identification,
+            ...group.stores.map((store: any) => store.identification).flat(),
+          ],
         };
       });
     }
@@ -91,7 +103,11 @@ export default class Superacao {
     }
     if (["ALL", "PROTHEUS"].includes(`${(argv as any).types}`.toUpperCase())) {
       Logger.info("STARTING PROCESSING PROTHEUS");
-      const protheus = new Protheus(this.connection, this.transport, this.credentials);
+      const protheus = new Protheus(
+        this.connection,
+        this.transport,
+        this.credentials
+      );
       await protheus.process();
       Logger.info("END PROCESS PROTHEUS");
     }
