@@ -8,7 +8,7 @@ export default async (config: Config, args: string): Promise<boolean> => {
   }
   return new Promise(async (resolve) => {
     try {
-      resolve(await bootstrap(config));
+      resolve(await bootstrap());
     }
     catch (e) {
       resolve(false)
