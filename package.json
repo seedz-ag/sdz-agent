@@ -10,6 +10,7 @@
     "cli-progress": "^3.9.1",
     "dotenv": "^10.0.0",
     "enquirer": "^2.3.6",
+    "fast-glob": "^3.2.11",
     "moment": "^2.29.1",
     "node-schedule": "^2.0.0",
     "openid-client": "^5.1.2",
