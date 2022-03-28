@@ -1,4 +1,5 @@
 import { Client, Issuer, TokenSet } from "openid-client";
+
 import moment from "moment";
 export class OpenIdClient {
   private clientId: string;
@@ -57,25 +58,47 @@ export class OpenIdClient {
 
   //FUNCTIONS
   public async connect(): Promise<this> {
-    const issuer = await Issuer.discover(this.getIssuerURL());
-    this.setOpenIdClient(
-      new issuer.Client({
-        client_id: this.getClientId(),
-        client_secret: this.getClientSecret(),
-      })
-    );
+    try  
+    {
+      // custom.setHttpOptionsDefaults({
+      //   timeout: 5000,
+      // });
+      
+      const issuer = await Issuer.discover(this.getIssuerURL());
+      this.setOpenIdClient(
+        new issuer.Client({
+          client_id: this.getClientId(),
+          client_secret: this.getClientSecret(),
+        })
+      );
+    }
+    catch(e:any)
+    {
+      console.log(e.message)
+    }
     return this;
   }
 
   public async grant(): Promise<this> {
-    const response = await this.getOpenIdClient().grant({
-      grant_type: "client_credentials",
-    });
-    this.setToken(response);
-    this.subscriber.forEach((subscriber: any) => {
-      subscriber(this.getToken().access_token)
-    });
-    await this.refresh();
+    try
+    {
+      const grant = await this.getOpenIdClient();
+      if(grant){
+        const response = await grant.grant({
+          grant_type: "client_credentials",
+        });
+        this.setToken(response);
+        this.subscriber.forEach((subscriber: any) => {
+          subscriber(this.getToken().access_token)
+        });
+        await this.refresh();
+      }
+      
+    }
+    catch(e:any)
+    {
+      console.log(e.message)
+    }
     return this;
   }
 
