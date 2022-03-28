@@ -12,14 +12,18 @@ import update from "./update";
 import { Logger } from "sdz-agent-common";
 import saveConfig from "./save-config";
 
+
 export default new (class WebSocketClient {
   private config: Config;
   private connected: boolean = false;
+  private connecting: boolean = false;
   private CREDENTIALS: any;
   private isListenning: boolean = false;
   private logger;
   private socket: Socket;
+  private timer: NodeJS.Timeout;
   private token: string;
+
   constructor() {
     this.logger = Logger;
   }
@@ -35,31 +39,41 @@ export default new (class WebSocketClient {
   }
 
   connect() {
-
+    this.connecting = true;
     return new Promise((resolve) => {
+      try {
+        this.socket = io(`${process.env.WS_SERVER_URL}`, {
+          path: "/integration/agentws",
+          query: {
+            token: this.getToken(),
+          },
+          upgrade: false,
+          timeout: 5000,
+          transports: ["websocket"],
+        });
+        
+        this.socket.on("connect", () => {
+          this.connected = true;
+          this.logger.info("Connected to SdzAgentWS");
+          if (!this.isListenning) {
+            this.listen();
+          }
+          resolve(true);
+        });
 
-      this.socket = io(`${process.env.WS_SERVER_URL}`, {
-        path: "/integration/agentws",
-        query: {
-          token: this.getToken(),
-        },
-        upgrade: false,
-        transports: ["websocket"],
-      });
-
-      this.socket.on("connect", () => {
-        this.connected = true;
-        this.logger.info("Connected to SdzAgentWS");
-        if (!this.isListenning) {
-          this.listen();
-        }
-        resolve(true);
-      });
-
-      this.socket.on("disconnect", (reason) => {
-        this.connected = false;
-        this.logger.info("Disconnected to SdzAgentWS");
-      });
+        this.socket.on("disconnect", () => {
+          this.connected = false;
+          this.logger.info("Disconnected to SdzAgentWS");
+        });
+      }
+      catch(e:any)
+      {
+        console.log(e.message)
+      }
+      finally
+      {
+        this.connecting = false;
+      }
     });
   }
 
@@ -117,6 +131,22 @@ export default new (class WebSocketClient {
     const configFile = `${process.env.CONFIGDIR}/config.json`;
     if (fs.existsSync(configFile)) {
       fs.closeSync(fs.openSync(configFile, "w"));
+    }
+  }
+  async watchConnection() {
+    try{
+
+      //console.log("Watching connection...");
+      clearTimeout(this.timer);
+      if(!this.isConnected() && !this.connecting) {
+        //console.log('trying to connect...')
+        await this.connect();
+      }
+      this.timer = setTimeout(this.watchConnection.bind(this), 60000) 
+    }
+    catch(e:any)
+    {
+      console.log(e.message)
     }
   }
 
