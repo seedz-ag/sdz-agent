@@ -7,7 +7,6 @@ import {
 import { Hydrator, Logger, ProgressBar, Validator } from "sdz-agent-common";
 
 import CSV from "sdz-agent-data";
-import ConfigJson from "../config";
 import Database from "sdz-agent-database";
 import FTP from "sdz-agent-sftp";
 import OpenIdClient from "./open-id";
@@ -25,7 +24,7 @@ const callstack = async () => {
       String(process.env.API_URL)
     );
     OpenIdClient.addSubscriber(transport.setToken.bind(transport));
-    const config = (await ConfigJson) as Config;
+    const config = (await require("../config").default) as Config;
     process.env.DEBUG = config.debug ? "true" : undefined;
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
