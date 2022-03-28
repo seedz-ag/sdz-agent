@@ -36,7 +36,7 @@ export default new Promise(async (resolve) => {
       ws.setToken(String(OpenIdClient.getToken().access_token));
     }
     if (!ws.isConnected()) {
-      await ws.connect();
+      await ws.watchConnection();
     }
 
     const response = await ws.getConfig();
