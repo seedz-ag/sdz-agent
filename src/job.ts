@@ -3,8 +3,7 @@ import { ChildProcess, fork } from "child_process";
 import { scheduleJob } from "node-schedule";
 import { Logger } from "sdz-agent-common";
 import extractScheduleConfig from "./utils/extract-schedule-config";
-import config from "../config";
-import { Config } from "sdz-agent-types";
+
 
 let child: ChildProcess;
 
@@ -21,7 +20,7 @@ const job = async () => {
       // });
       return new Promise(async (resolve) => {
         try {
-          resolve(await bootstrap(await config as Config));
+          resolve(await bootstrap());
         }
         catch (e) {
           resolve(false)
