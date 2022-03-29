@@ -1,31 +1,40 @@
 import {
+  AbstractRepository,
   Config,
   DatabaseRow,
   Entity,
-  HydratorMapping,
-  AbstractRepository,
 } from "sdz-agent-types";
+import { Hydrator, Logger, ProgressBar, Validator } from "sdz-agent-common";
+
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
-import fs from "fs";
 import FTP from "sdz-agent-sftp";
-import { Hydrator, Logger, Validator, ProgressBar } from "sdz-agent-common";
-import ws from "./websocket/client";
 import OpenIdClient from "./open-id";
 import { TransportSeedz } from "sdz-agent-transport";
+import dotenv from 'dotenv';
+import fs from "fs";
+import glob from 'fast-glob';
+import ws from "./websocket/client";
 
-require("dotenv").config();
-
-const callstack = async (config: Config) => {
+const callstack = async () => {
   try {
+    dotenv.config();
+    const transport = new TransportSeedz(
+      String(process.env.ISSUER_URL),
+      String(process.env.API_URL)
+    );
+    OpenIdClient.addSubscriber(transport.setToken.bind(transport));
+    const config = (await require("../config").default) as Config;
     process.env.DEBUG = config.debug ? "true" : undefined;
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
 
-    let transport = new TransportSeedz(
-      String(process.env.ISSUER_URL),
-      String(process.env.API_URL)
-    );
+    if (!ws.isConnected()) {
+      Logger.error("SDZ-AGENT-WS DISCONNECT, ABORTING.");
+      return false;
+    }
+
+    Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
 
     transport.setUriMap({
       faturamento: "invoices",
@@ -36,23 +45,7 @@ const callstack = async (config: Config) => {
       itemBranding: "brands",
     });
 
-    if (
-      process.env["CLIENT_ID"] &&
-      process.env["CLIENT_SECRET"] &&
-      process.env["ISSUER_URL"]
-    ) {
-      if (!OpenIdClient.getToken()) {
-        await OpenIdClient.connect();
-        OpenIdClient.addSubscriber(transport.setToken.bind(transport));
-        await OpenIdClient.grant();
-      }
-      if (!config.legacy)
-      {
-        transport.setToken(String(OpenIdClient.getToken().access_token));
-      }
-    }
-
-    if(config.legacy) {
+    if (config.legacy) {
       Logger.info("VALIDATING CLIENT FTP");
       const ftp1 = new FTP(config.ftp);
       await ftp1.connect();
@@ -67,12 +60,16 @@ const callstack = async (config: Config) => {
     const csv = new CSV(config.legacy, config.fileSize);
     const ftpFiles: string[][] = [];
 
+    //CLEAR OLD FILES
+    await glob('./**/*.csv').then((paths) => paths.forEach(fs.unlinkSync));
+    await glob('./config/dto/*.json').then((paths) => paths.forEach(fs.unlinkSync));
+    await glob('./config/sql/*.sql').then((paths) => paths.forEach(fs.unlinkSync));
+
     for (const entity of entities) {
       Logger.info(entity.name.toLocaleUpperCase());
       const promise = new Promise<boolean>(async (resolve, reject) => {
         try {
           const baseDir = process.env.CONFIGDIR;
-
           const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
           const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
           const file = `${process.cwd()}/${entity.file}`;
@@ -154,12 +151,10 @@ const callstack = async (config: Config) => {
     }
     const ftp = new FTP(config.ftp);
     for (const file of ftpFiles) {
-     if(fs.existsSync(file[0]))
-     {
-      await ftp.sendFile(file[0], file[1]);
-     } 
-    fs.existsSync(file[0]) &&
-    fs.unlinkSync(file[0]);
+      if (fs.existsSync(file[0])) {
+        await ftp.sendFile(file[0], file[1]);
+      }
+      fs.existsSync(file[0]) && fs.unlinkSync(file[0]);
     }
 
     !config.async && (await Promise.all(promises));
@@ -171,7 +166,7 @@ const callstack = async (config: Config) => {
   } catch (e: any) {
     Logger.error(e.message);
   }
-  return true
+  return true;
 };
 
 const validate = (config: Config) => {
