@@ -39,7 +39,7 @@ class Protheus extends Base {
       emp: integration["emp"],
       pass: integration["pass"],
       user: integration["user"],
-      inicial: Moment().subtract(process.env.DAYS_TO_PROCESS || 1, 'd').format("YYYYMMDD"),
+      inicial: Moment().subtract(process.env.SUPERACAO_PROTHEUS_DAYS_TO_PROCESS || 1, 'd').format("YYYYMMDD"),
       final: Moment().format("YYYYMMDD"),
     };
     if (integration["filial"]) {
