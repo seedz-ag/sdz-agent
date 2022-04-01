@@ -6,6 +6,7 @@
   "cpfVendedor": "4",
   "categoria": "5",
   "descricaoItem": "6",
+  "skuItem": "6",
   "quantidadeItem": "7",
   "valorUnitarioItem": "8",
   "cpfCliente": "9",
