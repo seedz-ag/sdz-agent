@@ -1,12 +1,14 @@
 import Axios, { AxiosRequestHeaders } from "axios";
-Axios.defaults.timeout = 5000;
-
-import Moment from "moment";
 import { Hydrator, Logger } from "sdz-agent-common";
-import Database from "sdz-agent-database";
-import { TransportSeedz } from "sdz-agent-transport";
 
 import Base from "./base";
+import Database from "sdz-agent-database";
+import Moment from "moment";
+import { TransportSeedz } from "sdz-agent-transport";
+
+Axios.defaults.timeout = 10000;
+
+
 
 class Protheus extends Base {
   /**
@@ -37,7 +39,7 @@ class Protheus extends Base {
       emp: integration["emp"],
       pass: integration["pass"],
       user: integration["user"],
-      inicial: Moment().format("YYYYMMDD"),
+      inicial: Moment().subtract(process.env.DAYS_TO_PROCESS || 1, 'd').format("YYYYMMDD"),
       final: Moment().format("YYYYMMDD"),
     };
     if (integration["filial"]) {
