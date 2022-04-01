@@ -10,6 +10,7 @@
   "tipo": "Tipo",
   "categoria": "Categoria",
   "descricaoItem": "Produto",
+  "skuItem": "Produto",
   "notaFiscalOrigem": "NumerNota",
   "id": "uuid"
 }
