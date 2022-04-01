@@ -8,5 +8,11 @@ resources:
       name: Devops/pipeline-templates
       ref: v2
 
+variables:
+  - name: SERVICE_NAME
+    value: 'sdz-agent-superacao'
+
 extends:
   template: node/node.github.generic.v1.yml@template
+  parameters:
+    SERVICENAME: ${{ variables.SERVICE_NAME }}
