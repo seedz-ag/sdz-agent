@@ -10,7 +10,7 @@
   "quantidadeItem": "7",
   "valorUnitarioItem": "8",
   "cpfCliente": "9",
-  "data": "10",
+  "dataEmissao": "10",
   "hora": "11",
   "tipo": "12"
 }
