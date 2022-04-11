@@ -146,6 +146,7 @@ const callstack = async () => {
       });
       (config.async && promises.push(promise)) ||
         (await Promise.resolve(promise));
+      ProgressBar.close();
     }
     const ftp = new FTP(config.ftp);
     for (const file of ftpFiles) {
@@ -156,8 +157,6 @@ const callstack = async () => {
     }
 
     !config.async && (await Promise.all(promises));
-
-    ProgressBar.close();
 
     Logger.info("ENDING PROCESS");
     (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") && process.exit(0);
