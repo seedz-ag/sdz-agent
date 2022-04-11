@@ -12,7 +12,14 @@ if (dev) {
 
 const argv = require('../src/args.ts').default;
 
-argv.isWS ? process.env.COMMAND_LINE = true : null
+if(argv.isWS)
+{
+  process.env.COMMAND_LINE = true;
+}
+else 
+{
+  process.env.COMMAND_LINE = false;
+}
 
 switch (true) {
   case (argv.C || argv.config):
@@ -40,6 +47,5 @@ switch (true) {
     });
     break
   default:
-    process.env.COMMAND_LINE = argv.isWS;
     require(`${process.cwd()}/src/bootstrap.ts`);
 }
