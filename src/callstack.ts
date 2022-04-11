@@ -79,7 +79,7 @@ const callstack = async () => {
           const countResponse = await respository[count]();
           let barProgress: any = "";
           if (response && response.length) {
-            if (!process.env.COMMAND_LINE) {
+            if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
               barProgress = ProgressBar.create(entity.name, countResponse, 0, {
                 color: `\u001b[33m`,
                 event: "WRITING",
@@ -114,7 +114,7 @@ const callstack = async () => {
                   });
                 }
               }
-              if (!!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
+              if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
                 barProgress.increment();
                 barProgress.update(updateProgress, {
                   count: `${updateProgress}/${countResponse}`,
