@@ -33,9 +33,7 @@ const callstack = async () => {
       Logger.error("SDZ-AGENT-WS DISCONNECT, ABORTING.");
       return false;
     }
-
-    Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
-
+    
     transport.setUriMap({
       faturamento: "invoices",
       faturamentoItem: "invoice-items",
@@ -81,7 +79,7 @@ const callstack = async () => {
           const countResponse = await respository[count]();
           let barProgress: any = "";
           if (response && response.length) {
-            if (!process.env.COMMAND_LINE) {
+            if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
               barProgress = ProgressBar.create(entity.name, countResponse, 0, {
                 color: `\u001b[33m`,
                 event: "WRITING",
@@ -108,7 +106,7 @@ const callstack = async () => {
               let updateProgress: any = page * limit;
               let difUpdateProgress = countResponse - page * limit;
               if (difUpdateProgress < limit) {
-                if (!process.env.COMMAND_LINE) {
+                if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
                   updateProgress = parseFloat(countResponse);
                   barProgress.update(updateProgress, {
                     event: "DONE",
@@ -116,7 +114,7 @@ const callstack = async () => {
                   });
                 }
               }
-              if (!process.env.COMMAND_LINE) {
+              if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
                 barProgress.increment();
                 barProgress.update(updateProgress, {
                   count: `${updateProgress}/${countResponse}`,
@@ -148,6 +146,7 @@ const callstack = async () => {
       });
       (config.async && promises.push(promise)) ||
         (await Promise.resolve(promise));
+      ProgressBar.close();
     }
     const ftp = new FTP(config.ftp);
     for (const file of ftpFiles) {
@@ -159,10 +158,8 @@ const callstack = async () => {
 
     !config.async && (await Promise.all(promises));
 
-    ProgressBar.close();
-
     Logger.info("ENDING PROCESS");
-    !process.env.COMMAND_LINE && process.exit(0);
+    (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") && process.exit(0);
   } catch (e: any) {
     Logger.error(e.message);
   }
