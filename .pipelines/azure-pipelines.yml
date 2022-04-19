@@ -10,7 +10,7 @@ resources:
 
 variables:
   - name: SERVICE_NAME
-    value: 'sdz-agent-superacao'
+    value: 'sdz-age-superacao'
 
 extends:
   template: node/node.github.generic.v1.yml@template
