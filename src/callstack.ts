@@ -3,9 +3,9 @@ import OpenIdClient from "./open-id";
 import databaseConsumer from "./utils/consumers/database";
 import dotenv from "dotenv";
 import fs from "fs";
-import ftpTransport from "./transports/ftp";
+import ftpTransport from "./utils/transports/ftp";
 import glob from "fast-glob";
-import httpTransport from "./transports/http";
+import httpTransport from "./utils/transports/http";
 import ws from "./websocket/client";
 
 const callstack = async () => {
@@ -23,17 +23,15 @@ const callstack = async () => {
 
     OpenIdClient.addSubscriber(httpTransport.getInstance().setToken.bind(httpTransport));
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
-    OpenIdClient.grant();
-
+    await OpenIdClient.connect();
+    await OpenIdClient.grant();
     await ws.connect();
-
     if (!ws.isConnected()) {
       Logger.error("SDZ-AGENT-WS DISCONNECTED, ABORTING.");
       return false;
     }
 
     const config = await ws.getConfig();
-
     ftpTransport.setConfig(config)
 
     let consumer;
