@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import ftpTransport from "./utils/transports/ftp";
 import glob from "fast-glob";
+import httpConsumer from "./utils/consumers/http";
 import httpTransport from "./utils/transports/http";
 import ws from "./websocket/client";
 
@@ -38,7 +39,7 @@ const callstack = async () => {
 
     switch (config.connector) {
       case 'database': consumer = databaseConsumer; break;
-      // case 'http': consumer = ''; break;
+      case 'http': consumer = httpConsumer; break;
     }
     if (!consumer) {
       throw new Error('CONNECTOR NOT FOUND');
