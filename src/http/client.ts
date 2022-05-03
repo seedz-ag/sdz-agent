@@ -3,15 +3,15 @@ import axios from "axios";
 import { get } from "dot-wild";
 import interpolation from "./interpolation";
 
-export default class SOAPClient {
+export default class HttpClient {
   private authHeader?: any;
   private body?: string;
   private dataPath?: string;
   private headers: any;
   private scope?: any;
-  private url: string;
+  private url?: string;
 
-  public constructor(url: string, headers?: any, scope?: any, body?: string) {
+  public constructor(url?: string, headers?: any, scope?: any, body?: string) {
     this.setBody(body);
     this.setHeaders(headers);
     this.setScope(scope);
@@ -63,10 +63,10 @@ export default class SOAPClient {
     return this;
   }
 
-  public getURL(): string {
+  public getURL(): string | undefined {
     return this.url;
   }
-  public setURL(url: string): this {
+  public setURL(url?: string): this {
     this.url = url;
     return this;
   }
