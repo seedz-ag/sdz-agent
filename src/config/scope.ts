@@ -73,27 +73,27 @@ export default async (config: Config["scope"] | undefined): Promise<any> => {
     {
       name: "AccountsPay",
       file: "contas_pagar.csv",
-      entity: "contas_pagar.csv",
+      entity: "contas_pagar",
     },
     {
       name: "AccountsReceivable",
       file: "contas_receber.csv",
-      entity: "contas_receber.csv",
+      entity: "contas_receber",
     },
     {
       name: "Vendors",
       file: "vendedor.csv",
-      entity: "vendedor.csv",
+      entity: "vendedor",
     },
     {
       name: "Employees",
       file: "funcionario.csv",
-      entity: "funcionario.csv",
+      entity: "funcionario",
     },
     {
       name: "Inventories",
       file: "estoque.csv",
-      entity: "estoque.csv",
+      entity: "estoque",
     },
   ];
 

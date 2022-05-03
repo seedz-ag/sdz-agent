@@ -36,11 +36,11 @@ const callstack = async () => {
     
     transport.setUriMap({
       faturamento: "invoices",
-      faturamentoItem: "invoice-items",
+      faturamento_item: "invoice-items",
       estoque: "inventories",
       item: "items",
-      itemGrupo: "groups",
-      itemBranding: "brands",
+      item_grupo: "groups",
+      item_branding: "brands",
     });
 
     if (config.legacy) {
