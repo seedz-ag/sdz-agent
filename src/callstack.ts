@@ -15,11 +15,11 @@ const callstack = async () => {
     dotenv.config();
 
     //CLEAR OLD FILES
-    await glob("./**/*.csv").then((paths) => paths.forEach(fs.unlinkSync));
-    await glob("./config/dto/*.json").then((paths) =>
+    await glob("./**/*.csv").then((paths: string[]) => paths.forEach(fs.unlinkSync));
+    await glob("./config/dto/*.json").then((paths: string[]) =>
       paths.forEach(fs.unlinkSync)
     );
-    await glob("./config/sql/*.sql").then((paths) =>
+    await glob("./config/sql/*.sql").then((paths: string[]) =>
       paths.forEach(fs.unlinkSync)
     );
 
