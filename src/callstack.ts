@@ -1,5 +1,6 @@
 import { Logger } from "sdz-agent-common";
 import OpenIdClient from "./open-id";
+import csv from "./utils/csv";
 import databaseConsumer from "./utils/consumers/database";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -33,6 +34,7 @@ const callstack = async () => {
     }
 
     const config = await ws.getConfig();
+    csv.setConfig(config);
     ftpTransport.setConfig(config)
 
     let consumer;
