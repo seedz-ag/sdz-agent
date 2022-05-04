@@ -54,7 +54,7 @@ export default new (class WebSocketClient {
         
         this.socket.on("connect", () => {
           this.connected = true;
-          this.logger.info("Connected to SdzAgentWS");
+          // this.logger.info("Connected to SdzAgentWS");
           if (!this.isListenning) {
             this.listen();
           }

@@ -8,7 +8,7 @@ let instance: FTP;
 
 const transport = async (local: string, destination: string) => {
   if (!instance) {
-    Logger.info("VALIDATING CLIENT FTP");
+    //Logger.info("VALIDATING CLIENT FTP");
     (new FTP(config.ftp)).connect();
     instance = new FTP(config.ftp);
   }
