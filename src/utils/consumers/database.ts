@@ -25,7 +25,7 @@ const consumer = async () => {
       const baseDir = process.env.CONFIGDIR;
       const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
       const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
-      const file = `${process.cwd()}/${entity.file}`;
+      const file = `${process.cwd()}/output/${entity.file}`;
       const limit = config.pageSize || 1000;
       const method = `get${entity.name}` as keyof AbstractRepository;
       const count = `count${entity.name}` as keyof AbstractRepository;
@@ -84,15 +84,15 @@ const consumer = async () => {
       }
       if (config.legacy) {
         const newFile = entity.file.split(/\.(?=[^\.]+$)/);
-        const files = fs.readdirSync(`${process.cwd()}`).filter((file) => {
+        const files = fs.readdirSync(`${process.cwd()}/output/`).filter((file) => {
           if (file.includes(newFile[0])) {
             return true;
           }
         });
 
         for (const newFiles of files) {
-          if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
-            await ftpTransport(`${process.cwd()}/${newFiles}`, newFiles);
+          if (fs.existsSync(`${process.cwd()}/output/${newFiles}`)) {
+            await ftpTransport(`${process.cwd()}/output/${newFiles}`, newFiles);
           }
         }
       }
