@@ -1,4 +1,4 @@
-import { Config } from "sdz-agent-types";
+import writeJson from "../write-json";
 import { TransportSeedz } from "sdz-agent-transport";
 
 const instance = new TransportSeedz(
@@ -16,7 +16,7 @@ instance.setUriMap({
 });
 
 const transport = (entity: string, payload: any) => {
-
+  writeJson(entity, payload);
   return instance.send(entity, payload);
 };
 
