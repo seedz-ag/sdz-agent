@@ -27,7 +27,10 @@ const callstack = async () => {
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
     await OpenIdClient.connect();
     await OpenIdClient.grant();
-    await ws.connect();
+    if(!ws.isConnected())
+    {
+      await ws.connect();
+    }
     if (!ws.isConnected()) {
       Logger.error("SDZ-AGENT-WS DISCONNECTED, ABORTING.");
       return false;
