@@ -15,15 +15,16 @@ const consumer = async () => {
   const http = new HttpConsumer();
   for (const entity of entities) {
     const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
-    const request: any = ws.getHttpRequest(entity.name.toLocaleLowerCase());
+    const request: any = await ws.getHttpRequest(entity.name.toLocaleLowerCase());
     http.setBody(request.body);
     http.setDataPath(request.dataPath);
     http.setHeaders(request.headers);
     http.setScope(request.scope);
     http.setURL(request.url);
+
     const response = await http.request();
 
-    const data = response.map((row: any) => Hydrator(dto, row));
+    const data = (Array.isArray(response) ? response : [response]).map((row: any) => Hydrator(dto, row));
 
     if (!config.legacy) {
       await httpTransport(entity.entity, data);
