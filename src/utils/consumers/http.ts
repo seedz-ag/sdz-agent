@@ -1,5 +1,5 @@
 import { Config, Entity } from "sdz-agent-types";
-import { Hydrator, Logger, ProgressBar, Validator } from "sdz-agent-common";
+import { Factory } from "sdz-agent-common";
 
 import HttpConsumer from "../../http/client";
 import csv from "../csv";
@@ -24,7 +24,7 @@ const consumer = async () => {
 
     const response = await http.request();
 
-    const data = (Array.isArray(response) ? response : [response]).map((row: any) => Hydrator(dto, row));
+    const data = (Array.isArray(response) ? response : [response]).map((row: any) => Factory(dto, row));
 
     if (!config.legacy) {
       await httpTransport(entity.entity, data);
@@ -40,7 +40,7 @@ const consumer = async () => {
 
     for (const newFiles of files) {
       if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
-        ftpTransport(`${process.cwd()}/${newFiles}`, newFiles);
+        await ftpTransport(`${process.cwd()}/${newFiles}`, newFiles);
       }
     }
   }
