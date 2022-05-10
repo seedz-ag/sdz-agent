@@ -32,15 +32,15 @@ const consumer = async () => {
     }
     await csv().write(`${process.cwd()}/${entity.file}`, data);
     const newFile = entity.file.split(/\.(?=[^\.]+$)/);
-    const files = fs.readdirSync(`${process.cwd()}`).filter((file) => {
+    const files = fs.readdirSync(`${process.cwd()}/output/`).filter((file) => {
       if (file.includes(newFile[0])) {
         return true;
       }
     });
 
     for (const newFiles of files) {
-      if (fs.existsSync(`${process.cwd()}/${newFiles}`)) {
-        await ftpTransport(`${process.cwd()}/${newFiles}`, newFiles);
+      if (fs.existsSync(`${process.cwd()}/output/${newFiles}`)) {
+        await ftpTransport(`${process.cwd()}/output/${newFiles}`, newFiles);
       }
     }
   }
