@@ -1,17 +1,17 @@
 import { Config, HydratorMapping } from "sdz-agent-types";
-import { io, Socket } from "socket.io-client";
+import { Socket, io } from "socket.io-client";
 
+import { Logger } from "sdz-agent-common";
 import exec from "./exec";
 import executeQuery from "./execute-query";
 import fs from "fs";
 import getConfig from "./get-config";
 import getDTO from "./get-dto";
+import getHttpRequest from "./get-http-request";
 import getSQL from "./get-sql";
 import run from "./run";
-import update from "./update";
-import { Logger } from "sdz-agent-common";
 import saveConfig from "./save-config";
-
+import update from "./update";
 
 export default new (class WebSocketClient {
   private config: Config;
@@ -54,7 +54,7 @@ export default new (class WebSocketClient {
         
         this.socket.on("connect", () => {
           this.connected = true;
-          this.logger.info("Connected to SdzAgentWS");
+          // this.logger.info("Connected to SdzAgentWS");
           if (!this.isListenning) {
             this.listen();
           }
@@ -97,6 +97,10 @@ export default new (class WebSocketClient {
     this.socket.emit("getAPMEnvironment", (response: any) => {
       console.log("APMEnv:", response);
     });
+  }
+
+  async getHttpRequest(entity: string): Promise<any> {
+    return await getHttpRequest(this.socket, entity);
   }
 
   async getSQL(entity: string): Promise<Config> {
