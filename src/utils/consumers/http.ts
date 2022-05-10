@@ -30,7 +30,7 @@ const consumer = async () => {
       await httpTransport(entity.entity, data);
       continue;
     }
-    await csv().write(`${process.cwd()}/${entity.file}`, data);
+    await csv().write(`${process.cwd()}/output/${entity.file}`, data);
     const newFile = entity.file.split(/\.(?=[^\.]+$)/);
     const files = fs.readdirSync(`${process.cwd()}/output/`).filter((file) => {
       if (file.includes(newFile[0])) {
