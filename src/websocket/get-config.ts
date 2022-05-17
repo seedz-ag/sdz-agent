@@ -1,8 +1,8 @@
-import fs from "fs";
 import { Config } from "sdz-agent-types";
 import { Socket } from "socket.io-client";
+import fs from "fs";
 
-export default async (socket: Socket): Promise<Config> => {
+export default async (socket: Socket): Promise<Config | Config[]> => {
   return new Promise((resolve) => {
     socket.emit("get-config", (response: any) => {
       if(!Object.keys(response).length) {

@@ -1,3 +1,4 @@
+import { Config } from "sdz-agent-types";
 import { Logger } from "sdz-agent-common";
 import OpenIdClient from "./open-id";
 import csv from "./utils/csv";
@@ -10,7 +11,7 @@ import httpConsumer from "./utils/consumers/http";
 import httpTransport from "./utils/transports/http";
 import ws from "./websocket/client";
 
-const callstack = async () => {
+const callstack = async (configName = 'default') => {
   try {
     dotenv.config();
 
@@ -36,7 +37,14 @@ const callstack = async () => {
       return false;
     }
 
-    const config = await ws.getConfig();
+    let config: Config | Config[] | undefined = await ws.getConfig();
+    if (Array.isArray(config)) {
+      config = config.find((config: Config) => config.name === configName);
+      if (!config) {
+        Logger.error(`Config ${configName} not found.`);
+        throw new Error(`Config ${configName} not found.`);
+      }
+    }
     csv.setConfig(config);
     ftpTransport.setConfig(config)
 
