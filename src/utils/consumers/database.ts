@@ -23,8 +23,8 @@ const consumer = async () => {
   for (const entity of entities) {
     Logger.info(entity.name.toLocaleUpperCase());
       const baseDir = process.env.CONFIGDIR;
-      const dto = await ws.getDTO(entity.name.toLocaleLowerCase());
-      const sql = await ws.getSQL(entity.name.toLocaleLowerCase());
+      const dto = config.dto[entity.name.toLocaleLowerCase()] || await ws.getDTO(entity.name.toLocaleLowerCase());
+      const sql = config.sql[entity.name.toLocaleLowerCase()] || await ws.getSQL(entity.name.toLocaleLowerCase());
       const file = `${process.cwd()}/output/${entity.file}`;
       const limit = config.pageSize || 1000;
       const method = `get${entity.name}` as keyof AbstractRepository;
