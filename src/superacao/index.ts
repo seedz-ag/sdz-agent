@@ -1,13 +1,13 @@
-import argv from "../args";
 import CSV from "sdz-agent-data";
 import { Config } from "sdz-agent-types";
 import Database from "sdz-agent-database";
 import FTP from "sdz-agent-sftp";
 import Linx from "./linx";
 import { Logger } from "sdz-agent-common";
+import { MongoClient } from "mongodb";
 import Protheus from "./protheus";
 import { TransportSeedz } from "sdz-agent-transport";
-import { MongoClient } from "mongodb";
+import argv from "../args";
 
 require("dotenv").config();
 
@@ -69,16 +69,16 @@ export default class Superacao {
         })
         .toArray();
 
-      this.credentials = groups.map((group) => {
+      this.credentials = groups.map((group: any) => {
         return {
           credential: credentials.find(
-            (credential) =>
-              credential.tenantId.toString() === group._id.toString()
+            (credential: any) =>
+              [credential.tenantId?.toString(), credential.tenant_id?.toString()].includes(group._id.toString())
           ),
           name: group.name,
           members: [
             group.identification,
-            ...group.stores.map((store: any) => store.identification).flat(),
+            ...(group.stores?.map((store: any) => store.identification)?.flat() || []),
           ],
         };
       });
