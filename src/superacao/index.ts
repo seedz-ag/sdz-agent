@@ -25,7 +25,7 @@ export default class Superacao {
   }
 
   configure(config: Partial<Config>): this {
-    if (config.api && config.database && config.ftp) {
+    if (config.apiUrl && config.database && config.ftp) {
       this.config = config;
       this.csv = new CSV(config.legacy as boolean);
       this.ftp = new FTP(config.ftp);
@@ -34,10 +34,6 @@ export default class Superacao {
       this.transport = new TransportSeedz(
         `${config.issuerUrl}`,
         `${config.apiUrl}`,
-        {
-          client_id: config.api.username,
-          client_secret: config.api.password,
-        }
       );
       this.transport.setUriMap({
         notaFiscal: "invoice-items",
