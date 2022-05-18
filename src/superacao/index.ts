@@ -33,7 +33,7 @@ export default class Superacao {
       this.mongo.connect();
       this.transport = new TransportSeedz(
         `${config.issuerUrl}`,
-        `${config.api.url}`,
+        `${config.apiUrl}`,
         {
           client_id: config.api.username,
           client_secret: config.api.password,
