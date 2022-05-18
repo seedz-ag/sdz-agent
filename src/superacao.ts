@@ -5,6 +5,7 @@ require("dotenv").config();
 
 (async () => {
   const superacao = new Superacao({
+    apiUrl: `${process.env.SUPERACAO_API_URL}`,
     database: {
       driver: `${process.env.SUPERACAO_DATABASE_DRIVER}` as DatabaseDrivers,
       host: `${process.env.SUPERACAO_DATABASE_HOST}`,
