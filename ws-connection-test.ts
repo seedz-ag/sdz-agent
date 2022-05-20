@@ -7,5 +7,7 @@ require("dotenv").config();
   OpenIdClient.addSubscriber(ws.setToken.bind(ws));
   await (await OpenIdClient.connect()).grant();
   // await OpenIdClient.refresh();
-  await ws.watchConnection();
+  await ws.connect();
+
+  console.log(await ws.getHttpRequest('teste'));
 })();
