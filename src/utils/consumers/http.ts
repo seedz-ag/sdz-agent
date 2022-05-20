@@ -1,4 +1,4 @@
-import { Config, Entity } from "sdz-agent-types";
+import { Config, Entity, HydratorMapping } from "sdz-agent-types";
 
 import { Factory } from "sdz-agent-common";
 import HttpConsumer from "../../http/client";
@@ -14,7 +14,7 @@ const consumer = async () => {
   const entities: Entity[] = config.scope;
   const http = new HttpConsumer();
   for (const entity of entities) {
-    const dto = config.dto[entity.name.toLocaleLowerCase()] || await ws.getDTO(entity.name.toLocaleLowerCase());
+    const dto = (config?.dtos?.[entity.name.toLocaleLowerCase()] || await ws.getDTO(entity.name.toLocaleLowerCase())) as HydratorMapping;
     const request: any = config.http[entity.name.toLocaleLowerCase()] || await ws.getHttpRequest(entity.name.toLocaleLowerCase());
     http.setBody(request.body);
     http.setDataPath(request.dataPath);
