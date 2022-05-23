@@ -33,7 +33,7 @@ export default class Superacao {
       this.mongo.connect();
       this.transport = new TransportSeedz(
         `${config.issuerUrl}`,
-        `${config.apiUrl}`,
+        `${config.apiUrl}`
       );
       this.transport.setUriMap({
         notaFiscal: "invoice-items",
@@ -67,14 +67,20 @@ export default class Superacao {
 
       this.credentials = groups.map((group: any) => {
         return {
-          credential: credentials.find(
-            (credential: any) =>
-              [credential.tenantId?.toString(), credential.tenant_id?.toString()].includes(group._id.toString())
+          credential: credentials.find((credential: any) =>
+            [
+              credential.tenantId?.toString(),
+              credential.tenant_id?.toString(),
+            ].includes(group._id.toString())
           ),
           name: group.name,
           members: [
             `00000000000000${group.identification}`.slice(-14),
-            ...(group.stores?.map((store: any) => `000000000000000${store.identification}`.slice(-14))?.flat() || []),
+            ...(group.stores
+              ?.map((store: any) =>
+                `000000000000000${store.identification}`.slice(-14)
+              )
+              ?.flat() || []),
           ],
         };
       });
