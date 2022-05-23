@@ -85,7 +85,7 @@ export default new (class WebSocketClient {
     this.isListenning = true;
   }
 
-  async getConfig(): Promise<Config> {
+  async getConfig(): Promise<Config | Config[]> {
     return await getConfig(this.socket);
   }
 
@@ -117,7 +117,7 @@ export default new (class WebSocketClient {
 
   async run(...args: string[]): Promise<void> {
     const requesterId = args.pop() || "";
-    this.response(requesterId, [await run(await this.getConfig(), args[1])]);
+    this.response(requesterId, [await run(await this.getConfig(), args[1], args[2])]);
   }
 
   async response(requesterId: string, data: any): Promise<void> {
