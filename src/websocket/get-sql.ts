@@ -8,11 +8,7 @@ export default async (socket: Socket, entity: string): Promise<Config> => {
       if(!Object.keys(response).length) {
         return resolve(response);
       }
-      const file = `${process.cwd()}/${process.env.DOCKER ? "docker/" : "" }config/sql/${entity}.sql`;
-      if (fs.existsSync(file)) {
-        fs.unlinkSync(file);
-      }
-      fs.writeFileSync(file, response);
+      
       resolve(response);
     });
   });
