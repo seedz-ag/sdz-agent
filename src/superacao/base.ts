@@ -78,7 +78,7 @@ class Base {
    * Functions
    */
   async changeCredentials(id: string): Promise<boolean> {
-    const needle = id.replace(/[^0-9]/g, "");
+    const needle = `00000000000000${id.replace(/[^0-9]/g, "")}`.slice(-14);
     switch (true) {
       case this.getCurrentCredential() &&
         this.getCurrentCredential().members.includes(needle):

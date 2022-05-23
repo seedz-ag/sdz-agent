@@ -73,8 +73,8 @@ export default class Superacao {
           ),
           name: group.name,
           members: [
-            group.identification,
-            ...(group.stores?.map((store: any) => store.identification)?.flat() || []),
+            `00000000000000${group.identification}`.slice(-14),
+            ...(group.stores?.map((store: any) => `000000000000000${store.identification}`.slice(-14))?.flat() || []),
           ],
         };
       });
