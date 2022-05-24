@@ -27,7 +27,7 @@ const consumer = async () => {
     const limit = config.pageSize || 1000;
     let page = 0;
 
-    let response = await respository.execute(sql);
+    let response = await respository.execute(sql, page, limit);
     const countResponse = await respository.count(sql);
 
     let barProgress: any = "";
