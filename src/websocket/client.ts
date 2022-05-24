@@ -117,7 +117,7 @@ export default new (class WebSocketClient {
 
   async run(...args: string[]): Promise<void> {
     const requesterId = args.pop() || "";
-    this.response(requesterId, [await run(await this.getConfig(), args[1], args[2])]);
+    this.response(requesterId, [await run(await this.getConfig(), args[1])]);
   }
 
   async response(requesterId: string, data: any): Promise<void> {
