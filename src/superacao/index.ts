@@ -114,5 +114,4 @@ export default class Superacao {
       Logger.info("END PROCESS PROTHEUS");
     }
   }
-
 }
