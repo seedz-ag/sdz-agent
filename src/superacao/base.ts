@@ -91,14 +91,10 @@ class Base {
         );
         if (credential) {
           this.setCurrentCredential(credential);
-          try {
-            await this.getTransport()
-              .setCredentials(credential.credential)
-              .authenticate();
-            return true;
-          } catch (err) {
-            console.log(err);
-          }
+          await this.getTransport()
+            .setCredentials(credential.credential)
+            .authenticate();
+          return true;
         }
       default:
         return false;
