@@ -1,5 +1,5 @@
-import { Client, Issuer, TokenSet } from "openid-client";
-
+import { Client, custom, Issuer, TokenSet } from "openid-client";
+import { Logger } from "sdz-agent-common";
 import moment from "moment";
 export class OpenIdClient {
   private clientId: string;
@@ -60,9 +60,9 @@ export class OpenIdClient {
   public async connect(): Promise<this> {
     try  
     {
-      // custom.setHttpOptionsDefaults({
-      //   timeout: 5000,
-      // });
+      custom.setHttpOptionsDefaults({
+        timeout: 30000,
+      });
       
       const issuer = await Issuer.discover(this.getIssuerURL());
       this.setOpenIdClient(
@@ -74,7 +74,9 @@ export class OpenIdClient {
     }
     catch(e:any)
     {
-      console.log(e.message)
+      Logger.info(`OPEN ID Connected - ${e.message.toUpperCase()}`)
+      process.exitCode = 1;
+      process.exit()
     }
     return this;
   }
