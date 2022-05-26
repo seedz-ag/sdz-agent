@@ -11,7 +11,7 @@ const job = async () => {
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
     await OpenIdClient.connect();
     await OpenIdClient.grant();
-    await ws.connect();
+    await ws.watchConnection();
   }
   if (!ws.isConnected()) {
     Logger.error("SDZ-AGENT-WS DISCONNECTED, ABORTING.");
