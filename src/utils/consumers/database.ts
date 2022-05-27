@@ -6,11 +6,30 @@ import csv from "../csv";
 import fs from "fs";
 import ftpTransport from "../transports/ftp";
 import httpTransport from "../transports/http";
+import moment from "moment";
 import ws from "../../websocket/client";
-
+import yargs from "yargs";
 let config: Config;
 
 const consumer = async () => {
+  const args = yargs(process.argv) as any;
+  switch (true) {
+    // case config.lastExtraction && args.sqlDays:
+    //   process.argv = process.argv.map((param) => {
+    //     if (param.includes("sqlDays"))
+    //       return `--sqlDays=${moment().diff(
+    //         moment(config.lastExtraction),
+    //         "days"
+    //       )}`;
+    //     return param;
+    //   });
+    //   break;
+    case config.lastExtraction && !args.argv.sqlDays:
+      process.argv.push(
+        `--sqlDays=${moment().diff(moment(config.lastExtraction), "days")}`
+      );
+      break;
+  }
   const database = new Database(config.database);
   const entities: Entity[] = config.scope;
 
@@ -27,8 +46,10 @@ const consumer = async () => {
     const limit = config.pageSize || 1000;
     let page = 0;
 
-    fs.writeFileSync(`${process.cwd()}/output/${entity.name}.sql`, sql as string
-    )
+    fs.writeFileSync(
+      `${process.cwd()}/output/${entity.name}.sql`,
+      sql as string
+    );
 
     let response = await respository.execute(sql, page, limit);
     const countResponse = await respository.count(sql);
