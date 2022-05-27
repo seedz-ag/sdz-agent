@@ -13,21 +13,28 @@ import moment from "moment";
 import OpenIdClient from "./open-id";
 import ws from "./websocket/client";
 
-const callstack = async (configName = 'default') => {
+const callstack = async (configName = "default") => {
   try {
     dotenv.config();
 
     //CLEAR OLD FILES
-    await glob("./output/*.csv").then((paths: string[]) => paths.forEach(fs.unlinkSync));
-    await glob("./output/*.json").then((paths: string[]) => paths.forEach(fs.unlinkSync));
-    await glob("./output/*.sql").then((paths: string[]) => paths.forEach(fs.unlinkSync));
-    
-    OpenIdClient.addSubscriber(httpTransport.getInstance().setToken.bind(httpTransport.getInstance()));
+    await glob("./output/*.csv").then((paths: string[]) =>
+      paths.forEach(fs.unlinkSync)
+    );
+    await glob("./output/*.json").then((paths: string[]) =>
+      paths.forEach(fs.unlinkSync)
+    );
+    await glob("./output/*.sql").then((paths: string[]) =>
+      paths.forEach(fs.unlinkSync)
+    );
+
+    OpenIdClient.addSubscriber(
+      httpTransport.getInstance().setToken.bind(httpTransport.getInstance())
+    );
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
     await OpenIdClient.connect();
     await OpenIdClient.grant();
-    if(!ws.isConnected())
-    {
+    if (!ws.isConnected()) {
       await ws.connect();
     }
     if (!ws.isConnected()) {
@@ -35,7 +42,8 @@ const callstack = async (configName = 'default') => {
       return false;
     }
 
-    let config: Config | Config[] | undefined = await ws.getConfig();
+    const configWs: Config | Config[] | undefined = await ws.getConfig();
+    let config: Config | Config[] | undefined = configWs;
     if (Array.isArray(config)) {
       config = config.find((config: Config) => config.name === configName);
       if (!config) {
@@ -44,16 +52,20 @@ const callstack = async (configName = 'default') => {
       }
     }
     csv.setConfig(config);
-    ftpTransport.setConfig(config)
+    ftpTransport.setConfig(config);
 
     let consumer;
 
     switch (config.connector) {
-      case 'database': consumer = databaseConsumer; break;
-      case 'http': consumer = httpConsumer; break;
+      case "database":
+        consumer = databaseConsumer;
+        break;
+      case "http":
+        consumer = httpConsumer;
+        break;
     }
     if (!consumer) {
-      throw new Error('CONNECTOR NOT FOUND');
+      throw new Error("CONNECTOR NOT FOUND");
     }
 
     consumer.setConfig(config);
@@ -63,10 +75,19 @@ const callstack = async (configName = 'default') => {
     consumer.setConfig(config);
     await consumer();
 
-    if(!(argv as any).sqlDays)
-    {
-      config.lastExtraction = moment().format('YYYY-MM-DD');
-      ws.saveConfig(config)
+    if (!(argv as any).sqlDays) {
+      config.lastExtraction = moment().format("YYYY-MM-DD");
+      if (Array.isArray(configWs)) {
+        configWs.map((c: Config) => {
+          if (c.name === configName) {
+            return config;
+          }
+          return c;
+        });
+        ws.saveConfig(configWs);
+      } else {
+        ws.saveConfig(config);
+      }
     }
 
     Logger.info("ENDING PROCESS");
