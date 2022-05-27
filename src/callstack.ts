@@ -16,14 +16,10 @@ const callstack = async (configName = 'default') => {
     dotenv.config();
 
     //CLEAR OLD FILES
-    await glob("./output/*.json").then((paths: string[]) => paths.forEach(fs.unlinkSync));
     await glob("./output/*.csv").then((paths: string[]) => paths.forEach(fs.unlinkSync));
-    await glob("./config/dto/*.json").then((paths: string[]) =>
-      paths.forEach(fs.unlinkSync)
-    );
-    await glob("./config/sql/*.sql").then((paths: string[]) =>
-      paths.forEach(fs.unlinkSync)
-      );
+    await glob("./output/*.json").then((paths: string[]) => paths.forEach(fs.unlinkSync));
+    await glob("./output/*.sql").then((paths: string[]) => paths.forEach(fs.unlinkSync));
+    
     OpenIdClient.addSubscriber(httpTransport.getInstance().setToken.bind(httpTransport.getInstance()));
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
     await OpenIdClient.connect();
