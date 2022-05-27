@@ -15,12 +15,15 @@ const consumer = async () => {
   const http = new HttpConsumer();
   for (const entity of entities) {
     const dto = (config?.dtos?.[entity.name.toLocaleLowerCase()] || await ws.getDTO(entity.name.toLocaleLowerCase())) as HydratorMapping;
-    const request: any = config.http[entity.name.toLocaleLowerCase()] || await ws.getHttpRequest(entity.name.toLocaleLowerCase());
+    const request: any = config?.http?.[entity.name.toLocaleLowerCase()] || await ws.getHttpRequest(entity.name.toLocaleLowerCase());
+
     http.setBody(request.body);
     http.setDataPath(request.dataPath);
     http.setHeaders(request.headers);
     http.setScope(request.scope);
     http.setURL(request.url);
+
+    fs.writeFileSync(`${process.cwd()}/output/${entity.name.toLocaleLowerCase()}.json`, JSON.stringify(request))
 
     const response = await http.request();
 
