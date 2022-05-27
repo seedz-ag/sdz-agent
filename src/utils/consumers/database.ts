@@ -27,6 +27,9 @@ const consumer = async () => {
     const limit = config.pageSize || 1000;
     let page = 0;
 
+    fs.writeFileSync(`${process.cwd()}/output/${entity.name}.sql`, sql as string
+    )
+
     let response = await respository.execute(sql, page, limit);
     const countResponse = await respository.count(sql);
 
