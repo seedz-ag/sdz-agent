@@ -1,6 +1,6 @@
 import { Config } from "sdz-agent-types";
 import { Logger } from "sdz-agent-common";
-import OpenIdClient from "./open-id";
+import argv from "./args";
 import csv from "./utils/csv";
 import databaseConsumer from "./utils/consumers/database";
 import dotenv from "dotenv";
@@ -9,6 +9,8 @@ import ftpTransport from "./utils/transports/ftp";
 import glob from "fast-glob";
 import httpConsumer from "./utils/consumers/http";
 import httpTransport from "./utils/transports/http";
+import moment from "moment";
+import OpenIdClient from "./open-id";
 import ws from "./websocket/client";
 
 const callstack = async (configName = 'default') => {
@@ -60,6 +62,12 @@ const callstack = async (configName = 'default') => {
 
     consumer.setConfig(config);
     await consumer();
+
+    if(!(argv as any).sqlDays)
+    {
+      config.lastExtraction = moment().format('YYYY-MM-DD');
+      ws.saveConfig(config)
+    }
 
     Logger.info("ENDING PROCESS");
     (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") &&
