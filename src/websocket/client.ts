@@ -76,7 +76,7 @@ export default new (class WebSocketClient {
           resolve(true)
         }
       } catch (e: any) {
-        this.logger.info(`WS Connection - ${e.message.toUpperCase()}`);
+        this.logger.info(`WS Connect - ${e.message.toUpperCase()}`);
         process.exitCode = 1;
         process.exit();
       } finally {
@@ -155,7 +155,7 @@ export default new (class WebSocketClient {
       }
       this.timer = setTimeout(this.watchConnection.bind(this), 60000);
     } catch (e: any) {
-      this.logger.info(`WS Connection - ${e.message.toUpperCase()}`);
+      this.logger.info(`WS WatchConnection - ${e.message.toUpperCase()}`);
     }
   }
 
