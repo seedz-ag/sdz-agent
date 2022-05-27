@@ -99,7 +99,9 @@ export class OpenIdClient {
     }
     catch(e:any)
     {
-      console.log(e.message)
+      Logger.info(`OPEN ID Grant - ${e.message.toUpperCase()}`)
+      process.exitCode = 1;
+      process.exit()
     }
     return this;
   }
