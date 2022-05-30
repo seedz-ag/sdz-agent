@@ -1,11 +1,14 @@
 import { readFileSync, unlinkSync, writeFileSync } from "fs";
+
 import Base from "./base";
 import CSV from "sdz-agent-data";
 import Database from "sdz-agent-database";
 import FTP from "sdz-agent-sftp";
 import { Hydrator } from "sdz-agent-common";
-import { TransportSeedz } from "sdz-agent-transport";
 import { Logger } from "sdz-agent-common";
+import { TransportSeedz } from "sdz-agent-transport";
+import argv from "../args";
+import moment from "moment";
 
 class Linx extends Base {
   private csv: CSV;
@@ -61,6 +64,12 @@ class Linx extends Base {
 
   async process() {
     try {
+      const dateLimit = moment(
+        (argv as any).dateLimit ||
+          moment().subtract(1, "month").format("YYYY-MM-DD"),
+        "YYYY-MM-DD"
+      );
+      Logger.info(`Data limite: `, dateLimit.format("YYYY-MM-DD"));
       const integrations = await this.getList();
       for (const integration of integrations) {
         Logger.info(`Buscando: `, integration);
@@ -87,15 +96,24 @@ class Linx extends Base {
                 break;
               }
               const data = this.groupBy(
-                csv.map((row) => {
-                  const dto: any = Hydrator(this.getDTO(), row);
-                  return {
-                    ...dto,
-                    cnpjOrigemDados: `${dto.cnpjOrigemDados}`
-                      .split(/(,|\.)/g)
-                      .shift(),
-                  };
-                }),
+                csv
+                  .filter(
+                    (row) =>
+                      Number(moment(row[10], "DD/MM/YYYY").format("X")) >=
+                      Number(dateLimit.format("X"))
+                  )
+                  .map((row) => {
+                    const dto: any = Hydrator(this.getDTO(), row);
+                    return {
+                      ...dto,
+                      cnpjOrigemDados: `${dto.cnpjOrigemDados}`
+                        .split(/(,|\.)/g)
+                        .shift(),
+                      cpfVendedor: `${dto.cpfVendedor}`
+                        .split(/(,|\.)/)
+                        .shift(),
+                    };
+                  }),
                 "cnpjOrigemDados"
               );
               for (const key of Object.keys(data)) {
@@ -107,13 +125,14 @@ class Linx extends Base {
                 }
               }
               writeFileSync(fileName, file.slice(size - 1).join("\n"));
-              await new Promise((resolve) => setTimeout(resolve, 150));
+              await new Promise((resolve) => setTimeout(resolve, 1000));
             } catch (e: any) {
               this.handleError(e);
             }
           }
           unlinkSync(fileName);
         }
+        await new Promise((resolve) => setTimeout(resolve, 120000));
       }
     } catch (e: any) {
       this.handleError(e);

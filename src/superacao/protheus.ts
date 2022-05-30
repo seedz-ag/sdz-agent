@@ -5,12 +5,16 @@ import Base from "./base";
 import Database from "sdz-agent-database";
 import Moment from "moment";
 import { TransportSeedz } from "sdz-agent-transport";
+import argv from "../args";
+import moment from "moment";
 
 Axios.defaults.timeout = 10000;
 
-
-
 class Protheus extends Base {
+  /**
+   * @var Moment
+   */
+  private dateLimit: Moment.Moment;
   /**
    * Create a new instance
    *
@@ -23,6 +27,11 @@ class Protheus extends Base {
     credentials: any[]
   ) {
     super(database, transport, credentials);
+    this.dateLimit = moment(
+      (argv as any).dateLimit ||
+        moment().subtract(1, "month").format("YYYY-MM-DD"),
+      "YYYY-MM-DD"
+    );
     this.setDTO(`${process.cwd()}/src/superacao/dto-protheus.json`);
   }
 
@@ -39,7 +48,7 @@ class Protheus extends Base {
       emp: integration["emp"],
       pass: integration["pass"],
       user: integration["user"],
-      inicial: Moment().subtract(process.env.SUPERACAO_PROTHEUS_DAYS_TO_PROCESS || 1, 'd').format("YYYYMMDD"),
+      inicial: this.dateLimit.format("YYYYMMDD"),
       final: Moment().format("YYYYMMDD"),
     };
     if (integration["filial"]) {
@@ -60,6 +69,7 @@ class Protheus extends Base {
 
   async process() {
     try {
+      Logger.info(`Data limite: `, this.dateLimit.format("YYYY-MM-DD"));
       const integrations = await this.getList();
       for (const integration of integrations) {
         const { user, pass, endpoint, ...info } = integration;
@@ -91,10 +101,7 @@ class Protheus extends Base {
           for (const key of Object.keys(data)) {
             if (await this.changeCredentials(key)) {
               Logger.info(`Enviando de ${key}: `, data[key].length);
-              await this.getTransport().send(
-                "notaFiscal",
-                data[key]
-              );
+              await this.getTransport().send("notaFiscal", data[key]);
             } else {
               Logger.error(`Credencial não encontrada para: `, key);
             }
