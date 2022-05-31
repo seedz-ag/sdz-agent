@@ -77,6 +77,12 @@ const { argv } = yargs(hideBin(process.argv))
       requiresArg: false,
       required: false,
     },
+    sqlDays: {
+      alias: "sqlDays",
+      description: "Execute sqlDays",
+      requiresArg: false,
+      required: false,
+    }
   })
   .usage("This is the SdzAgent command line program\n\nUsage: $0 [options]")
   .version("version", "1.0.0")
