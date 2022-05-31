@@ -35,43 +35,51 @@ export default new (class WebSocketClient {
 
   async executeQuery(...args: string[]) {
     const requesterId = args.pop() || "";
-    this.response(requesterId, [await executeQuery(await this.getConfig(), args[1] || "")]);
+    this.response(requesterId, [
+      await executeQuery(await this.getConfig(), args[1] || ""),
+    ]);
   }
 
-  connect() {
+  async connect() {
     this.connecting = true;
     return new Promise((resolve) => {
       try {
-        this.socket = io(`${process.env.WS_SERVER_URL}`, {
-          path: "/integration/agentws",
-          query: {
-            token: this.getToken(),
-          },
-          upgrade: false,
-          timeout: 5000,
-          transports: ["websocket"],
-        });
-        
-        this.socket.on("connect", () => {
-          this.connected = true;
-          // this.logger.info("Connected to SdzAgentWS");
-          if (!this.isListenning) {
-            this.listen();
-          }
-          resolve(true);
-        });
+        if (!this.socket) {
+          this.socket = io(`${process.env.WS_SERVER_URL}`, {
+            path: "/integration/agentws",
+            query: {
+              token: this.getToken(),
+            },
+            upgrade: false,
+            timeout: 30000,
+            transports: ["websocket"],
+          });
 
-        this.socket.on("disconnect", () => {
-          this.connected = false;
-          this.logger.info("Disconnected to SdzAgentWS");
-        });
-      }
-      catch(e:any)
-      {
-        console.log(e.message)
-      }
-      finally
-      {
+          this.socket.on("connect", () => {
+            this.connected = true;
+            this.logger.info("CONNECTED TO SdzAgentWS");
+            if (!this.isListenning) {
+              this.listen();
+            }
+            resolve(true);
+          });
+
+          this.socket.on("disconnect", () => {
+            this.connected = false;
+            this.logger.info("DISCONNECTED TO SdzAgentWS");
+            resolve(true);
+          });
+        }
+        else
+        {
+          this.socket.connect();
+          resolve(true)
+        }
+      } catch (e: any) {
+        this.logger.info(`WS Connect - ${e.message.toUpperCase()}`);
+        process.exitCode = 1;
+        process.exit();
+      } finally {
         this.connecting = false;
       }
     });
@@ -138,19 +146,16 @@ export default new (class WebSocketClient {
     }
   }
   async watchConnection() {
-    try{
-
-      //console.log("Watching connection...");
-      clearTimeout(this.timer);
-      if(!this.isConnected() && !this.connecting) {
-        //console.log('trying to connect...')
+    clearTimeout(this.timer);
+    try {
+      // Logger.info("Watching connection...");
+      if (!this.isConnected() && !this.connecting) {
+        // this.logger.info("trying to connect...");
         await this.connect();
       }
-      this.timer = setTimeout(this.watchConnection.bind(this), 60000) 
-    }
-    catch(e:any)
-    {
-      console.log(e.message)
+      this.timer = setTimeout(this.watchConnection.bind(this), 60000);
+    } catch (e: any) {
+      this.logger.info(`WS WatchConnection - ${e.message.toUpperCase()}`);
     }
   }
 
@@ -162,5 +167,4 @@ export default new (class WebSocketClient {
     this.token = token;
     return this;
   }
-
 })();
