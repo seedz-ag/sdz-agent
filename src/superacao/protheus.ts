@@ -58,12 +58,18 @@ class Protheus extends Base {
   }
 
   async getList(): Promise<any[]> {
+    const groupName: string | undefined = (argv as any).groupName;
     return await this.getDatabase().getConnector().execute(`
-      SELECT i.grupo, i.endpoint, i.user, i.pass, id.filial, i.id, i.emp
-      FROM jd_setup_integration i
-      LEFT JOIN jd_setup_integration_detail id ON id.jd_setup_integration = i.id
-      WHERE i.tipo = 'totvs' AND i.email = 'liberado'
-      ORDER BY grupo ASC
+      SELECT
+        i.grupo, i.endpoint, i.user, i.pass, id.filial, i.id, i.emp
+      FROM
+        jd_setup_integration i
+      LEFT JOIN
+        jd_setup_integration_detail id ON id.jd_setup_integration = i.id
+      WHERE
+        i.tipo = 'totvs' AND i.email = 'liberado' ${groupName ? ` AND i.grupo = '${groupName}'` : ''}
+      ORDER BY
+        grupo ASC
     `);
   }
 
