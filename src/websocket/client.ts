@@ -132,7 +132,7 @@ export default new (class WebSocketClient {
     this.getSocket().emit("sdz-response", requesterId, ...data);
   }
 
-  async saveConfig(config: Config): Promise<void> {
+  async saveConfig(config: Config | Config[]): Promise<void> {
     await saveConfig(this.getSocket(), config);
   }
 
