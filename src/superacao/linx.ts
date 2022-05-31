@@ -1,4 +1,4 @@
-import { readFileSync, unlinkSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
 
 import Base from "./base";
 import CSV from "sdz-agent-data";
@@ -55,10 +55,20 @@ class Linx extends Base {
    */
 
   async getList(): Promise<any[]> {
+    const groupName: string | undefined = (argv as any).groupName;
     return await this.getDatabase()
       .getConnector()
       .execute(
-        "SELECT i.grupo, i.id, d.filial FROM   jd_setup_integration i JOIN jd_setup_integration_detail d ON d.jd_setup_integration = i.id WHERE  i.tipo = 'lynx'"
+        `
+        SELECT
+          i.grupo, i.id, d.filial
+        FROM
+          jd_setup_integration i
+        JOIN
+          jd_setup_integration_detail d ON d.jd_setup_integration = i.id
+        WHERE
+          i.tipo = 'lynx' ${groupName ? ` AND i.grupo = '${groupName}'` : ''}
+        `
       );
   }
 
@@ -74,12 +84,18 @@ class Linx extends Base {
       for (const integration of integrations) {
         Logger.info(`Buscando: `, integration);
         const fileName = `${integration["filial"]}.csv`;
-        if (
+
+        try {
           await this.getFTP().getFile(
             `${integration["grupo"]}/${fileName}`,
             fileName
-          )
-        ) {
+          );
+        } catch (err) {
+          Logger.error('[FTP] Arquivo não encontrado: ', `${integration["grupo"]}/${fileName}`);
+          continue;
+        }
+
+        if (existsSync(fileName)) {
           let page = 0;
           while (true) {
             try {
@@ -99,7 +115,7 @@ class Linx extends Base {
                 csv
                   .filter(
                     (row) =>
-                      Number(moment(row[10], "DD/MM/YYYY").format("X")) >=
+                      Number(moment(row[10] || '01/01/1900', "DD/MM/YYYY").format("X")) >= 
                       Number(dateLimit.format("X"))
                   )
                   .map((row) => {
