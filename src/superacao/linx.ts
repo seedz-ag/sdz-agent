@@ -148,7 +148,7 @@ class Linx extends Base {
           }
           unlinkSync(fileName);
         }
-        await new Promise((resolve) => setTimeout(resolve, 120000));
+        await new Promise((resolve) => setTimeout(resolve, 30000));
       }
     } catch (e: any) {
       this.handleError(e);
