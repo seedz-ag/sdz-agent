@@ -67,7 +67,8 @@ export default new (class WebSocketClient {
           this.socket.on("disconnect", () => {
             this.connected = false;
             this.logger.info("DISCONNECTED TO SdzAgentWS");
-            resolve(true);
+            process.exitCode = 0;
+            process.exit();
           });
         }
         else
@@ -148,9 +149,9 @@ export default new (class WebSocketClient {
   async watchConnection() {
     clearTimeout(this.timer);
     try {
-       this.logger.info("Watching Connection...");
+       //this.logger.info("Watching Connection...");
       if (!this.isConnected() && !this.connecting) {
-       this.logger.info("Trying to Connect...");
+       //this.logger.info("Trying to Connect...");
         await this.connect();
       }
       this.timer = setTimeout(this.watchConnection.bind(this), 60000);
