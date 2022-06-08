@@ -1,12 +1,7 @@
 import chalk from "chalk";
 import { Logger } from "sdz-agent-common";
 import dotenv from "dotenv";
-import {
-  Config,
-  ConfigAuthFTP,
-  ERPs,
-  ConfigDatabaseInterface,
-} from "sdz-agent-types";
+import { Config, ConfigAuthFTP, ERPs } from "sdz-agent-types";
 
 import connector from "./connector";
 import database from "./database";
@@ -81,7 +76,6 @@ const log = (msg: string) => console.log(chalk.green(msg));
       answers.scope = scopeAnswers.scope;
 
       const connectorType = await connector();
-      let dtoType: string | undefined = "";
 
       answers.connector = connectorType;
 
@@ -90,9 +84,6 @@ const log = (msg: string) => console.log(chalk.green(msg));
       switch (connectorType) {
         case "database": {
           answers.database = await database(config?.database, answers.erp);
-          if (answers.database?.driver) {
-            dtoType = answers.database.driver;
-          }
         }
       }
 
@@ -100,16 +91,14 @@ const log = (msg: string) => console.log(chalk.green(msg));
 
       if (Array.isArray(configWs)) {
         ws.saveConfig(
-          configWs.map(
-            (config: any) => {
-              if (config.name === name) {
-                return {
-                  ...config,
-                  ...answers,
-                };
-              }
+          configWs.map((config: any) => {
+            if (config.name === name) {
+              return {
+                ...config,
+                ...answers,
+              };
             }
-          )
+          })
         );
       } else {
         config = {
