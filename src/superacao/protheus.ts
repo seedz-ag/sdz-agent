@@ -79,59 +79,62 @@ class Protheus extends Base {
       Logger.info(`Data limite: `, this.dateLimit.format("YYYY-MM-DD"));
       const integrations = await this.getList();
       for (const integration of integrations) {
-        if (this.getSkipList().includes(integration["grupo"])) {
-          Logger.info(
-            `Skip: ${integration["grupo"]}${
-              integration["filial"] ? ` - filial ${integration["filial"]}` : ""
-            }`
-          );
-          continue;
-        }
-        const { user, pass, endpoint, ...info } = integration;
-        Logger.info(`Buscando: `, { ...info, endpoint });
-        const headers = this.composeHeaders(integration);
-        const days = moment().diff(this.dateLimit, "days");
-        const start = this.dateLimit;
-        for (let i = 0; i <= days; i++) {
-          headers.inicial = start.format('YYYYMMDD');
-          headers.final = start.add(1, 'd').format('YYYYMMDD');
-          const response =
-            (
-              await Axios.request({
-                headers,
-                maxContentLength: 100000000,
-                maxBodyLength: 1000000000,
-                timeout: 120000,
-                url: integration["endpoint"],
-              }).catch((e) => {
-                Logger.error(e.message, e.config.url);
-                return { data: [] };
-              })
-            ).data?.Vendas || [];
-          if (response.length) {
-            Logger.info(`Total a ser processado: `, response.length);
-            const data = this.groupBy(
-              response.map((row: any) =>
-                Hydrator(this.getDTO(), {
-                  ...row,
-                  Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
-                })
-              ),
-              "cnpjOrigemDados"
+        try {
+          if (this.getSkipList().includes(integration["grupo"])) {
+            Logger.info(
+              `Skip: ${integration["grupo"]}${
+                integration["filial"] ? ` - filial ${integration["filial"]}` : ""
+              }`
             );
-            for (const key of Object.keys(data)) {
-              if (await this.changeCredentials(key)) {
-                Logger.info(`Enviando de ${key}: `, data[key].length);
-                await this.getTransport().send("notaFiscal", data[key]);
-              } else {
-                Logger.error(`Credencial não encontrada para: `, key);
+            continue;
+          }
+          const { user, pass, endpoint, ...info } = integration;
+          Logger.info(`Buscando: `, { ...info, endpoint });
+          const headers = this.composeHeaders(integration);
+          const days = moment().diff(this.dateLimit, "days");
+          const start = this.dateLimit;
+          for (let i = 0; i <= days; i++) {
+            headers.inicial = start.format('YYYYMMDD');
+            headers.final = start.add(1, 'd').format('YYYYMMDD');
+            const response =
+              (
+                await Axios.request({
+                  headers,
+                  maxContentLength: 100000000,
+                  maxBodyLength: 1000000000,
+                  timeout: 120000,
+                  url: integration["endpoint"],
+                }).catch((e) => {
+                  throw e;
+                })
+              ).data?.Vendas || [];
+            if (response.length) {
+              Logger.info(`Total a ser processado: `, response.length);
+              const data = this.groupBy(
+                response.map((row: any) =>
+                  Hydrator(this.getDTO(), {
+                    ...row,
+                    Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
+                  })
+                ),
+                "cnpjOrigemDados"
+              );
+              for (const key of Object.keys(data)) {
+                if (await this.changeCredentials(key)) {
+                  Logger.info(`Enviando de ${key}: `, data[key].length);
+                  await this.getTransport().send("notaFiscal", data[key]);
+                } else {
+                  Logger.error(`Credencial não encontrada para: `, key);
+                }
               }
             }
           }
+        } catch (e: any) {
+          Logger.error(e.message, e.config.url);
         }
       }
     } catch (e) {
-      console.log(e);
+      Logger.error(e);
     }
   }
 }
