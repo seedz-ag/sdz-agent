@@ -97,13 +97,28 @@ export default async (config: Config["scope"] | undefined): Promise<any> => {
     },
   ];
 
+  config?.forEach((scope) => {
+    if (
+      !choices.find(
+        (choice) =>
+          scope.file === choice.file &&
+          scope.name === choice.name &&
+          scope.entity === choice.entity
+      )
+    ) {
+      choices.push(scope);
+    }
+  });
+
   const prompt1 = new MultiSelect({
     name: "response",
     message: `What is your desired ${chalk.green(
       chalk.bold("SCOPE")
     )} entities?`,
     initial:
-      (config && config.length > 0 && config.map(({ name }: {[key:string]: string}) => name)) ||
+      (config &&
+        config.length > 0 &&
+        config.map(({ name }: { [key: string]: string }) => name)) ||
       choices.map((item) => item.name),
     choices: choices,
     sort: true,
@@ -113,6 +128,10 @@ export default async (config: Config["scope"] | undefined): Promise<any> => {
   return {
     scope: choices
       .filter((item) => scope.includes(item.name))
-      .map((item) => ({ file: item.file, name: item.name, entity: item.entity })),
+      .map((item) => ({
+        file: item.file,
+        name: item.name,
+        entity: item.entity,
+      })),
   };
 };

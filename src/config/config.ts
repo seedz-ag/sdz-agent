@@ -1,116 +1,127 @@
 import chalk from "chalk";
-import fs from "fs";
+import { Logger } from "sdz-agent-common";
+import dotenv from "dotenv";
+import {
+  Config,
+  ConfigAuthFTP,
+  ERPs,
+  ConfigDatabaseInterface,
+} from "sdz-agent-types";
 
 import connector from "./connector";
 import database from "./database";
-import api from "./api";
 import erp from "./erp";
 import ftp from "./ftp";
 import legacy from "./legacy";
 import schedule from "./schedule";
 import scope from "./scope";
-import stubs from "./stubs";
-import { Config, ConfigAuthOpenId } from "sdz-agent-types";
-import auth from "./auth";
-import dotenv from "dotenv";
+import ws from "../websocket/client";
+import configSelector from "./config-selector";
+import configName from "./config-name";
+import OpenIdClient from "../open-id";
+
+interface IAnswers {
+  name: string;
+  legacy: boolean;
+  async: boolean;
+  fileSize: number;
+  pageSize: number;
+  ftp: Partial<ConfigAuthFTP>;
+  scope: Config["scope"];
+  connector: any;
+  erp: ERPs;
+  database: { driver?: string };
+  schedule: { [key: string]: string | number };
+}
 
 dotenv.config();
 
 const log = (msg: string) => console.log(chalk.green(msg));
 
-!(async () => {
+(async () => {
   try {
     await (async () => {
       log("SEEDZ INTEGRATION AGENT");
       log("YOU WILL WALK THROUGH SOME CONFIGURATIONS STEPS");
       log("");
 
-      const answers: any = {};
-      // let OpenIdClient;
-      // let WSClient;
+      const answers: Partial<IAnswers> = {};
+
+      OpenIdClient.addSubscriber(ws.setToken.bind(ws));
+      await OpenIdClient.connect();
+      await OpenIdClient.grant();
+
+      if (!ws.isConnected()) {
+        await ws.connect();
+      }
+      if (!ws.isConnected()) {
+        Logger.error("SDZ-AGENT-WS DISCONNECTED, ABORTING.");
+        return false;
+      }
+
+      const configWs: Config | Config[] | undefined = await ws.getConfig();
+      let config: any = configWs;
+      let name: string;
+
+      if (Array.isArray(config)) {
+        name = await configSelector(config);
+        config = config.find((config: Config) => config.name === name);
+        answers.name = await configName(config?.name);
+      } else {
+        answers.name = await configName(config?.name);
+      }
 
       answers.legacy = await legacy(false);
-
-      // if (!answers.legacy) {
-      //   const env: Partial<ConfigAuthOpenId> = { ...(await auth()) };
-      //   const envKeys = Object.keys(env);
-      //   if (envKeys.length) {
-      //     let newENV = fs.readFileSync(`${process.cwd()}/.env`).toString();
-      //     for (const key of envKeys) {
-      //       process.env[key] = env[key as keyof ConfigAuthOpenId];
-      //       console.log(process.env[key]);
-      //       newENV = newENV.replace(
-      //         new RegExp(`${key}.*`, "gi"),
-      //         `${key}=${env[key as keyof ConfigAuthOpenId]}`
-      //       );
-      //     }
-      //     fs.writeFileSync(`${process.cwd()}/.env`, newENV);
-
-      //     console.log(env);
-      //   }
-
-      //   OpenIdClient = require("../open-id").default;
-      //   WSClient = require("../websocket/client").default;
-      //   await OpenIdClient.connect();
-      //   OpenIdClient.addSubscriber(WSClient.setToken.bind(WSClient));
-      //   await OpenIdClient.grant();
-      //   await WSClient.connect();
-      // }
-
-      // const config = await (answers.legacy
-      //   ? require("../../config").default
-      //   : WSClient.getConfig());
-
-      const config = await require("../../config").default;
-
-      answers.async = false; //await exportMode(config?.async);
-
+      answers.async = false;
       answers.fileSize = 5;
-
       answers.pageSize = 1000;
-
       answers.ftp = await ftp(config?.ftp);
 
       const scopeAnswers = await scope(config?.scope);
       answers.scope = scopeAnswers.scope;
 
       const connectorType = await connector();
-      let dtoType = "";
+      let dtoType: string | undefined = "";
 
       answers.connector = connectorType;
 
-      answers.erp = await erp(config.erp);
+      answers.erp = await erp(config?.erp);
 
       switch (connectorType) {
         case "database": {
           answers.database = await database(config?.database, answers.erp);
-          dtoType = answers.database.driver;
+          if (answers.database?.driver) {
+            dtoType = answers.database.driver;
+          }
         }
       }
 
       answers.schedule = await schedule(config?.schedule);
 
-      stubs(
-        answers.erp,
-        connectorType,
-        dtoType,
-        scopeAnswers.scope.map((item: any) => item.name)
-      );
-
-     // if (answers.legacy) {
-        const dir = process.env.CONFIGDIR || `${process.cwd()}/config`;
-        fs.writeFileSync(
-          `${dir}/config.json`,
-          JSON.stringify(answers, null, "\t")
+      if (Array.isArray(configWs)) {
+        ws.saveConfig(
+          configWs.map(
+            (config: any) => {
+              if (config.name === name) {
+                return {
+                  ...config,
+                  ...answers,
+                };
+              }
+            }
+          )
         );
-      // } else {
-      //   WSClient.saveConfig(answers);
-      // }
-
+      } else {
+        config = {
+          ...config,
+          ...answers,
+        };
+        ws.saveConfig([config]);
+      }
       log("");
       log("CONGRATULATIONS, CONFIGURATION COMPLETED!");
     })();
-  } catch(e) {
-    console.log(e)
+  } catch (e) {
+    console.log(e);
   }
 })();
