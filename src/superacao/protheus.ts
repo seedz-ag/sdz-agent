@@ -24,9 +24,10 @@ class Protheus extends Base {
   constructor(
     database: Database,
     transport: TransportSeedz,
-    credentials: any[]
+    credentials: any[],
+    skipList: string[]
   ) {
-    super(database, transport, credentials);
+    super(database, transport, credentials, skipList);
     this.dateLimit = moment(
       (argv as any).dateLimit ||
         moment().subtract(1, "month").format("YYYY-MM-DD"),
@@ -78,8 +79,12 @@ class Protheus extends Base {
       Logger.info(`Data limite: `, this.dateLimit.format("YYYY-MM-DD"));
       const integrations = await this.getList();
       for (const integration of integrations) {
+        if (this.getSkipList().includes(integration["grupo"])) {
+          Logger.info(`Skip: ${integration["grupo"]}${integration["filial"] ? ` - filial ${integration["filial"]}` : ''}`);
+          continue;
+        }
         const { user, pass, endpoint, ...info } = integration;
-        Logger.info(`Buscando: `, info);
+        Logger.info(`Buscando: `, { ...info, endpoint });
         const headers = this.composeHeaders(integration);
         const response =
           (
@@ -89,7 +94,7 @@ class Protheus extends Base {
               maxBodyLength: 1000000000,
               url: integration["endpoint"],
             }).catch((e) => {
-              // console.log('Error', e);
+              Logger.error( e.message, e.config.url);
               return { data: [] };
             })
           ).data?.Vendas || [];

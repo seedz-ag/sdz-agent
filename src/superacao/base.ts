@@ -8,16 +8,19 @@ class Base {
   private currentCredential: any;
   private database: Database;
   private dto: HydratorMapping;
+  private skipList: string[];
   private transport: TransportSeedz;
 
   constructor(
     database: Database,
     transport: TransportSeedz,
-    credentials: any[]
+    credentials: any[],
+    skipList: string[]
   ) {
     if (new.target === Base) {
       throw new TypeError("Cannot construct Abstract instances directly");
     }
+    this.setSkipList(skipList);
     this.setCredentials(credentials);
     this.setDatabase(database);
     this.setTransport(transport);
@@ -40,6 +43,10 @@ class Base {
 
   getDTO(): HydratorMapping {
     return this.dto;
+  }
+
+  getSkipList(): string[] {
+    return this.skipList;
   }
 
   getTransport(): TransportSeedz {
@@ -66,6 +73,11 @@ class Base {
 
   setDTO(json: string): this {
     this.dto = this.readFile(json);
+    return this;
+  }
+
+  setSkipList(skipList: string[]): this {
+    this.skipList = skipList;
     return this;
   }
 

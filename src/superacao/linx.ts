@@ -19,9 +19,10 @@ class Linx extends Base {
     csv: CSV,
     ftp: FTP,
     transport: TransportSeedz,
-    credentials: any[]
+    credentials: any[],
+    skipList: string[]
   ) {
-    super(database, transport, credentials);
+    super(database, transport, credentials, skipList);
     this.setCSV(csv);
     this.setDTO(`${process.cwd()}/src/superacao/dto-linx.json`);
     this.setFTP(ftp);
@@ -82,6 +83,10 @@ class Linx extends Base {
       Logger.info(`Data limite: `, dateLimit.format("YYYY-MM-DD"));
       const integrations = await this.getList();
       for (const integration of integrations) {
+        if (this.getSkipList().includes(integration.grupo)) {
+          Logger.warning(`Skip: ${integration.grupo}`);
+          continue;
+        }
         Logger.info(`Buscando: `, integration);
         const fileName = `${integration["filial"]}.csv`;
 
