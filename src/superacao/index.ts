@@ -18,6 +18,7 @@ export default class Superacao {
   private credentials: any[];
   private ftp: FTP;
   private mongo: MongoClient;
+  private skipList: string[];
   private transport: TransportSeedz;
 
   constructor(config: Partial<Config>) {
@@ -25,6 +26,10 @@ export default class Superacao {
   }
 
   configure(config: Partial<Config>): this {
+    this.skipList =
+      process.env.SUPERACAO_SKIP_LIST?.split(/,|;/).map((group) =>
+        group.trim()
+      ) || [];
     if (config.apiUrl && config.database && config.ftp) {
       this.config = config;
       this.csv = new CSV(config.legacy as boolean);
@@ -98,7 +103,8 @@ export default class Superacao {
         this.csv,
         this.ftp,
         this.transport,
-        this.credentials
+        this.credentials,
+        this.skipList
       );
       await linx.process();
       Logger.info("END PROCESS LINX");
@@ -108,7 +114,8 @@ export default class Superacao {
       const protheus = new Protheus(
         this.connection,
         this.transport,
-        this.credentials
+        this.credentials,
+        this.skipList
       );
       await protheus.process();
       Logger.info("END PROCESS PROTHEUS");
