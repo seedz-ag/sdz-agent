@@ -49,8 +49,6 @@ class Protheus extends Base {
       emp: integration["emp"],
       pass: integration["pass"],
       user: integration["user"],
-      inicial: this.dateLimit.format("YYYYMMDD"),
-      final: Moment().format("YYYYMMDD"),
     };
     if (integration["filial"]) {
       headers.fil = integration["filial"];
@@ -68,7 +66,9 @@ class Protheus extends Base {
       LEFT JOIN
         jd_setup_integration_detail id ON id.jd_setup_integration = i.id
       WHERE
-        i.tipo = 'totvs' AND i.email = 'liberado' ${groupName ? ` AND i.grupo = '${groupName}'` : ''}
+        i.tipo = 'totvs' AND i.email = 'liberado' ${
+          groupName ? ` AND i.grupo = '${groupName}'` : ""
+        }
       ORDER BY
         grupo ASC
     `);
@@ -80,41 +80,52 @@ class Protheus extends Base {
       const integrations = await this.getList();
       for (const integration of integrations) {
         if (this.getSkipList().includes(integration["grupo"])) {
-          Logger.info(`Skip: ${integration["grupo"]}${integration["filial"] ? ` - filial ${integration["filial"]}` : ''}`);
+          Logger.info(
+            `Skip: ${integration["grupo"]}${
+              integration["filial"] ? ` - filial ${integration["filial"]}` : ""
+            }`
+          );
           continue;
         }
         const { user, pass, endpoint, ...info } = integration;
         Logger.info(`Buscando: `, { ...info, endpoint });
         const headers = this.composeHeaders(integration);
-        const response =
-          (
-            await Axios.request({
-              headers,
-              maxContentLength: 100000000,
-              maxBodyLength: 1000000000,
-              url: integration["endpoint"],
-            }).catch((e) => {
-              Logger.error( e.message, e.config.url);
-              return { data: [] };
-            })
-          ).data?.Vendas || [];
-        if (response.length) {
-          Logger.info(`Total a ser processado: `, response.length);
-          const data = this.groupBy(
-            response.map((row: any) =>
-              Hydrator(this.getDTO(), {
-                ...row,
-                Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
+        const days = moment().diff(this.dateLimit, "days");
+        const start = this.dateLimit;
+        for (let i = 0; i <= days; i++) {
+          headers.inicial = start.format('YYYYMMDD');
+          headers.final = start.add(1, 'd').format('YYYYMMDD');
+          const response =
+            (
+              await Axios.request({
+                headers,
+                maxContentLength: 100000000,
+                maxBodyLength: 1000000000,
+                timeout: 120000,
+                url: integration["endpoint"],
+              }).catch((e) => {
+                Logger.error(e.message, e.config.url);
+                return { data: [] };
               })
-            ),
-            "cnpjOrigemDados"
-          );
-          for (const key of Object.keys(data)) {
-            if (await this.changeCredentials(key)) {
-              Logger.info(`Enviando de ${key}: `, data[key].length);
-              await this.getTransport().send("notaFiscal", data[key]);
-            } else {
-              Logger.error(`Credencial não encontrada para: `, key);
+            ).data?.Vendas || [];
+          if (response.length) {
+            Logger.info(`Total a ser processado: `, response.length);
+            const data = this.groupBy(
+              response.map((row: any) =>
+                Hydrator(this.getDTO(), {
+                  ...row,
+                  Data: Moment(row["Data"], "DD/MM/YYYY").format("YYYY-MM-DD"),
+                })
+              ),
+              "cnpjOrigemDados"
+            );
+            for (const key of Object.keys(data)) {
+              if (await this.changeCredentials(key)) {
+                Logger.info(`Enviando de ${key}: `, data[key].length);
+                await this.getTransport().send("notaFiscal", data[key]);
+              } else {
+                Logger.error(`Credencial não encontrada para: `, key);
+              }
             }
           }
         }
