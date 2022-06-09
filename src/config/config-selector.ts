@@ -3,7 +3,7 @@ import { Config } from "sdz-agent-types";
 
 const { Select } = require("enquirer");
 
-export default async (configuration: Config[] | undefined): Promise<any> => {
+export default async (configuration: Config | Config[] | undefined): Promise<any> => {
   let name;
   let choices: string[] = [];
   if (configuration && Array.isArray(configuration) && configuration.length) {

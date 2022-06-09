@@ -23,7 +23,7 @@ interface IAnswers {
   pageSize: number;
   ftp: Partial<ConfigAuthFTP>;
   scope: Config["scope"];
-  connector: any;
+  connector: string;
   erp: ERPs;
   database: { driver?: string };
   schedule: { [key: string]: string | number };
@@ -42,6 +42,10 @@ const log = (msg: string) => console.log(chalk.green(msg));
 
       const answers: Partial<IAnswers> = {};
 
+      let config: Config | undefined;
+      let configsArray: Config[];
+      let name: string;
+
       OpenIdClient.addSubscriber(ws.setToken.bind(ws));
       await OpenIdClient.connect();
       await OpenIdClient.grant();
@@ -54,34 +58,28 @@ const log = (msg: string) => console.log(chalk.green(msg));
         return false;
       }
 
-      const configWs: Config | Config[] | undefined = await ws.getConfig();
-      let config: any = configWs;
-      let name: string;
+      const configWs: Config | Config[] = await ws.getConfig();
 
-      if (Array.isArray(config)) {
-        name = await configSelector(config);
-        config = config.find((config: Config) => config.name === name);
-        answers.name = await configName(config?.name);
+      if (Array.isArray(configWs)) {
+        configsArray = configWs;
       } else {
-        answers.name = await configName(config?.name);
+        configsArray = [configWs];
       }
 
-      answers.legacy = await legacy(false);
+      name = await configSelector(configWs);
+      config = configsArray.find((config: Config) => config.name === name);
+
+      answers.name = await configName(config?.name);
       answers.async = false;
       answers.fileSize = 5;
       answers.pageSize = 1000;
+      answers.legacy = await legacy(false);
       answers.ftp = await ftp(config?.ftp);
-
-      const scopeAnswers = await scope(config?.scope);
-      answers.scope = scopeAnswers.scope;
-
-      const connectorType = await connector();
-
-      answers.connector = connectorType;
-
+      answers.scope = (await scope(config?.scope)).scope;
+      answers.connector = await connector();
       answers.erp = await erp(config?.erp);
 
-      switch (connectorType) {
+      switch (answers.connector) {
         case "database": {
           answers.database = await database(config?.database, answers.erp);
         }
@@ -89,24 +87,20 @@ const log = (msg: string) => console.log(chalk.green(msg));
 
       answers.schedule = await schedule(config?.schedule);
 
-      if (Array.isArray(configWs)) {
-        ws.saveConfig(
-          configWs.map((config: any) => {
-            if (config.name === name) {
-              return {
-                ...config,
-                ...answers,
-              };
-            }
-          })
-        );
-      } else {
-        config = {
-          ...config,
-          ...answers,
-        };
-        ws.saveConfig([config]);
-      }
+      const newConfig = configsArray.map(
+        (config: Config | undefined, index: Number) => {
+          if (config?.name === name || index === configsArray.length - 1) {
+            return {
+              ...config,
+              ...answers,
+            };
+          }
+          return config;
+        }
+      ) as Config[];
+
+      ws.saveConfig(newConfig);
+
       log("");
       log("CONGRATULATIONS, CONFIGURATION COMPLETED!");
     })();
