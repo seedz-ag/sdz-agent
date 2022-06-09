@@ -14,6 +14,7 @@ import ws from "../websocket/client";
 import configSelector from "./config-selector";
 import configName from "./config-name";
 import OpenIdClient from "../open-id";
+import isNewConfig from "./is-new-config";
 
 interface IAnswers {
   name: string;
@@ -45,6 +46,8 @@ const log = (msg: string) => console.log(chalk.green(msg));
       let config: Config | undefined;
       let configsArray: Config[];
       let name: string;
+      let newConfig: Config[];
+      let addConfig: boolean = false;
 
       OpenIdClient.addSubscriber(ws.setToken.bind(ws));
       await OpenIdClient.connect();
@@ -59,17 +62,23 @@ const log = (msg: string) => console.log(chalk.green(msg));
       }
 
       const configWs: Config | Config[] = await ws.getConfig();
-
+      
       if (Array.isArray(configWs)) {
         configsArray = configWs;
       } else {
         configsArray = [configWs];
       }
 
-      name = await configSelector(configWs);
-      config = configsArray.find((config: Config) => config.name === name);
+      if (Object.values(configsArray[0]).length !== 0) {
+        addConfig = await isNewConfig();     
+      }
 
-      answers.name = await configName(config?.name);
+      name = addConfig ? "default" : await configSelector(configWs);
+
+      config = configsArray.find((config: Config) => config.name === name);
+      const configNameList = configsArray.map((config: Config) => config.name);
+   
+      answers.name = await configName(config?.name, configNameList, addConfig);
       answers.async = false;
       answers.fileSize = 5;
       answers.pageSize = 1000;
@@ -86,18 +95,22 @@ const log = (msg: string) => console.log(chalk.green(msg));
       }
 
       answers.schedule = await schedule(config?.schedule);
-
-      const newConfig = configsArray.map(
-        (config: Config | undefined, index: Number) => {
-          if (config?.name === name || index === configsArray.length - 1) {
-            return {
-              ...config,
-              ...answers,
-            };
+      
+      if (addConfig) {
+        newConfig = [...configsArray, { ...answers }] as Config[];
+      } else {
+        newConfig = configsArray.map(
+          (config: Config | undefined, index: Number) => {
+            if (config?.name === name || index === configsArray.length - 1) {
+              return {
+                ...config,
+                ...answers,
+              };
+            }
+            return config;
           }
-          return config;
-        }
-      ) as Config[];
+        ) as Config[];
+      }
 
       ws.saveConfig(newConfig);
 
