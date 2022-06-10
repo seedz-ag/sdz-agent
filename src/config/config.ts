@@ -62,7 +62,7 @@ const log = (msg: string) => console.log(chalk.green(msg));
       }
 
       const configWs: Config | Config[] = await ws.getConfig();
-      
+
       if (Array.isArray(configWs)) {
         configsArray = configWs;
       } else {
@@ -70,14 +70,14 @@ const log = (msg: string) => console.log(chalk.green(msg));
       }
 
       if (Object.values(configsArray[0]).length !== 0) {
-        addConfig = await isNewConfig();     
+        addConfig = await isNewConfig();
       }
 
       name = addConfig ? "default" : await configSelector(configWs);
 
       config = configsArray.find((config: Config) => config.name === name);
       const configNameList = configsArray.map((config: Config) => config.name);
-   
+
       answers.name = await configName(config?.name, configNameList, addConfig);
       answers.async = false;
       answers.fileSize = 5;
@@ -95,7 +95,7 @@ const log = (msg: string) => console.log(chalk.green(msg));
       }
 
       answers.schedule = await schedule(config?.schedule);
-      
+
       if (addConfig) {
         newConfig = [...configsArray, { ...answers }] as Config[];
       } else {

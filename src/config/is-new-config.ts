@@ -7,6 +7,7 @@ export default async () => {
     name: "response",
     message: `New ${chalk.green(chalk.bold("config"))}?`,
   });
+
   const response = await question.run();
 
   return response === "yes" ? true : false;
