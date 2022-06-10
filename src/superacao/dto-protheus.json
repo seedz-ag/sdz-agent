@@ -11,6 +11,6 @@
   "categoria": "Categoria",
   "descricaoItem": "Produto",
   "skuItem": "Produto",
-  "notaFiscalOrigem": "NumerNota",
+  "numero": "NumerNota",
   "id": "uuid"
 }
