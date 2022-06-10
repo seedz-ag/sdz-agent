@@ -20,10 +20,12 @@ export default async (
         return "This config name already exists";
       }
 
-      configNameList.push(value);
+      if (!addConfig && value !== name) {
+        configNameList.push(value);
+      }
 
       if (
-        configNameList.filter((configName) => configName === name).length > 1
+        configNameList.filter((configName) => configName === value).length > 1
       ) {
         return "This config name already exists in another config";
       }
