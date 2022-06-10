@@ -100,7 +100,7 @@ const log = (msg: string) => console.log(chalk.green(msg));
         newConfig = [...configsArray, { ...answers }] as Config[];
       } else {
         newConfig = configsArray.map(
-          (config: Config | undefined, index: Number) => {
+          (config: Config | undefined) => {
             if (
               config?.name === name ||
               Object.values(configsArray[0]).length === 0
