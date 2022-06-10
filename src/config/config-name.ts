@@ -19,6 +19,15 @@ export default async (
       if (addConfig && configNameList.includes(value)) {
         return "This config name already exists";
       }
+
+      configNameList.push(value);
+
+      if (
+        configNameList.filter((configsName) => configsName === name).length > 1
+      ) {
+        return "This config name already exists in another config";
+      }
+
       return true;
     },
   });
