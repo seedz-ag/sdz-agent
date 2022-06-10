@@ -23,7 +23,7 @@ export default async (
       configNameList.push(value);
 
       if (
-        configNameList.filter((configsName) => configsName === name).length > 1
+        configNameList.filter((configName) => configName === name).length > 1
       ) {
         return "This config name already exists in another config";
       }
