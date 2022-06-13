@@ -12,7 +12,7 @@ const validate = (value: string): string | boolean  => {
 }
 
 export default async (config: Config["schedule"] | undefined) => {
-  const answers: { [key: string]: any } = {};
+  const answers: { [key: string]: string | number } = {};
   answers.hour = await enquirer
     .prompt<QuestionResponse>({
       type: "input",
