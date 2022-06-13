@@ -73,7 +73,7 @@ const log = (msg: string) => console.log(chalk.green(msg));
         addConfig = await isNewConfig();
       }
 
-      name = addConfig ? "default" : await configSelector(configWs);
+      name = addConfig ? "default" : await configSelector(configsArray);
 
       config = configsArray.find((config: Config) => config.name === name);
       const configNameList = configsArray.map((config: Config) => config.name);
