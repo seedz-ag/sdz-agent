@@ -12,7 +12,7 @@ export default async (socket: Socket): Promise<Config | Config[]> => {
       if (fs.existsSync(file)) {
         fs.unlinkSync(file);
       }
-      fs.writeFileSync(file, JSON.stringify(response, null, "\t"));
+      // fs.writeFileSync(file, JSON.stringify(response, null, "\t"));
       resolve(response);
     });
   });
