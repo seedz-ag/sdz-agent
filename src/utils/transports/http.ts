@@ -5,7 +5,7 @@ let instance: TransportSeedz;
 
 const transport = (entity: string, payload: any) => {
   writeJson(entity, payload);
-  return instance.send(entity, payload);
+  return transport.getInstance().send(entity, payload);
 };
 
 transport.getInstance = () => {
