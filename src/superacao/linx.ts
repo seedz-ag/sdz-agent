@@ -96,7 +96,7 @@ class Linx extends Base {
             fileName
           );
         } catch (err) {
-          Logger.error('[FTP] Arquivo não encontrado: ', `${integration["grupo"]}/${fileName}`);
+          Logger.warning('[FTP] Arquivo não encontrado: ', `${integration["grupo"]}/${fileName}`);
           continue;
         }
 
@@ -151,6 +151,10 @@ class Linx extends Base {
               this.handleError(e);
             }
           }
+          this.getFTP().renameFile(
+            `${integration["grupo"]}/${fileName}`,
+            `${integration["grupo"]}/processado/${moment().format('YYYY-MM-DD')}-${fileName}`
+          );
           unlinkSync(fileName);
         }
         await new Promise((resolve) => setTimeout(resolve, 30000));
