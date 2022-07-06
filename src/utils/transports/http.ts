@@ -27,12 +27,12 @@ transport.getInstance = () => {
       condicaoPagamento: "payment-conditions",
       fornecedor: "suppliers",
       contasPagar: "account-payables",
-      contasReceber:"account-receivables",
+      contasReceber: "account-receivables",
       vendedor: "sellers",
       funcionario: "employees",
       cliente: "customers",
       endereco: "addresses",
-      propriedade: "properties"
+      propriedade: "properties",
     });
   }
   return instance;
