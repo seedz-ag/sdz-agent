@@ -21,6 +21,18 @@ transport.getInstance = () => {
       item: "items",
       itemGrupo: "groups",
       itemBranding: "brands",
+      pedidoItem: "orders-items",
+      pedido: "orders",
+      especiePagamento: "payment-species",
+      condicaoPagamento: "payment-conditions",
+      fornecedor: "suppliers",
+      contasPagar: "account-payables",
+      contasReceber:"account-receivables",
+      vendedor: "sellers",
+      funcionario: "employees",
+      cliente: "customers",
+      endereco: "addresses",
+      propriedade: "properties"
     });
   }
   return instance;
