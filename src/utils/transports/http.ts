@@ -21,7 +21,7 @@ transport.getInstance = () => {
       item: "items",
       itemGrupo: "groups",
       itemBranding: "brands",
-      pedidoItem: "orders-items",
+      pedidoItem: "order-items",
       pedido: "orders",
       especiePagamento: "payment-species",
       condicaoPagamento: "payment-conditions",
