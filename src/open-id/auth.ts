@@ -1,6 +1,9 @@
-import { Client, custom, Issuer, TokenSet } from "openid-client";
+import { Client, Issuer, TokenSet, custom } from "openid-client";
+
 import { Logger } from "sdz-agent-common";
+import killProcess from "utils/kill-process";
 import moment from "moment";
+
 export class OpenIdClient {
   private clientId: string;
   private clientSecret: string;
@@ -75,8 +78,7 @@ export class OpenIdClient {
     catch(e:any)
     {
       Logger.info(`OPEN ID Connected - ${e.message.toUpperCase()}`)
-      process.exitCode = 1;
-      process.exit()
+      await killProcess()
     }
     return this;
   }
@@ -100,8 +102,7 @@ export class OpenIdClient {
     catch(e:any)
     {
       Logger.info(`OPEN ID Grant - ${e.message.toUpperCase()}`)
-      process.exitCode = 1;
-      process.exit()
+      killProcess();
     }
     return this;
   }
