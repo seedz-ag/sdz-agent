@@ -1,7 +1,7 @@
 import { Client, Issuer, TokenSet, custom } from "openid-client";
 
 import { Logger } from "sdz-agent-common";
-import killProcess from "utils/kill-process";
+import killProcess from "../utils/kill-process";
 import moment from "moment";
 
 export class OpenIdClient {
