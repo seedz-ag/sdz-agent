@@ -4,7 +4,7 @@ import { Config } from "sdz-agent-types";
 import ProcessScope from "./process-scope";
 import ProcessScopeDatabase from "./process-scope-database";
 import ProcessScopeFTP from "./process-scope-ftp";
-import killProcess from "utils/kill-process";
+import killProcess from "../utils/kill-process";
 import processScopeApi from "./process-scope-api";
 
 export default class Caller {

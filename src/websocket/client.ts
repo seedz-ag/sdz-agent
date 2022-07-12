@@ -9,7 +9,7 @@ import getConfig from "./get-config";
 import getDTO from "./get-dto";
 import getHttpRequest from "./get-http-request";
 import getSQL from "./get-sql";
-import killProcess from "utils/kill-process";
+import killProcess from "../utils/kill-process";
 import run from "./run";
 import saveConfig from "./save-config";
 import update from "./update";
