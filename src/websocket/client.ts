@@ -65,11 +65,10 @@ export default new (class WebSocketClient {
             resolve(true);
           });
 
-          this.socket.on("disconnect", () => {
+          this.socket.on("disconnect", async () => {
             this.connected = false;
             this.logger.info("DISCONNECTED TO SdzAgentWS");
-            process.exitCode = 0;
-            process.exit();
+            await killProcess();
           });
         }
         else
