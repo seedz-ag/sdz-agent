@@ -9,6 +9,7 @@ import getConfig from "./get-config";
 import getDTO from "./get-dto";
 import getHttpRequest from "./get-http-request";
 import getSQL from "./get-sql";
+import killProcess from "../utils/kill-process";
 import run from "./run";
 import saveConfig from "./save-config";
 import update from "./update";
@@ -42,7 +43,7 @@ export default new (class WebSocketClient {
 
   async connect() {
     this.connecting = true;
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
       try {
         if (!this.socket) {
           this.socket = io(`${process.env.WS_SERVER_URL}`, {
@@ -64,11 +65,10 @@ export default new (class WebSocketClient {
             resolve(true);
           });
 
-          this.socket.on("disconnect", () => {
+          this.socket.on("disconnect", async () => {
             this.connected = false;
             this.logger.info("DISCONNECTED TO SdzAgentWS");
-            process.exitCode = 0;
-            process.exit();
+            await killProcess();
           });
         }
         else
@@ -78,8 +78,7 @@ export default new (class WebSocketClient {
         }
       } catch (e: any) {
         this.logger.error(`WS Connect - ${e.message.toUpperCase()}`);
-        process.exitCode = 1;
-        process.exit();
+        await killProcess();
       } finally {
         this.connecting = false;
       }

@@ -1,8 +1,10 @@
-import { Config } from "sdz-agent-types";
 import { Logger, Validator } from "sdz-agent-common";
+
+import { Config } from "sdz-agent-types";
 import ProcessScope from "./process-scope";
 import ProcessScopeDatabase from "./process-scope-database";
 import ProcessScopeFTP from "./process-scope-ftp";
+import killProcess from "../utils/kill-process";
 import processScopeApi from "./process-scope-api";
 
 export default class Caller {
@@ -53,7 +55,7 @@ export default class Caller {
     //     this.validate();
     await this.scope.process();
     this.logger.info("END PROCESS");
-    process.exit(1);
+    await killProcess();
   }
 
   validate(): void {
