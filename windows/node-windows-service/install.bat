@@ -18,8 +18,8 @@ ECHO INSTALLING SERVICE %SERVICENAME%
 %NSSM% set %SERVICENAME% AppStopMethodWindow 0
 %NSSM% set %SERVICENAME% AppStopMethodThreads 0
 %NSSM% set %SERVICENAME% AppThrottle 0
-%NSSM% set %SERVICENAME% AppExit Default Ignore
-%NSSM% set %SERVICENAME% AppRestartDelay 0
+%NSSM% set %SERVICENAME% AppExit Default Restart
+%NSSM% set %SERVICENAME% AppRestartDelay 60000
 %NSSM% set %SERVICENAME% AppStdout %CD%\windows\logs\%SERVICENAME%.log
 %NSSM% set %SERVICENAME% AppStderr %CD%\windows\logs\%SERVICENAME%.log
 %NSSM% set %SERVICENAME% AppStdoutCreationDisposition 4

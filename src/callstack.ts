@@ -1,5 +1,6 @@
 import { Config } from "sdz-agent-types";
 import { Logger } from "sdz-agent-common";
+import OpenIdClient from "./open-id";
 import argv from "./args";
 import csv from "./utils/csv";
 import databaseConsumer from "./utils/consumers/database";
@@ -9,8 +10,8 @@ import ftpTransport from "./utils/transports/ftp";
 import glob from "fast-glob";
 import httpConsumer from "./utils/consumers/http";
 import httpTransport from "./utils/transports/http";
+import killProcess from "utils/kill-process";
 import moment from "moment";
-import OpenIdClient from "./open-id";
 import ws from "./websocket/client";
 
 const callstack = async (configName = "default") => {
@@ -92,7 +93,7 @@ const callstack = async (configName = "default") => {
 
     Logger.info("ENDING PROCESS");
     (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") &&
-      process.exit(0);
+    killProcess(0);
   } catch (e: any) {
     Logger.error(e.message);
   }
