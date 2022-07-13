@@ -10,7 +10,7 @@ import ftpTransport from "./utils/transports/ftp";
 import glob from "fast-glob";
 import httpConsumer from "./utils/consumers/http";
 import httpTransport from "./utils/transports/http";
-import killProcess from "utils/kill-process";
+import killProcess from "./utils/kill-process";
 import moment from "moment";
 import ws from "./websocket/client";
 
