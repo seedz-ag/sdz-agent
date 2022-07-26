@@ -72,6 +72,7 @@ const callstack = async (configName = "default") => {
     consumer.setConfig(config);
 
     Logger.info("STARTING INTEGRATION CLIENT SEEDZ.");
+    Logger.info(`EXECUTE CONFIG ${configName.toLocaleUpperCase()}`);
 
     consumer.setConfig(config);
     await consumer();
