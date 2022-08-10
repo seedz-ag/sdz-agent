@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/seedz-ag/sdz-agent/compare/v1.1.1...v2.0.0) (2022-08-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* teste8
+
+### Features
+
+* teste8 ([a1df985](https://github.com/seedz-ag/sdz-agent/commit/a1df985d4f2c32609cc54b35855db85b92e8c053))
+
 ### [1.1.1](https://github.com/seedz-ag/sdz-agent/compare/v1.1.0...v1.1.1) (2022-08-09)
 
 
