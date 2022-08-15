@@ -30,8 +30,8 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.0.3",
-    "@commitlint/config-conventional": "^17.0.3",
+    "@commitlint/cli": "8.2.0",
+    "@commitlint/config-conventional": "8.2.0",
     "@types/cli-progress": "^3.11.0",
     "@types/node": "^18.0.4",
     "@types/openid-client": "^3.7.0",
@@ -39,7 +39,7 @@
     "@types/socket.io-client": "^3.0.0",
     "@types/websocket": "^1.0.5",
     "express": "^4.18.1",
-    "husky": "^8.0.0",
+    "husky": "7.0.4",
     "socket.io": "^4.5.1",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.1",
