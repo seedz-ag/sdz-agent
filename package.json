@@ -4,6 +4,8 @@
   "license": "Apache",
   "dependencies": {
     "@types/node-schedule": "^2.1.0",
+    "applicationinsights": "^2.3.3",
+    "applicationinsights-native-metrics": "^0.0.7",
     "axios": "^0.27.2",
     "child_process": "^1.0.2",
     "chokidar": "^3.5.3",
