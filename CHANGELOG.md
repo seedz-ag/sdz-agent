@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/seedz-ag/sdz-agent/compare/v1.1.2...v1.4.0) (2022-08-29)
+
+
+### Features
+
+* add appInfights config ([60fb8cb](https://github.com/seedz-ag/sdz-agent/commit/60fb8cbd57882221e86c3a1dc01d2ea4860976c2))
+* add applicationinsights dependencies in package.json ([5599a04](https://github.com/seedz-ag/sdz-agent/commit/5599a04b8dbcb726dda997e717a0135a2caefc32))
+* implements appinsights ([f2fe7f0](https://github.com/seedz-ag/sdz-agent/commit/f2fe7f0b199a9a73f9af451d3f1118bc06ca69b6))
+* yarn lock ([4141ffc](https://github.com/seedz-ag/sdz-agent/commit/4141ffc280b24febde17600ff72c436fb3349b9e))
+
+
+### Bug Fixes
+
+* version lint commit and husky node 12.22.10 ([d29cf07](https://github.com/seedz-ag/sdz-agent/commit/d29cf07f9aa00ca752326d14c0644d373ec5c9f8))
+
 ## 1.3.0 (2022-08-29)
 
 
