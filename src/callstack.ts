@@ -13,10 +13,18 @@ import httpTransport from "./utils/transports/http";
 import killProcess from "./utils/kill-process";
 import moment from "moment";
 import ws from "./websocket/client";
+import appInsights from "./config/appInsights";
 
 const callstack = async (configName = "default") => {
   try {
     dotenv.config();
+
+    if (
+      process.env.APPLICATION_INSIGHTS_CONNECTION_STRING &&
+      process.env.APPLICATION_INSIGHTS_TAG_NAME
+    ) {
+      await appInsights.init();
+    }
 
     //CLEAR OLD FILES
     await glob("./output/*.csv").then((paths: string[]) =>
@@ -94,7 +102,7 @@ const callstack = async (configName = "default") => {
 
     Logger.info("ENDING PROCESS");
     (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") &&
-    killProcess(0);
+      killProcess(0);
   } catch (e: any) {
     Logger.error(e.message);
   }
