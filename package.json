@@ -2,6 +2,7 @@
   "name": "sdz-agent",
   "version": "1.4.0",
   "license": "Apache",
+  "private": true,
   "dependencies": {
     "@types/node-schedule": "^2.1.0",
     "applicationinsights": "^2.3.3",
