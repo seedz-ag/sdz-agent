@@ -1,6 +1,6 @@
 {
-  "branches": ["master"],
-  "baseBranch": "master",
+  "branches": ["master-fake"],
+  "baseBranch": "master-fake",
   "tagFormat": "${version}",
   "preset": "conventionalcommits",
   "plugins": [
