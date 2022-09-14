@@ -1,3 +1,14 @@
+## [1.5.0](https://github.com/seedz-ag/sdz-agent/compare/1.4.0...1.5.0) (2022-09-14)
+
+
+### Features
+
+* add .releaserc with semantic-release settings ([508210a](https://github.com/seedz-ag/sdz-agent/commit/508210ab586ef83d8bafbfb1d14acdc8a1d0d2fa))
+* add private field in package.json ([a188a82](https://github.com/seedz-ag/sdz-agent/commit/a188a824519cf74e00023620759e46aa168bc6aa))
+* add release.yml ([296bef5](https://github.com/seedz-ag/sdz-agent/commit/296bef5af947fd7c1764e0abd8b9531412a379a7))
+* install semantic-release and its dependencies ([7fd51f1](https://github.com/seedz-ag/sdz-agent/commit/7fd51f12884beeefcc692f398841038d9e3ee7ae))
+* remove standard-version dependencie ([13e010b](https://github.com/seedz-ag/sdz-agent/commit/13e010bf545f1eb5cd2aaa562731d8d694d78859))
+
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
