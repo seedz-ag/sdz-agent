@@ -20,41 +20,32 @@
     "moment": "^2.29.4",
     "node-schedule": "^2.1.0",
     "openid-client": "^5.1.8",
-    "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git",
+    "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git#bugfix/#24905",
     "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
-    "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git",
-    "sdz-agent-database-mysql": "https://github.com/seedz-ag/sdz-agent-database-mysql.git",
-    "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git",
-    "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport.git",
-    "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git",
+    "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git#bugfix/#24905",
+    "sdz-agent-database-mysql": "https://github.com/seedz-ag/sdz-agent-database-mysql.git#bugfix/#24905",
+    "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git#bugfix/#24905",
+    "sdz-agent-transport": "https://github.com/seedz-ag/sdz-agent-transport.git#bugfix/#24905",
+    "sdz-agent-types": "https://github.com/seedz-ag/sdz-agent-types.git#bugfix/#24905",
     "socket.io-client": "^4.5.1",
     "string-interpolation": "^1.2.5",
     "websocket": "^1.0.34",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "8.2.0",
-    "@commitlint/config-conventional": "8.2.0",
-    "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/git": "^10.0.1",
     "@types/cli-progress": "^3.11.0",
     "@types/node": "^18.0.4",
     "@types/openid-client": "^3.7.0",
     "@types/shelljs": "^0.8.11",
     "@types/socket.io-client": "^3.0.0",
     "@types/websocket": "^1.0.5",
-    "conventional-changelog-conventionalcommits": "^5.0.0",
     "express": "^4.18.1",
-    "husky": "7.0.4",
-    "semantic-release": "^19.0.5",
     "socket.io": "^4.5.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
   },
   "scripts": {
     "scheduler": "npm run sheduler:start",
-    "scheduler:start": "ts-node src/schedule.ts",
-    "prepare": "husky install",
-    "release": "standard-version"
+    "scheduler:start": "ts-node src/schedule.ts"
   }
 }
