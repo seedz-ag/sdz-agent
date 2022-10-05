@@ -21,7 +21,7 @@
     "node-schedule": "^2.1.0",
     "openid-client": "^5.1.8",
     "sdz-agent-common": "https://github.com/seedz-ag/sdz-agent-common.git#bugfix/#24905",
-    "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git",
+    "sdz-agent-data": "https://github.com/seedz-ag/sdz-agent-data.git#bugfix/#24905",
     "sdz-agent-database": "https://github.com/seedz-ag/sdz-agent-database.git#bugfix/#24905",
     "sdz-agent-database-mysql": "https://github.com/seedz-ag/sdz-agent-database-mysql.git#bugfix/#24905",
     "sdz-agent-sftp": "https://github.com/seedz-ag/sdz-agent-sftp.git#bugfix/#24905",
