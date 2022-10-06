@@ -13,18 +13,18 @@ import httpTransport from "./utils/transports/http";
 import killProcess from "./utils/kill-process";
 import moment from "moment";
 import ws from "./websocket/client";
-import appInsights from "./config/appInsights";
+// import appInsights from "./config/appInsights";
 
 const callstack = async (configName = "default") => {
   try {
     dotenv.config();
 
-    if (
-      process.env.APPLICATION_INSIGHTS_CONNECTION_STRING &&
-      process.env.APPLICATION_INSIGHTS_TAG_NAME
-    ) {
-      await appInsights.init();
-    }
+    // if (
+    //   process.env.APPLICATION_INSIGHTS_CONNECTION_STRING &&
+    //   process.env.APPLICATION_INSIGHTS_TAG_NAME
+    // ) {
+    //   await appInsights.init();
+    // }
 
     //CLEAR OLD FILES
     await glob("./output/*.csv").then((paths: string[]) =>
