@@ -58,37 +58,26 @@ export default class Superacao {
       .toArray();
 
     for (const credential of credentials) {
-      console.log(credential);
       const list = await this.ftp.list(credential.tenantId);
-      const fileName = "process.csv";
 
-      for (const file of list) {
-        if (!file.endsWith(".csv")) continue;
+      for (const { name: fileName } of list) {
+        if (!fileName.endsWith(".csv")) continue;
         try {
-          await this.ftp.getFile(file, fileName);
+          await this.ftp.getFile(`${credential.tenantId}/${fileName}`, fileName);
         } catch (err) {
-          Logger.warning("[FTP] Arquivo não encontrado: ", file);
+          Logger.warning("[FTP] Arquivo não encontrado: ", fileName);
           continue;
         }
-        const csv = (await this.csv.read(fileName, {
-          quote: "``",
-          delimiter: ";",
-          headers: false,
-          skipRows: 0,
-          maxRows: 10000,
-        } as any)) as string[];
-
         if (existsSync(fileName)) {
           let page = 0;
           while (true) {
             try {
-              const file = readFileSync(fileName).toString().split("\n");
               const size = 10000;
               const csv = (await this.csv.read(fileName, {
                 quote: "``",
                 delimiter: ";",
-                headers: false,
-                skipRows: 0,
+                headers: true,
+                skipRows: size * page,
                 maxRows: size,
               } as any)) as any[];
               if (!csv.length) {
@@ -97,19 +86,23 @@ export default class Superacao {
               const data = csv.map((row) => Hydrator(this.dto, row));
               await this.changeCredentials(credential);
               Logger.info(`Enviando: `, data.length);
-              await this.transport.send("notaFiscal", data);
-              writeFileSync(fileName, file.slice(size - 1).join("\n"));
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+              // await this.transport.send("notaFiscal", data);
+              // await new Promise((resolve) => setTimeout(resolve, 1000));
+              page++
             } catch (e: any) {
               this.handleError(e);
             }
           }
+          try {
           this.ftp.renameFile(
-            `${file}`,
+            `${credential.tenantId}/${fileName}`,
             `${credential.tenantId}/processado/${moment().format(
               "YYYY-MM-DD"
             )}-${fileName}`
           );
+          } catch(e) {
+            console.error(e)
+          }
           unlinkSync(fileName);
         }
       }
