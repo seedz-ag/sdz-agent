@@ -1,0 +1,11 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": false,
+  "eslint.workingDirectories": ["./"],
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": false,
+    "source.fixAll.format": true,
+    "source.fixAll.eslint": true
+  },
+  "typescript.preferences.importModuleSpecifier": "project-relative"
+}

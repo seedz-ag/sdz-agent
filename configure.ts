@@ -1,9 +1,11 @@
 import "colors";
 
+import ora from "ora";
 import { prompt } from "enquirer";
-import { writeFileSync } from  'fs'
+import { writeFileSync } from  'fs';
 
 (async () => {
+  let spinner;
   const { clientId } = await prompt({
     type: "password",
     name: "clientId",
@@ -21,9 +23,38 @@ import { writeFileSync } from  'fs'
     message: `What is your ${"Domain Address?".bold}`.green,
   }) as any;
 
-  const dotEnv = `CLIENT_ID='${clientId}'
-CLIENT_SECRET='${clientId}'
-DOMAIN='${domain}'
+  spinner = ora("CREATING .ENV").start()
+  const dotEnv = [
+    `CLIENT_ID='${clientId}`,
+    `CLIENT_SECRET='${clientId}'`,
+    `DOMAIN='${domain}'`
+  ]
+  writeFileSync('.env', dotEnv.join("\r"))
+  spinner.stop()
+
+  // CONNECT AT WEBSOCKET
+  const config: any = {};
+  const imports: string[] = [];
+
+  spinner = ora("CREATING CALLSTACK").start()
+  switch(config?.database?.driver) {
+    // INSTALL DB LIB
+    // PUSH TO IMPORTS
+    case 'mysql': 
+      imports.push("import { Database } from  'DBLIB'")
+      break;
+  }
+
+  // CREATE CALLSTACK
+  const callstack = `import dotenv from 'dotenv'
+  ${imports.join("\r")}
+  const consumer = 
+  const transport =
+
+  while (let data = await consumer()) {
+    await transport(data)
+  }
 `
-  writeFileSync('.env', dotEnv)
+  writeFileSync('index.ts', callstack)
+  spinner.stop()
 })();
