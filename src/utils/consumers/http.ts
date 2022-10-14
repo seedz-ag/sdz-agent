@@ -1,6 +1,6 @@
 import { Config, Entity, HydratorMapping } from "sdz-agent-types";
 
-import { Factory } from "sdz-agent-common";
+import { Hydrator } from "sdz-agent-common";
 import HttpConsumer from "../../http/client";
 import csv from "../csv";
 import fs from "fs";
@@ -30,7 +30,7 @@ const consumer = async () => {
 
     const response = await http.request();
 
-    const data = (Array.isArray(response) ? response : [response]).map((row: any) => Factory(dto, row));
+    const data = (Array.isArray(response) ? response : [response]).map((row: any) => Hydrator(dto, row));
 
     if (!config.legacy) {
       await httpTransport(entity.entity, data);
