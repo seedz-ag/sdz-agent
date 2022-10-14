@@ -10,6 +10,7 @@ import ws from "../../websocket/client";
 
 let config: Config;
 
+
 const consumer = async () => {
   const entities: Entity[] = config.scope;
   const http = new HttpConsumer();
@@ -20,9 +21,11 @@ const consumer = async () => {
     http.setBody(request.body);
     http.setDataPath(request.dataPath);
     http.setHeaders(request.headers);
+    http.setMethod(request.method);
     http.setScope(request.scope);
     http.setURL(request.url);
-
+    http.setInsecure(request.insecure);
+    
     fs.writeFileSync(`${process.cwd()}/output/${entity.name.toLocaleLowerCase()}.json`, JSON.stringify(request))
 
     const response = await http.request();
