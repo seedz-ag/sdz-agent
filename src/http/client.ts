@@ -94,11 +94,11 @@ export default class HttpClient {
   }
 
   // FUNCTIONS
-  public compile() {
-    return interpolation.parse(this.body, this.scope);
+  public compile(...args : any) {
+    return interpolation.parse(...args);
   }
 
-  public request() {
+  public async request() {
     let axiosInstance = axios.create();
     if(this.getInsecure()) {
       axiosInstance = axios.create({
@@ -108,11 +108,11 @@ export default class HttpClient {
       })
     }
 
-    return axiosInstance({
-      data: this.compile(),
+    return  axiosInstance({
+      data: this.compile(this.body, this.scope),
       headers: this.getHeaders(),
       method: this.getMethod(),
-      url: this.getURL(),
+      url: this.compile(this.url),
     })
       .then(({ data }) => {
         if (get(this.getHeaders(), "Accept") === "application/xml") {
