@@ -1,6 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import axios from "axios";
 import { get } from "dot-wild";
+import https from "https"
 import interpolation from "./interpolation";
 
 export default class HttpClient {
@@ -8,13 +9,17 @@ export default class HttpClient {
   private body?: string;
   private dataPath?: string;
   private headers: any;
+  private method: string = "POST"
   private scope?: any;
+  private insecure?: boolean;
   private url?: string;
 
-  public constructor(url?: string, headers?: any, scope?: any, body?: string) {
+  public constructor(url?: string, headers?: any, method?: string, scope?: any, insecure?: boolean, body?: string) {
     this.setBody(body);
     this.setHeaders(headers);
+    this.setMethod(method);
     this.setScope(scope);
+    this.setInsecure(insecure);
     this.setURL(url);
   }
 
@@ -55,11 +60,28 @@ export default class HttpClient {
     return this;
   }
 
+  public getMethod(): string {
+    return this.method;
+  }
+  public setMethod(method?: string): this {
+    this.method = method || "POST";
+    return this;
+  }
+
   public getScope(): any {
     return this.scope;
   }
   public setScope(scope: any): this {
     this.scope = scope;
+    return this;
+  }
+
+  public getInsecure(): boolean {
+    return !!this.insecure;
+  }
+
+  public setInsecure(insecure?: boolean): this {
+    this.insecure = insecure || false;
     return this;
   }
 
@@ -77,10 +99,19 @@ export default class HttpClient {
   }
 
   public request() {
-    return axios({
+    let axiosInstance = axios.create();
+    if(this.getInsecure()) {
+      axiosInstance = axios.create({
+        httpsAgent: new https.Agent({  
+          rejectUnauthorized: false
+        })
+      })
+    }
+
+    return axiosInstance({
       data: this.compile(),
       headers: this.getHeaders(),
-      method: "post",
+      method: this.getMethod(),
       url: this.getURL(),
     })
       .then(({ data }) => {
@@ -97,16 +128,30 @@ export default class HttpClient {
       });
   }
 
-  public searchDataPath(data: any, path: string) {
-    const dataPath = path.split(".");
-    let currentData = data;
-    for (let i = 0; i < dataPath.length; i++) {
-      currentData = Object.keys(currentData).reduce((acc: any, key: string) => {
-        acc[key.toUpperCase()] = currentData[key];
-        return acc;
-      }, {});
-      currentData = get(currentData, dataPath[i].toUpperCase());
+   searchDataPath = (data: any, path: string) => {
+    try {
+      const dataPath = path.split(".");
+      let key;
+      let currentData = data;
+      while ((key = dataPath.shift())) {
+        currentData = get(
+          currentData,
+          key === "*" ? `${key}.${dataPath.shift()}` : key
+        );
+      }
+      if (currentData) {
+        currentData = (
+          Array.isArray(currentData) ? currentData : [currentData]
+        ).map((currentData) =>
+          Object.keys(currentData).reduce((acc: any, key: string) => {
+            acc[key.toUpperCase()] = currentData[key];
+            return acc;
+          }, {})
+        );
+      }
+      return currentData;
+    } catch (e) {
+      console.log(e);
     }
-    return currentData;
-  }
+  };
 }
