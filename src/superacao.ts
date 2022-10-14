@@ -5,11 +5,7 @@ require("dotenv").config();
 
 (async () => {
   const superacao = new Superacao({
-    api: {
-      password: `${process.env.SUPERACAO_API_PASSWORD}`,
-      url: `${process.env.SUPERACAO_API_URL}`,
-      username: `${process.env.SUPERACAO_API_USERNAME}`,
-    },
+    apiUrl: `${process.env.SUPERACAO_API_URL}`,
     database: {
       driver: `${process.env.SUPERACAO_DATABASE_DRIVER}` as DatabaseDrivers,
       host: `${process.env.SUPERACAO_DATABASE_HOST}`,
@@ -25,6 +21,8 @@ require("dotenv").config();
       port: `${process.env.SUPERACAO_FTP_PORT}` as unknown as number,
       username: `${process.env.SUPERACAO_FTP_USERNAME}`,
     },
+    mongoUrl: `${process.env.SUPERACAO_MONGO_URL}`,
+    issuerUrl: `${process.env.ISSUER_URL}`,
     legacy: "TRUE" === `${`${process.env.SUPERACAO_LEGACY}`.toUpperCase()}`,
   });
 
