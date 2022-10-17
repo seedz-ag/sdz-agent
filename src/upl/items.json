@@ -1,0 +1,11 @@
+{
+  "cnpjOrigemDados": "cnpj",
+  "id|Concat(cnpj)": "codigoProduto",
+  "descricao": "descricaoProduto",
+  "codigoFabricante": "cnpjFabricante",
+  "branding": "nomeFabricante",
+  "um": "unidadeMedida",
+  "valorUnidadeMedida": "fatorConversaoQuantidade",
+  "grupo": "grupo",
+  "barras": "GTIN"
+}

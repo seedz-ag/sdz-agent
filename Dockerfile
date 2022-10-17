@@ -1,21 +1,25 @@
-FROM node:14 as base
+FROM ubuntu:22.04 as base
+
+ARG NODE_VERSION=16
+
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    apt-get install -y curl && \
+    curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - && \
+    apt-get install -y nodejs \
+      git \
+      cmake
 
 WORKDIR /home/node/app
 
-RUN apt-get update && apt-get -y install cmake
-
 COPY package*.json ./
+
+RUN npm install -g npm@8.19.2
 
 RUN npm i -g ts-node
 
 RUN npm i
 
-RUN cp /home/node/app/node_modules/informixdb/installer/onedb-odbc-driver/lib/cli/* /lib
-RUN cp /home/node/app/node_modules/informixdb/installer/onedb-odbc-driver/lib/esql/* /lib
-
-ENV LD_LIBRARY_PATH=/home/node/app/node_modules/sdz-agent-database-oracle/instantclient_21_3/ 
-ENV INFORMIXDIR=/home/node/app/node_modules/informixdb/installer/onedb-odbc-driver
-
 COPY . .
 
-CMD [ "/usr/local/bin/ts-node", "./src/superacao.ts", "--types=all" ]
+CMD [ "/usr/bin/npm", "run", "start" ]

@@ -1,0 +1,13 @@
+{
+  "cnpjOrigemDados": "cnpjFilial",
+  "issueAt|Concat(anoEstoque)|Concat(mesEstoque)": "",
+  "idItem": "codigoProduto",
+  "descricao": "descricaoProduto",
+  "um": "UnidadeMedida",
+  "quantidadeTotal": "EstoqueTotal",
+  "quantidadeDisponivel": "EstoqueDisponivel",
+  "quantidadeReservada": "EstoqueReservado",
+  "quantidadeTransito": "EstoqueEmTrasito",
+  "loteItem": "loteProduto",
+  "validadeProduto": "validadeLote"
+}

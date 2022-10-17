@@ -1,0 +1,13 @@
+{
+  "cnpjOrigemDados": "cnpjFilial",
+  "idItem": "codigoProduto",
+  "quantidadeItem": "quantidadeFaturada",
+  "descricaoProduto": "",
+  "dataEmissao": "dataEmissao",
+  "cepCliente": "CEP",
+  "numero": "numeroNotaFiscal",
+  "cfopItem": "CFOP",
+  "valorTotalItem": "Valortotal",
+  "cpfVendedor": "codigoVendedor",
+  "nomeVendedor": "nomeVendedor"
+}
