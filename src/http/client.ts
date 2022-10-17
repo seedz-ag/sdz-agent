@@ -149,7 +149,7 @@ export default class HttpClient {
           }, {})
         );
       }
-      return currentData;
+      return currentData || "";
     } catch (e) {
       console.log(e);
     }
