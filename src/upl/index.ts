@@ -66,62 +66,64 @@ export default class UPL {
       .toArray();
 
     for (const credential of credentials) {
-      Logger.info("[FTP] SEARCHING NEW FILES FROM " + credential.tenantId);
-      const list = await this.ftp.list(credential.tenantId);
+      if(credential?.tenantId) {
+        Logger.info("[FTP] SEARCHING NEW FILES FROM " + credential.tenantId);
+        const list = await this.ftp.list(credential.tenantId);
 
-      for (const { name: fileName } of list) {
-        if (!fileName.endsWith(".csv")) continue;
-        const type = fileName.split(".").shift();
-        if (!['inventories', 'invoice-items', 'items'].includes(type)) {
-          Logger.error("[DTO] INVALID TYPE: " + type);
-          continue;
-        }
-        try {
-          Logger.info("[FTP] DOWNLOADING FILE " + fileName);
-          await this.ftp.getFile(`${credential.tenantId}/${fileName}`, fileName);
-        } catch (err) {
-          Logger.warning("[FTP] FILE NOT FOUND: ", fileName);
-          continue;
-        }
-
-        if (existsSync(fileName)) {
-          let page = 0;
-          while (true) {
-            try {
-              const size = 10000;
-              Logger.info("[CSV] READING: ", fileName);
-              const csv = (await this.csv.read(fileName, {
-                // quote: "``",
-                delimiter: ";",
-                headers: true,
-                skipRows: size * page,
-                maxRows: size,
-              } as any)) as any[];
-              if (!csv.length) {
-                break;
-              }
-              Logger.info("[DTO] HYDRATING: ", fileName);
-              const data = csv.map((row) => Hydrator(this.dtos[type], row));
-              await this.changeCredentials(credential);
-              Logger.info("[TRANSPORT] SENDING: ", data.length);
-              await this.transport.send(type, data);
-              page++
-            } catch (e: any) {
-              this.handleError(e);
-            }
+        for (const { name: fileName } of list) {
+          if (!fileName.endsWith(".csv")) continue;
+          const type = fileName.split(".").shift();
+          if (!['inventories', 'invoice-items', 'items'].includes(type)) {
+            Logger.error("[DTO] INVALID TYPE: " + type);
+            continue;
           }
-          Logger.info("[FTP] RENAMING FILE: ", fileName);
-          this.ftp.renameFile(
-            `${credential.tenantId}/${fileName}`,
-            `${credential.tenantId}/processado/${moment().format(
-              "YYYY-MM-DD"
-            )}-${fileName}`
-          );
-          Logger.info("[FS] DELETING FILE: ", fileName);
-          unlinkSync(fileName);
+          try {
+            Logger.info("[FTP] DOWNLOADING FILE " + fileName);
+            await this.ftp.getFile(`${credential.tenantId}/${fileName}`, fileName);
+          } catch (err) {
+            Logger.warning("[FTP] FILE NOT FOUND: ", fileName);
+            continue;
+          }
+
+          if (existsSync(fileName)) {
+            let page = 0;
+            while (true) {
+              try {
+                const size = 10000;
+                Logger.info("[CSV] READING: ", fileName);
+                const csv = (await this.csv.read(fileName, {
+                  // quote: "``",
+                  delimiter: ";",
+                  headers: true,
+                  skipRows: size * page,
+                  maxRows: size,
+                } as any)) as any[];
+                if (!csv.length) {
+                  break;
+                }
+                Logger.info("[DTO] HYDRATING: ", fileName);
+                const data = csv.map((row) => Hydrator(this.dtos[type], row));
+                await this.changeCredentials(credential);
+                Logger.info("[TRANSPORT] SENDING: ", data.length);
+                await this.transport.send(type, data);
+                page++
+              } catch (e: any) {
+                this.handleError(e);
+              }
+            }
+            Logger.info("[FTP] RENAMING FILE: ", fileName);
+            this.ftp.renameFile(
+              `${credential.tenantId}/${fileName}`,
+              `${credential.tenantId}/processado/${moment().format(
+                "YYYY-MM-DD"
+              )}-${fileName}`
+            );
+            Logger.info("[FS] DELETING FILE: ", fileName);
+            unlinkSync(fileName);
+          }
         }
       }
-    }
+  }
     Logger.info("END PROCESS UPL FTP");
   }
 
