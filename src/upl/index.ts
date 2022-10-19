@@ -1,5 +1,5 @@
 import { Hydrator, Logger } from "sdz-agent-common";
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
 
 import CSV from "sdz-agent-data";
 import FTP from "sdz-agent-sftp";
@@ -8,10 +8,12 @@ import { MongoClient } from "mongodb";
 import { TransportSeedz } from "sdz-agent-transport";
 import moment from "moment";
 
+const baseDir = './src/upl';
+
 export default class UPL {
   private config: Record<string, any>;
   private csv: CSV;
-  private dtos: Record<string, HydratorMapping>;
+  private dtos: Record<string, HydratorMapping> = {};
   private ftp: FTP;
   private mongo: MongoClient;
   private transport: TransportSeedz;
@@ -25,11 +27,11 @@ export default class UPL {
     config = config || this.config;
     if (config) {
       this.csv = new CSV(true);
-      this.dtos = {
-        inventories: JSON.parse(readFileSync('./src/upl/inventories.json').toString()),
-        'invoice-items': JSON.parse(readFileSync('./src/upl/invoice-items.json').toString()),
-        items: JSON.parse(readFileSync('./src/upl/items.json').toString()),
-      };
+      readdirSync(baseDir).forEach(file => {
+        if (file.endsWith('.json')) {
+          this.dtos[file.split('.')[0]] = JSON.parse(readFileSync(`${baseDir}/${file}`).toString())
+        }
+      });
       this.ftp = new FTP(config.ftp);
       this.mongo = new MongoClient(`${config.mongo.url}`);
       this.mongo.connect();
@@ -37,11 +39,7 @@ export default class UPL {
         `${config.issuer.url}`,
         `${config.api.url}`
       );
-      this.transport.setUriMap({
-        'inventories': "inventories",
-        'invoice-items': "invoice-items",
-        'items': "items",
-      });
+      this.transport.setUriMap(Object.fromEntries(Object.keys(this.dtos).map(key => [key, key])));
       return this;
     }
     throw new Error("Invalid Config");
@@ -66,7 +64,7 @@ export default class UPL {
       .toArray();
 
     for (const credential of credentials) {
-      if(!credential.tenantId) {
+      if (!credential.tenantId) {
         continue;
       }
 
