@@ -76,7 +76,7 @@ export default class UPL {
       for (const { name: fileName } of list) {
         if (!fileName.endsWith(".csv")) continue;
         const type = fileName.split(".").shift();
-        if (!['inventories', 'invoice-items', 'items'].includes(type)) {
+        if (!Object.keys(this.dtos).includes(type)) {
           Logger.error("[DTO] INVALID TYPE: " + type);
           continue;
         }
