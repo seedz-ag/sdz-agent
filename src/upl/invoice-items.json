@@ -1,4 +1,5 @@
 {
+  "id|Concat(cnpjFilial)|Concat(anoEstoque)|Concat(mesEstoque)|Concat(codigoProduto)|Concat(numeroNotaFiscal)": "",
   "cnpjOrigemDados": "cnpjFilial",
   "idItem": "codigoProduto",
   "quantidadeItem": "quantidadeFaturada",

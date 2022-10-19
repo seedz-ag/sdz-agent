@@ -1,6 +1,7 @@
 {
+  "id|Concat(cnpjFilial)|Concat(anoEstoque)|Concat(mesEstoque)|Concat(codigoProduto)|Concat(loteProduto)": "",
   "cnpjOrigemDados": "cnpjFilial",
-  "issueAt|Concat(anoEstoque)|Concat(mesEstoque)": "",
+  "issueAt|Concat(anoEstoque)|Append(-)|Concat(mesEstoque)": "",
   "idItem": "codigoProduto",
   "descricao": "descricaoProduto",
   "um": "UnidadeMedida",
