@@ -30,4 +30,4 @@ jobs:
         run: |
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
-          git push --set-upstream origin ${{ env.version }}
+          git push --set-upstream origin version/${{ env.version }}
