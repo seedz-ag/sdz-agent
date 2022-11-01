@@ -1,4 +1,5 @@
 import UPL from "./upl/index";
+import moment from "moment";
 
 require("dotenv").config();
 
@@ -24,6 +25,6 @@ require("dotenv").config();
 
   while (true) {
     await upl.process();
-    await new Promise((resolve) => setTimeout(resolve, 60000));
+    await new Promise((resolve) => setTimeout(resolve, moment().add(1, 'hour').startOf('hour').diff(moment(), 'milliseconds')));
   }
 })();
