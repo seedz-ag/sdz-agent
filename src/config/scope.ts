@@ -95,6 +95,11 @@ export default async (config: Config["scope"] | undefined): Promise<any> => {
       file: "estoque.csv",
       entity: "estoque.csv",
     },
+    {
+      name: "ItemDetail",
+      file: "detalhe_item.csv",
+      entity: "detalhe_item.csv",
+    },
   ];
 
   config?.forEach((scope) => {

@@ -34,6 +34,7 @@ transport.getInstance = () => {
       endereco: "addresses",
       propriedade: "properties",
       servico: "services",
+      detalheItem: "item-detail",
     });
   }
   return instance;
