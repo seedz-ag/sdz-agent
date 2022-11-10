@@ -1,20 +1,12 @@
-FROM ubuntu:22.04 as base
+FROM node:16-alpine
 
-ARG NODE_VERSION=16
-
-RUN apt-get update -y && \
-    apt-get upgrade -y && \
-    apt-get install -y curl && \
-    curl -sL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash - && \
-    apt-get install -y nodejs \
-      git \
-      cmake
+RUN apk add git
 
 WORKDIR /home/node/app
 
 COPY package*.json ./
 
-RUN npm install -g npm@8.19.2
+RUN npm install -g npm@latest
 
 RUN npm i -g ts-node
 
