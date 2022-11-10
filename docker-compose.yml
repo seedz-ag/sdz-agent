@@ -6,11 +6,11 @@ services:
       dockerfile: ./Dockerfile
     environment:
       - DOCKER=true
-      - API_URL=
-      - FTP_HOST=
-      - FTP_PASSWORD=
-      - FTP_PORT=
-      - FTP_USERNAME=
-      - IDENTITY_DATABASE=
-      - MONGO_URL=
-      - ISSUER_URL=
+      - API_URL=https://int-api-v1.dev.seedz.ag/integration/v1
+      - FTP_HOST=ftps.seedz.ag
+      - FTP_PASSWORD=rubens.curvello
+      - FTP_PORT=22
+      - FTP_USERNAME=rubens.curvello
+      - IDENTITY_DATABASE=sdz-identity-service
+      - MONGO_URL=mongodb://seedz-3-0:PolyOXcq3kR0M4wx@seedz-3-0-dev-shard-00-00.n8cy7.mongodb.net:27017,seedz-3-0-dev-shard-00-01.n8cy7.mongodb.net:27017,seedz-3-0-dev-shard-00-02.n8cy7.mongodb.net:27017?ssl=true&replicaSet=atlas-qo31zv-shard-0&authSource=admin&retryWrites=true&w=majority
+      - ISSUER_URL=https://sdz-ide-svc.dev.seedz.ag/auth/oidc

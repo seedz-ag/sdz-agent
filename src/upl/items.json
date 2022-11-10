@@ -1,11 +1,13 @@
 {
   "cnpjOrigemDados": "cnpj",
-  "id|Concat(cnpj)": "codigoProduto",
+  "id|Concat(cnpj)|Concat(codigoProduto)|Concat(cnpjFabricante)": "",
   "descricao": "descricaoProduto",
-  "codigoFabricante": "cnpjFabricante",
+  "cnpjFabricante": "cnpjFabricante",
   "branding": "nomeFabricante",
+  "codigoFabricante": "codigoProdutoFabricante",
   "um": "unidadeMedida",
-  "valorUnidadeMedida": "fatorConversaoQuantidade",
+  "fatorConversaoQuantidade": "fatorConversaoQuantidade",
+  "volume": "volume",
   "grupo": "grupo",
   "barras": "GTIN"
 }
