@@ -3,12 +3,12 @@
   "cnpjOrigemDados": "cnpjFilial",
   "idItem": "codigoProduto",
   "quantidadeItem": "quantidadeFaturada",
-  "descricaoProduto": "",
+  "descricaoItem": "descricaoProduto",
   "dataEmissao": "dataEmissao",
   "cepCliente": "CEP",
   "numero": "numeroNotaFiscal",
   "cfopItem": "CFOP",
   "valorTotalItem": "Valortotal",
-  "cpfVendedor": "codigoVendedor",
+  "idVendedores": "codigoVendedor",
   "nomeVendedor": "nomeVendedor"
 }

@@ -4,11 +4,11 @@
   "issueAt|Concat(anoEstoque)|Append(-)|Concat(mesEstoque)": "",
   "idItem": "codigoProduto",
   "descricao": "descricaoProduto",
-  "um": "UnidadeMedida",
-  "quantidadeTotal": "EstoqueTotal",
-  "quantidadeDisponivel": "EstoqueDisponivel",
-  "quantidadeReservada": "EstoqueReservado",
-  "quantidadeTransito": "EstoqueEmTrasito",
+  "unidadeMedida": "unidadeMedida",
+  "quantidadeTotal": "estoqueTotal",
+  "quantidadeDisponivel": "estoqueDisponivel",
+  "quantidadeReservada": "estoqueReservado",
+  "quantidadeTransito": "estoqueEmTrasito",
   "loteItem": "loteProduto",
   "validadeProduto": "validadeLote"
 }
