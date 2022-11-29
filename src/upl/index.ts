@@ -1,11 +1,12 @@
 import { Hydrator, Logger } from "sdz-agent-common";
-import { existsSync, readFileSync, readdirSync, unlinkSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, readdirSync, unlinkSync } from "fs";
 
 import CSV from "sdz-agent-data";
 import FTP from "sdz-agent-sftp";
 import { HydratorMapping } from "sdz-agent-types";
 import { MongoClient } from "mongodb";
 import { TransportSeedz } from "sdz-agent-transport";
+import argv from "../args";
 import moment from "moment";
 
 const baseDir = './src/upl';
@@ -51,10 +52,16 @@ export default class UPL {
   async process(): Promise<void> {
     Logger.info("[NODE] STARTING PROCESS UPL FTP");
     Logger.info("[MONGO] GETTING CLIENT IDENTITIES");
+    const find: Record<string, string> = {};
+
+    if ((argv as any)['tenant']) {
+      find.tenantId = (argv as any).tenant
+    }
+
     const credentials = await this.mongo
       .db(this.config.mongo.identityDatabase)
       .collection("client")
-      .find({})
+      .find(find)
       .project({
         _id: true,
         client_id: true,
