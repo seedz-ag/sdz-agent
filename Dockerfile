@@ -38,5 +38,5 @@ RUN cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/esql/libifgl
 ENV INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driver
 ENV LD_LIBRARY_PATH=/opt/sdz-agent/node_modules/sdz-agent-database-oracle/instantclient_21_3/
 RUN unzip /opt/sdz-agent/node_modules/sdz-agent-database-oracle/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/node_modules/sdz-agent-database-oracle/
-
+USER agent
 CMD [ "/usr/bin/supervisord" ]
