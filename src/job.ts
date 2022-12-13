@@ -5,7 +5,6 @@ import ws from "./websocket/client";
 import { Config } from "sdz-agent-types";
 import callstack from "./callstack";
 
-
 const job = async () => {
   if (!ws.isConnected()) {
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
@@ -17,9 +16,14 @@ const job = async () => {
     Logger.error("SDZ-AGENT-WS DISCONNECTED, ABORTING.");
     return false;
   }
+  let config: Config | Config[] | undefined;
 
-  const config: Config | Config[] | undefined = await ws.getConfig();
-  const configs = Array.isArray(config) ? config : [config];
+  while(!config){
+    Logger.info('GETTING CONFIG')
+    config = await Promise.race([ws.getConfig(), new Promise<undefined>(resolve => setTimeout(resolve, 25000)) ]);
+  }
+   //config: Config | Config[] | undefined = await ws.getConfig();
+   const configs = Array.isArray(config) ? config : [config];
   for (const c of configs) {
     const schedule = {
       ...{
