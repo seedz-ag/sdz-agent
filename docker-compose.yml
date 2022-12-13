@@ -12,3 +12,4 @@ services:
       - CLIENT_SECRET=
       - ISSUER_URL=https://api-prod.seedz.ag/auth/oidc/.well-known/openid-configuration
       - WS_SERVER_URL=wss://api-prod.seedz.ag
+      - API_URL=https://api-prod.seedz.ag/integration/v1
