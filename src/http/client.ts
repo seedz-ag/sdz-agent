@@ -116,7 +116,7 @@ export default class HttpClient {
     })
       .then(({ data }) => {
         if (get(this.getHeaders(), "Accept") === "application/xml") {
-          return new XMLParser().parse(data);
+          return new XMLParser({ numberParseOptions: { hex: false, leadingZeros: false}}).parse(data);
         }
         return data;
       })
