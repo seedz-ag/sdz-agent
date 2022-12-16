@@ -1,7 +1,7 @@
-import { XMLParser } from "fast-xml-parser";
+import parser from "xml2json";
 import axios from "axios";
 import { get } from "dot-wild";
-import https from "https"
+import https from "https";
 import interpolation from "./interpolation";
 
 export default class HttpClient {
@@ -9,12 +9,19 @@ export default class HttpClient {
   private body?: string;
   private dataPath?: string;
   private headers: any;
-  private method: string = "POST"
+  private method: string = "POST";
   private scope?: any;
   private insecure?: boolean;
   private url?: string;
 
-  public constructor(url?: string, headers?: any, method?: string, scope?: any, insecure?: boolean, body?: string) {
+  public constructor(
+    url?: string,
+    headers?: any,
+    method?: string,
+    scope?: any,
+    insecure?: boolean,
+    body?: string
+  ) {
     this.setBody(body);
     this.setHeaders(headers);
     this.setMethod(method);
@@ -94,21 +101,21 @@ export default class HttpClient {
   }
 
   // FUNCTIONS
-  public compile(...args : any) {
+  public compile(...args: any) {
     return interpolation.parse(...args);
   }
 
   public async request() {
     let axiosInstance = axios.create();
-    if(this.getInsecure()) {
+    if (this.getInsecure()) {
       axiosInstance = axios.create({
-        httpsAgent: new https.Agent({  
-          rejectUnauthorized: false
-        })
-      })
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+      });
     }
 
-    return  axiosInstance({
+    return axiosInstance({
       data: this.compile(this.body, this.scope),
       headers: this.getHeaders(),
       method: this.getMethod(),
@@ -116,7 +123,7 @@ export default class HttpClient {
     })
       .then(({ data }) => {
         if (get(this.getHeaders(), "Accept") === "application/xml") {
-          return new XMLParser({ numberParseOptions: { hex: false, leadingZeros: false}}).parse(data);
+          return parser.toJson(data, { object: true });
         }
         return data;
       })
@@ -128,7 +135,7 @@ export default class HttpClient {
       });
   }
 
-   searchDataPath = (data: any, path: string) => {
+  searchDataPath = (data: any, path: string) => {
     try {
       const dataPath = path.split(".");
       let key;
