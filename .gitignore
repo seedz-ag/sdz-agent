@@ -109,3 +109,6 @@ dist
 .tern-port
 
 !windows/logs
+
+# Snyk
+.dccache
