@@ -10,13 +10,15 @@ import ws from "../../websocket/client";
 
 let config: Config;
 
-
 const consumer = async () => {
   const entities: Entity[] = config.scope;
   const http = new HttpConsumer();
   for (const entity of entities) {
-    const dto = (config?.dtos?.[entity.name.toLocaleLowerCase()] || await ws.getDTO(entity.name.toLocaleLowerCase())) as HydratorMapping;
-    const request: any = config?.http?.[entity.name.toLocaleLowerCase()] || await ws.getHttpRequest(entity.name.toLocaleLowerCase());
+    const dto = (config?.dtos?.[entity.name.toLocaleLowerCase()] ||
+      (await ws.getDTO(entity.name.toLocaleLowerCase()))) as HydratorMapping;
+    const request: any =
+      config?.http?.[entity.name.toLocaleLowerCase()] ||
+      (await ws.getHttpRequest(entity.name.toLocaleLowerCase()));
 
     http.setBody(request.body);
     http.setDataPath(request.dataPath);
@@ -25,12 +27,17 @@ const consumer = async () => {
     http.setScope(request.scope);
     http.setURL(request.url);
     http.setInsecure(request.insecure);
-    
-    fs.writeFileSync(`${process.cwd()}/output/${entity.name.toLocaleLowerCase()}.json`, JSON.stringify(request))
+
+    fs.writeFileSync(
+      `${process.cwd()}/output/${entity.name.toLocaleLowerCase()}.json`,
+      JSON.stringify(request)
+    );
 
     const response = await http.request();
 
-    const data = (Array.isArray(response) ? response : [response]).map((row: any) => Hydrator(dto, row));
+    const data = (Array.isArray(response) ? response : [response]).map(
+      (row: any) => Hydrator(dto, row)
+    );
 
     if (!config.legacy) {
       await httpTransport(entity.entity, data);

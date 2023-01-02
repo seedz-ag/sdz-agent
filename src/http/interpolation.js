@@ -25,6 +25,11 @@ interpolator.registerModifier("YYYYMMDD", (val, data) => {
   return val.format("YYYYMMDD");
 });
 
+let page = 0
+interpolator.registerModifier("page", (val, data) => {
+  return page++;
+});
+
 export default new (class {
   data = {
     now: moment(),
