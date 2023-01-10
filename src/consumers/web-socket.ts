@@ -1,3 +1,3 @@
-import { IWebSocketClient } from "interfaces/web-socket-client.interface";
+import { IWebSocketClient } from 'interfaces/web-socket-client.interface'
 
-export const WebSocketClient = ({ Socket }: { Socket: any }) => () => {}
+export const WebSocketClient = ({ Socket }: { Socket: IWebSocketClient }) => () => {}

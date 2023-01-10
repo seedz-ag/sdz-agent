@@ -1,7 +1,7 @@
 import { FileSystemAdapter } from './file-system.adapter'
 
 describe('FileSystem Adapter', () => {
-  const local = FileSystemAdapter({ type: 'local' });
+  const local = FileSystemAdapter({ type: 'local' })
 
   test('it should be defined', () => {
     expect(FileSystemAdapter).toBeDefined()
@@ -25,7 +25,7 @@ describe('FileSystem Adapter', () => {
     await local.write('FileSystemAdapter.test', text)
     const file = await local.read('FileSystemAdapter.test')
     expect(file).toBe(text)
-    local.delete('FileSystemAdapter.test')
+    await local.delete('FileSystemAdapter.test')
     expect(await local.exists('FileSystemAdapter.test')).toBeFalsy()
   })
 })

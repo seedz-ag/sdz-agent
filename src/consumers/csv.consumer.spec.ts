@@ -1,12 +1,12 @@
-import { CSVConsumer } from "./csv.consumer";
-import { ICSVConsumer } from "../interfaces/csv.interface";
+import { CSVConsumer } from './csv.consumer'
+import { ICSVConsumer } from '../interfaces/csv.interface'
 
 describe('CSV Consumer', () => {
-  let instance: ICSVConsumer;
+  let instance: ICSVConsumer
 
   beforeEach(() => {
-    instance = CSVConsumer({ CSV: { read: jest.fn(), write: jest.fn() } });
-  });
+    instance = CSVConsumer({ CSV: { read: jest.fn(), write: jest.fn() } })
+  })
   it('should be defined', () => {
     expect(CSVConsumer).toBeDefined()
   })

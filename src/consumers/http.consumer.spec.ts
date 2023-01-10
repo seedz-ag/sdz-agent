@@ -10,12 +10,12 @@ describe('HttpConsumer', () => {
     expect(HttpConsumer).toBeDefined()
   })
   it('should return an instance of HttpConsumer', () => {
-    instance = HttpConsumer({ HttpClient: HttpClientAdapter({ baseURL }) });
+    instance = HttpConsumer({ HttpClient: HttpClientAdapter({ baseURL }) })
     expect(instance).toBeDefined()
   })
 
   it('should do a GET request', async () => {
-    instance = HttpConsumer({ HttpClient: HttpClientAdapter({ baseURL }) });
+    instance = HttpConsumer({ HttpClient: HttpClientAdapter({ baseURL }) })
     const getSpy = jest.spyOn(axios, 'get')
     await instance('get', '', {})
     expect(getSpy).toHaveBeenCalled()

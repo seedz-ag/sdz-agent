@@ -1,7 +1,7 @@
-import { DatabaseConsumer } from "./database.consumer"
+import { DatabaseConsumer } from './database.consumer'
 
 describe('DatabaseConsumer', () => {
-  let instance;
+  let instance
   it('should be defined', () => {
     expect(DatabaseConsumer).toBeDefined()
   })
@@ -13,6 +13,6 @@ describe('DatabaseConsumer', () => {
 
   it('should consume the Database', async () => {
     instance = DatabaseConsumer({ Database: { query: jest.fn() } })
-    expect(await instance()).toBeUndefined()
+    expect(await instance('query')).toBeUndefined()
   })
 })

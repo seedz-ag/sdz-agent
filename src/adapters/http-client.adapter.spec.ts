@@ -7,7 +7,7 @@ describe('HttpClientAdapter', () => {
   const data = { value: 'any-value' }
   const endpoint = 'get'
 
-  let client: IHttpClient 
+  let client: IHttpClient
 
   it('should be defined', () => {
     expect(HttpClientAdapter).toBeDefined()

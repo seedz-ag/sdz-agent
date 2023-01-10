@@ -1,4 +1,4 @@
 export interface IWebSocketClient {
-  getConfig(): Promise<any>
-  saveConfig(): Promise<any>
+  getConfig: () => Promise<any>
+  saveConfig: () => Promise<any>
 }

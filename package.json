@@ -22,12 +22,14 @@
     "@types/ssh2-sftp-client": "^9.0.0",
     "@types/uuid": "^8.3.4",
     "eslint": "^8.24.0",
+    "eslint-config-standard-with-typescript": "^26.0.0",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.2"
   },
   "scripts": {
     "prepare": "ts-node configure.ts",
+    "lint": "eslint 'src/**/*.{js,ts}' --fix",
     "test": "npx jest --passWithNoTests --runInBand --noStackTrace",
     "test:ci": "test --coverage"
   }
