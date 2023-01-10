@@ -1,4 +1,4 @@
-import { JSONProducer } from './json'
+import { JSONProducer } from './json.producer'
 
 describe('JSONProducer', () => {
   let instance
