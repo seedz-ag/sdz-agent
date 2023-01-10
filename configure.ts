@@ -25,7 +25,7 @@ import { writeFileSync } from  'fs';
 
   spinner = ora("CREATING .ENV").start()
   const dotEnv = [
-    `CLIENT_ID='${clientId}`,
+    `CLIENT_ID='${clientId}'`,
     `CLIENT_SECRET='${clientId}'`,
     `DOMAIN='${domain}'`
   ]
