@@ -1,5 +1,5 @@
-import { HttpClientAdapter } from '@/adapters/http-client'
-import { HttpConsumer } from './http'
+import { HttpClientAdapter } from '@/adapters/http-client.adapter'
+import { HttpConsumer } from './http.consumer'
 import axios from 'axios'
 
 describe('HttpConsumer', () => {

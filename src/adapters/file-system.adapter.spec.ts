@@ -1,4 +1,4 @@
-import { FileSystemAdapter } from './file-system'
+import { FileSystemAdapter } from './file-system.adapter'
 
 describe('FileSystem Adapter', () => {
   const local = FileSystemAdapter({ type: 'local' });

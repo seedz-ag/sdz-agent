@@ -1,4 +1,4 @@
-import { HttpClientAdapter } from './http-client'
+import { HttpClientAdapter } from './http-client.adapter'
 import { IHttpClient } from '../interfaces/http-client.interface'
 import axios from 'axios'
 

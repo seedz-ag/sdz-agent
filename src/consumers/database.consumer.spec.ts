@@ -1,4 +1,4 @@
-import { DatabaseConsumer } from "./database"
+import { DatabaseConsumer } from "./database.consumer"
 
 describe('DatabaseConsumer', () => {
   let instance;
