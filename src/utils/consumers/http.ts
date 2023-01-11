@@ -12,47 +12,54 @@ let config: Config;
 
 const http = new HttpConsumer();
 
-const consume = async (entity: Entity, dto: HydratorMapping, request: Record<string, any>): Promise<boolean> => {
-    http.setBody(request.body);
-    http.setDataPath(request.dataPath);
-    http.setHeaders(request.headers);
-    http.setMethod(request.method);
-    http.setScope(request.scope);
-    http.setURL(request.url);
-    http.setInsecure(request.insecure);
-    const response = await http.request();
+const consume = async (
+  entity: Entity,
+  dto: HydratorMapping,
+  request: Record<string, any>
+): Promise<boolean> => {
+  http.setBody(request.body);
+  http.setDataPath(request.dataPath);
+  http.setHeaders(request.headers);
+  http.setMethod(request.method);
+  http.setScope(request.scope);
+  http.setURL(request.url);
+  http.setInsecure(request.insecure);
+  const response = await http.request();
 
-    const data = (Array.isArray(response) ? response : [response]).map(
-      (row: any) => Hydrator(dto, row)
-    );
+  console.log(response);
 
-    if (!config.legacy) {
-      await httpTransport(entity.entity, data);
-      return false;
-    }
+  const data = (Array.isArray(response) ? response : [response]).map(
+    (row: any) => Hydrator(dto, row)
+  );
 
-    await csv().write(`${process.cwd()}/output/${entity.file}`, data);
+  if (!config.legacy) {
+    await httpTransport(entity.entity, data);
+    // console.log(data);
 
-    const newFile = entity.file.split(/\.(?=[^\.]+$)/);
-
-    const files = fs.readdirSync(`${process.cwd()}/output/`).filter((file) => {
-      if (file.includes(newFile[0])) {
-        return true;
-      }
-    });
-
-    for (const newFiles of files) {
-      if (fs.existsSync(`${process.cwd()}/output/${newFiles}`)) {
-        await ftpTransport(`${process.cwd()}/output/${newFiles}`, newFiles);
-      }
-    }
-
-    if (request.paginates && data.length > 0) {
+    if (request.paginates && !!response && data.length > 0) {
       return true;
     }
-
     return false;
-}
+  }
+
+  await csv().write(`${process.cwd()}/output/${entity.file}`, data);
+
+  const newFile = entity.file.split(/\.(?=[^\.]+$)/);
+
+  const files = fs.readdirSync(`${process.cwd()}/output/`).filter((file) => {
+    if (file.includes(newFile[0])) {
+      return true;
+    }
+  });
+
+  for (const newFiles of files) {
+    if (fs.existsSync(`${process.cwd()}/output/${newFiles}`)) {
+      await ftpTransport(`${process.cwd()}/output/${newFiles}`, newFiles);
+    }
+  }
+
+  return false;
+};
 
 let cont;
 
@@ -70,9 +77,9 @@ const consumer = async () => {
       JSON.stringify(request)
     );
 
-    cont = await consume(entity, dto, request)
+    cont = await consume(entity, dto, request);
     while (cont) {
-      cont = await consume(entity, dto, request)
+      cont = await consume(entity, dto, request);
     }
   }
 };

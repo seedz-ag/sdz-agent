@@ -25,9 +25,10 @@ interpolator.registerModifier("YYYYMMDD", (val, data) => {
   return val.format("YYYYMMDD");
 });
 
-let page = 0
+let page = 0;
 interpolator.registerModifier("page", (val, data) => {
-  return page++;
+  page = page + (val || 1) 
+  return page
 });
 
 export default new (class {
