@@ -1,7 +1,7 @@
 import { ICSVAdapter, ICSVData, ICSVResultSet, ICSVRow } from '../interfaces/csv.interface'
+import { createReadStream, createWriteStream } from 'fs'
 
 import CsvReadableStream from 'csv-reader'
-import { createReadStream } from 'fs'
 
 export const CSVAdapter = (): ICSVAdapter => ({
   read: async (file: string): Promise<ICSVResultSet> => {
@@ -19,5 +19,16 @@ export const CSVAdapter = (): ICSVAdapter => ({
     })
     return temp
   },
-  write: async <T = ICSVData> (data: T, file: string): Promise<void> => {}
+  write: async (data: ICSVData , file: string): Promise<void> => {
+    const stream = createWriteStream(file)
+    const headers = Object.keys(data[0])
+    data.forEach((row) => {
+      const temp: string[] = []
+      headers.forEach((column) => {
+        temp.push(`"${row[column]}`)
+      })
+      stream.write(temp.join(';'))
+    })
+    stream.end()
+  }
 })
