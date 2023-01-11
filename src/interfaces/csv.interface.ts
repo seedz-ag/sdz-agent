@@ -1,6 +1,12 @@
+export type ICSVRow = Record<string, string | number | boolean | Date>
+
+export type ICSVResultSet = ICSVRow[]
+
+export type ICSVData = ICSVRow[]
+
 export interface ICSV {
-  read: (file: string) => Promise<Array<Record<string, string | number | boolean>>>
-  write: (data: Record<string, string | number | boolean>, file: string) => Promise<void>
+  read: <T = ICSVResultSet> (file: string) => Promise<T>
+  write: <T = ICSVData> (data: T, file: string) => Promise<void>
 }
 
-export type ICSVConsumer = (file: string) => Promise<Array<Record<string, string | number | boolean>>>
+export type ICSVConsumer = <T = ICSVResultSet> (file: string) => Promise<T>
