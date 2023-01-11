@@ -1,3 +1,3 @@
-import { ICSV, ICSVResultSet } from '@/interfaces/csv.interface'
+import { ICSVAdapter, ICSVResultSet } from '@/interfaces/csv.interface'
 
-export const CSVConsumer = ({ CSV }: { CSV: ICSV }) => async <T = ICSVResultSet> (file: string) => CSV.read(file)
+export const CSVConsumer = ({ CSV }: { CSV: ICSVAdapter }) => async (file: string): Promise<ICSVResultSet> => CSV.read(file)
