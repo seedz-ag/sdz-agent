@@ -1,6 +1,6 @@
 import SFTPClient, { ConnectOptions } from 'ssh2-sftp-client'
 
-import { IFtpClient } from '@/interfaces/ftp-client.interface'
+import { IFtpClient } from '@/interfaces/ftp.interface'
 
 export const FtpClientAdapter = ({ config }: { config: ConnectOptions }): IFtpClient => {
   const client = new SFTPClient()

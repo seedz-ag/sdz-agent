@@ -18,12 +18,8 @@
     "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": ["./*"]
-    }
+    },
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": [".eslintrc.json", "src", "./configure.ts"],
+  "exclude": ["node_modules"],
 }

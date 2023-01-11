@@ -12,7 +12,13 @@ describe('DatabaseConsumer', () => {
   })
 
   it('should consume the Database', async () => {
-    instance = DatabaseConsumer({ Database: { query: jest.fn() } })
-    expect(await instance('query')).toBeUndefined()
+    const Database = { query: jest.fn().mockImplementation((query: string) => ([{ query }])) };
+    
+    const spy = jest.spyOn(Database, 'query')
+
+    instance = DatabaseConsumer({ Database })
+    const resultSet = await instance('query')
+    expect(resultSet).toHaveLength(1)
+    expect(spy).toHaveBeenCalledTimes(1)
   })
 })
