@@ -9,4 +9,4 @@ export interface ICSV {
   write: <T = ICSVData> (data: T, file: string) => Promise<void>
 }
 
-export type ICSVConsumer = <T = ICSVResultSet> (file: string) => Promise<T>
+export type ICSVConsumer<T> = (file: string) => Promise<T>

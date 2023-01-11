@@ -1,3 +1,3 @@
-import { IDatabase } from 'interfaces/database.interface'
+import { IDatabase, IDatabaseDefaultResultSet } from 'interfaces/database.interface'
 
-export const DatabaseConsumer = ({ Database }: { Database: IDatabase }) => async (query: string) => Database.query(query)
+export const DatabaseConsumer = ({ Database }: { Database: IDatabase }) => async <T = IDatabaseDefaultResultSet> (query: string): Promise<T> => Database.query(query)

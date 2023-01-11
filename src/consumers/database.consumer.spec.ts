@@ -1,7 +1,10 @@
+import { IDatabaseConsumer, IDatabaseDefaultResultSet } from '../interfaces/database.interface'
+
 import { DatabaseConsumer } from './database.consumer'
 
 describe('DatabaseConsumer', () => {
-  let instance
+  let instance: IDatabaseConsumer<IDatabaseDefaultResultSet>
+  
   it('should be defined', () => {
     expect(DatabaseConsumer).toBeDefined()
   })
