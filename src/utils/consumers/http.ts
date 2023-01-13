@@ -26,11 +26,20 @@ const consume = async (
   http.setInsecure(request.insecure);
   const response = await http.request();
 
-  console.log(response);
-
   const data = (Array.isArray(response) ? response : [response]).map(
     (row: any) => Hydrator(dto, row)
   );
+
+  if (!data.filter(item => {
+    for (const key in Object.keys(item)) {
+      if (item[key]) {
+        return true;
+      }
+    }
+    return false;
+  }).length) {
+
+  }
 
   if (!config.legacy) {
     await httpTransport(entity.entity, data);
