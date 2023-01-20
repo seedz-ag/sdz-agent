@@ -30,20 +30,21 @@ const consume = async (
     (row: any) => Hydrator(dto, row)
   );
 
-  if (!data.filter(item => {
-    for (const key in Object.keys(item)) {
-      if (item[key]) {
-        return true;
+  if (
+    !data.filter((item: any) => {
+      for (const key of Object.keys(item)) {
+        if (item[key]) {
+          return true;
+        }
       }
-    }
+      return false;
+    }).length
+  ) {
     return false;
-  }).length) {
-
   }
 
   if (!config.legacy) {
     await httpTransport(entity.entity, data);
-    // console.log(data);
 
     if (request.paginates && !!response && data.length > 0) {
       return true;
