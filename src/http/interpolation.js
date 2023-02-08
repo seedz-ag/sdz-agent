@@ -26,6 +26,7 @@ interpolator.registerModifier("YYYYMMDD", (val, data) => {
 });
 
 let page = 0;
+export const setPage = (value) => page = value 
 interpolator.registerModifier("page", (val, data) => {
   page = page + (val || 1) 
   return page

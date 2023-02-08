@@ -7,6 +7,7 @@ import fs from "fs";
 import ftpTransport from "../transports/ftp";
 import httpTransport from "../transports/http";
 import ws from "../../websocket/client";
+import { setPage } from "../../http/interpolation";
 
 let config: Config;
 
@@ -76,6 +77,8 @@ let cont;
 const consumer = async () => {
   const entities: Entity[] = config.scope;
   for (const entity of entities) {
+    setPage(0);
+
     const dto = (config?.dtos?.[entity.name.toLocaleLowerCase()] ||
       (await ws.getDTO(entity.name.toLocaleLowerCase()))) as HydratorMapping;
     const request: any =
