@@ -41,6 +41,7 @@ const callstack = async (configName = "default") => {
       httpTransport.getInstance().setToken.bind(httpTransport.getInstance())
     );
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
+    OpenIdClient.addSubscriber(console.log);
     await OpenIdClient.connect();
     await OpenIdClient.grant();
     if (!ws.isConnected()) {
@@ -51,7 +52,17 @@ const callstack = async (configName = "default") => {
       return false;
     }
 
-    const configWs: Config | Config[] | undefined = await ws.getConfig();
+    let configWs: Config | Config[] | undefined;
+    let tries = 0;
+    while (!configWs && 20 > tries) {
+      Logger.info('GETTING CONFIG')
+      tries++;
+      configWs = await Promise.race([ws.getConfig(), new Promise<undefined>(resolve => setTimeout(resolve, 5000)) ]);
+    }
+    if (!configWs) {
+      Logger.error("COULD'T GET CONFIG, ABORTING.");
+      return false;
+    }
     let config: Config | Config[] | undefined = configWs;
     if (Array.isArray(config)) {
       config = config.find((config: Config) => config.name === configName);
