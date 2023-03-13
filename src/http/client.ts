@@ -102,7 +102,7 @@ export default class HttpClient {
 
   // FUNCTIONS
   public compile(...args: any) {
-    return interpolation.parse(...args);
+    return new interpolation().parse(...args);
   }
 
   public async request() {

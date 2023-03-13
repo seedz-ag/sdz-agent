@@ -32,7 +32,7 @@ interpolator.registerModifier("page", (val, data) => {
   return page
 });
 
-export default new (class {
+export default class {
   data = {
     now: moment(),
     tomorrow: moment().add(1, "d"),
@@ -41,4 +41,4 @@ export default new (class {
   parse(template, data) {
     return interpolator.parse(template, { ...this.data, ...data });
   }
-})();
+};
