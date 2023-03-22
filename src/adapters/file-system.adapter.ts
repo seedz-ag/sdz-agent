@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs'
 
-import { IFileSystem } from 'interfaces/file-system.interface'
+import { IFileSystem } from '@/interfaces/file-system.interface'
 
 export const FileSystemAdapter = ({ type }: { type?: string }): IFileSystem => {
   let driver: any

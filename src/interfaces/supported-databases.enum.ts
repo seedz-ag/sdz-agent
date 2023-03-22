@@ -1,0 +1,4 @@
+export enum SUPPORTED_DATABASES {
+  MYSQL = 'MYSQL',
+  SQLITE3 = 'SQLITE3'
+}

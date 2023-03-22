@@ -1,4 +1,4 @@
-import { IHttpClient, IHttpDefaultRequestData, IHttpDefaultResponse, IQueryString } from 'interfaces/http-client.interface'
+import { IHttpClient, IHttpDefaultRequestData, IHttpDefaultResponse, IQueryString } from '@/interfaces/http-client.interface'
 
 export const HttpConsumer = ({ HttpClient }: { HttpClient: IHttpClient }) =>
   async <T =IHttpDefaultRequestData | IQueryString, K = IHttpDefaultResponse> (method: string, endpoint: string, data?: T): Promise<K | undefined> => {
