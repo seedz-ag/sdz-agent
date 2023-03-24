@@ -31,8 +31,7 @@ const consumer = async () => {
       break;
   }
   const database = new Database(config.database);
-  const entities: Entity[] = config.scope;
-
+  const entities: Entity[] = args.argv.check ? [config.scope[0]] : config.scope;
   const respository: any = database.getRepository();
   for (const entity of entities) {
     Logger.info(entity.name.toLocaleUpperCase());
@@ -43,7 +42,7 @@ const consumer = async () => {
       config?.sqls?.[entity.name.toLocaleLowerCase()] ||
       (await ws.getSQL(entity.name.toLocaleLowerCase()));
     const file = `${process.cwd()}/output/${entity.file}`;
-    const limit = config.pageSize || 1000;
+    const limit = args.argv.check ? 1 : config.pageSize || 1000;
     let page = 0;
 
     fs.writeFileSync(
@@ -64,7 +63,7 @@ const consumer = async () => {
           unit: "Records",
         });
       }
-      while (0 < response.length) {
+      if( args.argv.check){
         if (!config.legacy) {
           await httpTransport(
             entity.entity,
@@ -76,29 +75,45 @@ const consumer = async () => {
             response.map((row: DatabaseRow) => Hydrator(dto, row))
           );
         }
-        page++;
-        response = await respository.execute(sql, page, limit);
-        let updateProgress: any = page * limit;
-        let difUpdateProgress = countResponse - page * limit;
-        if (difUpdateProgress < limit) {
-          if (
-            !process.env.COMMAND_LINE ||
-            process.env.COMMAND_LINE === "false"
-          ) {
-            updateProgress = parseFloat(countResponse);
+      }
+      else{
+        while (0 < response.length) {
+          if (!config.legacy) {
+            await httpTransport(
+              entity.entity,
+              response.map((row: DatabaseRow) => Hydrator(dto, row))
+            );
+          } else {
+            await csv().write(
+              file,
+              response.map((row: DatabaseRow) => Hydrator(dto, row))
+            );
+          }
+          page++;
+          response = await respository.execute(sql, page, limit);
+          let updateProgress: any = page * limit;
+          let difUpdateProgress = countResponse - page * limit;
+          if (difUpdateProgress < limit) {
+            if (
+              !process.env.COMMAND_LINE ||
+              process.env.COMMAND_LINE === "false"
+            ) {
+              updateProgress = parseFloat(countResponse);
+              barProgress.update(updateProgress, {
+                event: "DONE",
+                count: `${updateProgress}/${countResponse}`,
+              });
+            }
+          }
+          if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
+            barProgress.increment();
             barProgress.update(updateProgress, {
-              event: "DONE",
               count: `${updateProgress}/${countResponse}`,
             });
           }
         }
-        if (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") {
-          barProgress.increment();
-          barProgress.update(updateProgress, {
-            count: `${updateProgress}/${countResponse}`,
-          });
-        }
       }
+
     }
     if (config.legacy) {
       const newFile = entity.file.split(/\.(?=[^\.]+$)/);
