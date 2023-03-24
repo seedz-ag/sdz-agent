@@ -8,6 +8,7 @@ import ftpTransport from "../transports/ftp";
 import httpTransport from "../transports/http";
 import ws from "../../websocket/client";
 import { setPage } from "../../http/interpolation";
+import yargs from "yargs";
 
 let config: Config;
 
@@ -75,7 +76,8 @@ const consume = async (
 let cont;
 
 const consumer = async () => {
-  const entities: Entity[] = config.scope;
+  const args = yargs(process.argv) as any;
+  const entities: Entity[] = args.argv.check ? [config.scope[0]] : config.scope;
   for (const entity of entities) {
     setPage(0);
 
