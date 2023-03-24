@@ -18,14 +18,6 @@ import ws from "./websocket/client";
 const callstack = async (configName = "default") => {
   try {
     dotenv.config();
-
-    // if (
-    //   process.env.APPLICATION_INSIGHTS_CONNECTION_STRING &&
-    //   process.env.APPLICATION_INSIGHTS_TAG_NAME
-    // ) {
-    //   await appInsights.init();
-    // }
-
     //CLEAR OLD FILES
     await glob("./output/*.csv").then((paths: string[]) =>
       paths.forEach(fs.unlinkSync)
@@ -41,7 +33,6 @@ const callstack = async (configName = "default") => {
       httpTransport.getInstance().setToken.bind(httpTransport.getInstance())
     );
     OpenIdClient.addSubscriber(ws.setToken.bind(ws));
-    OpenIdClient.addSubscriber(console.log);
     await OpenIdClient.connect();
     await OpenIdClient.grant();
     if (!ws.isConnected()) {
