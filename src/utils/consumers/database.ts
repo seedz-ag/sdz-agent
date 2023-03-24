@@ -63,7 +63,7 @@ const consumer = async () => {
           unit: "Records",
         });
       }
-      if( args.argv.check){
+      if(args.argv.check) {
         if (!config.legacy) {
           await httpTransport(
             entity.entity,
