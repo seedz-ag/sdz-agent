@@ -117,7 +117,7 @@ export default class HttpClient {
 
     return axiosInstance({
       data: this.compile(this.body, this.scope),
-      headers: this.getHeaders(),
+      headers: JSON.parse(this.compile(JSON.stringify(this.getHeaders()))),
       method: this.getMethod(),
       url: this.compile(this.url),
     })
