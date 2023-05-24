@@ -24,6 +24,12 @@ interpolator.registerModifier("YYYY-MM-DD", (val, data) => {
 interpolator.registerModifier("YYYYMMDD", (val, data) => {
   return val.format("YYYYMMDD");
 });
+interpolator.registerModifier("date_sub_day", (val, data) => {
+  return moment(new Date()).subtract(val, "day");
+});
+interpolator.registerModifier("date_sub_month", (val, data) => {
+  return moment(new Date()).subtract(val, "month");
+});
 
 let page = 0;
 export const setPage = (value) => page = value 
