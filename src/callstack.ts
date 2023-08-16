@@ -13,7 +13,6 @@ import httpTransport from "./utils/transports/http";
 import killProcess from "./utils/kill-process";
 import moment from "moment";
 import ws from "./websocket/client";
-// import appInsights from "./config/appInsights";
 
 const callstack = async (configName = "default") => {
   try {
@@ -46,9 +45,12 @@ const callstack = async (configName = "default") => {
     let configWs: Config | Config[] | undefined;
     let tries = 0;
     while (!configWs && 20 > tries) {
-      Logger.info('GETTING CONFIG')
+      Logger.info("GETTING CONFIG");
       tries++;
-      configWs = await Promise.race([ws.getConfig(), new Promise<undefined>(resolve => setTimeout(resolve, 5000)) ]);
+      configWs = await Promise.race([
+        ws.getConfig(),
+        new Promise<undefined>((resolve) => setTimeout(resolve, 5000)),
+      ]);
     }
     if (!configWs) {
       Logger.error("COULD'T GET CONFIG, ABORTING.");
@@ -107,6 +109,8 @@ const callstack = async (configName = "default") => {
       killProcess(0);
   } catch (e: any) {
     Logger.error(e.message);
+    (!process.env.COMMAND_LINE || process.env.COMMAND_LINE === "false") &&
+      killProcess(0);
   }
   return true;
 };

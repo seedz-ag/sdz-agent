@@ -2,6 +2,7 @@ import parser from "xml2json";
 import axios from "axios";
 import { get } from "dot-wild";
 import https from "https";
+import { Logger } from "sdz-agent-common";
 import interpolation from "./interpolation";
 
 export default class HttpClient {
@@ -119,8 +120,13 @@ export default class HttpClient {
       data: this.compile(this.body, this.scope),
       headers: JSON.parse(this.compile(JSON.stringify(this.getHeaders()))),
       method: this.getMethod(),
+      timeout: Number(process.env.HTTP_CONSUMER_REQUEST_TIMEOUT) || undefined,
       url: this.compile(this.url),
     })
+      .catch((error) => {
+        Logger.error("HTTP CONSUMER", error.code);
+        throw error;
+      })
       .then(({ data }) => {
         if (get(this.getHeaders(), "Accept") === "application/xml") {
           return parser.toJson(data, { object: true });
