@@ -129,7 +129,16 @@ export default class HttpClient {
       })
       .then((data) => {
         if (this.dataPath) {
-          return this.searchDataPath(data, this.dataPath);
+          const DataPath =  this.setDataPath(this.dataPath);
+          return (Array.isArray(DataPath) ? DataPath : [DataPath]).map((data) => {
+		        return Object.fromEntries(Object.entries(data).map(([key, value]) => {
+              if(!!value && typeof value === "object")
+              {
+                  Object.keys(value).length === 0 ? "" : value
+              }
+              return [key, value];
+            }))
+          })
         }
         return data;
       });
