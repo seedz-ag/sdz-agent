@@ -1,0 +1,11 @@
+.dockerignore
+.github
+.pipeline
+node_modules
+windows
+.env
+.env.example
+.gitignore
+docker-compose.yml
+Dockerfile
+websocket*

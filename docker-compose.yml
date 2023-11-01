@@ -1,0 +1,8 @@
+version: '2'
+services:
+  sdz-agent:
+    build: .
+    working_dir: /opt/sdz-agent/
+    env_file:
+      - .env
+    command: ./agent scheduler
