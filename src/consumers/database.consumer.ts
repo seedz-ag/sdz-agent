@@ -136,7 +136,7 @@ export class DatabaseConsumer implements IConsumer {
         this.loggerAdapter.log("info", `SQL QUERY DONE`);
 
         while (response && response.length) {
-          const data = this.utilsService.needsToHydrate(schema)
+          const data = !this.utilsService.needsToHydrate(schema)
             ? response
             : response.map((row: Record<string, string>) =>
                 this.hydratorService.hydrate(schema.Maps, row)
