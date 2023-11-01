@@ -147,11 +147,6 @@ export class HttpConsumer implements IConsumer {
     }
 
     if (response && response.length) {
-      const dto = schema.Maps.reduce((previous, current) => {
-        previous[current.From] = current.To;
-        return previous;
-      }, {} as Record<string, string>);
-
       const data = !this.utilsService.needsToHydrate(schema)
         ? response
         : response.map((row: Record<string, string>) =>
