@@ -5,6 +5,7 @@ import { IDataSet } from "../interfaces/result-set.interface";
 import { IFlattenDataSet } from "../interfaces/flatten-data-set.interface";
 import { randomUUID } from "node:crypto";
 import { IMap } from "interfaces/setting.interface";
+import { UtilsService } from "./utils.service";
 
 const pipes = {
   Append: (row: IDataSet, value: unknown, args: string[]) =>
@@ -25,6 +26,8 @@ type Pipes = keyof typeof pipes | undefined;
 
 @singleton()
 export class HydratorService {
+  constructor(private readonly utilsService: UtilsService) {}
+
   private flatten<T = any>(obj: any): IFlattenDataSet<T> {
     let result: any = {};
     for (const i in obj) {

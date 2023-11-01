@@ -77,6 +77,14 @@ export class UtilsService {
     return schema.InputFormat === "AGENT" && !!schema.Maps.length;
   }
 
+  public normalizeObjectKeys<T>(obj: T) {
+    return JSON.parse(
+      JSON.stringify(obj).replace(/("\w+":)/g, (key: string) =>
+        key.toUpperCase()
+      )
+    );
+  }
+
   public wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
