@@ -12,7 +12,7 @@ const pipes = {
   Capitalize: (row: IDataSet, value: unknown, args: string[]) =>
     value && "string" === typeof value && value.toUpperCase(),
   Concat: (row: IDataSet, value: unknown, args: string[]) => {
-    return value + (row[args[0]] || "");
+    return value + get(row, args[0].toUpperCase(), "");
   },
   Now: () => moment().format("YYYY-MM-DD"),
   Prepend: (row: IDataSet, value: unknown, args: string[]) =>
@@ -64,7 +64,7 @@ export class HydratorService {
 
     return mapping.reduce((previous, { From, To }) => {
       let value = `${
-        From ? flattened[`${From}`.toUpperCase() as Uppercase<string>] : ""
+        From ? flattened[`${From}`.toUpperCase() as Uppercase<string>] : ``
       }`.trim();
 
       if (To.match(/\|/)) {
@@ -83,7 +83,7 @@ export class HydratorService {
               return;
             }
             const args = matches.shift()?.split(/,/g) || [];
-            value = pipes[key](row, value, args);
+            value = pipes[key](normalized, value, args);
             normalized[`${From || To}`.toUpperCase()] = value;
           });
         }
