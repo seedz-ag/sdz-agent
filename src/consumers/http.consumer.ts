@@ -152,7 +152,7 @@ export class HttpConsumer implements IConsumer {
         return previous;
       }, {} as Record<string, string>);
 
-      const data = this.utilsService.needsToHydrate(schema)
+      const data = !this.utilsService.needsToHydrate(schema)
         ? response
         : response.map((row: Record<string, string>) =>
             this.hydratorService.hydrate(schema.Maps, row)
