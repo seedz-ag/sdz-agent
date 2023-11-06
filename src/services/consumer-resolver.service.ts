@@ -22,6 +22,7 @@ export class ConsumerResolverService {
     );
 
     const consumers: Record<string, IConsumer> = {
+      API: this.httpConsumer,
       DATABASE: this.databaseConsumer,
       DB: this.databaseConsumer,
       FTP: this.ftpConsumer,

@@ -199,6 +199,11 @@ const mergeEnv = (args: Record<string, any>) => {
             describe: "Execute specified Query",
             type: "string",
           })
+          .option("raw-only", {
+            alias: "r",
+            describe: "Sends only raw data",
+            type: "boolean",
+          })
           .option("schema", {
             alias: "s",
             describe: "Extract only specified Schema",
