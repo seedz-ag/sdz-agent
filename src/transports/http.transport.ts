@@ -1,9 +1,9 @@
 import { singleton } from "tsyringe";
+import { LoggerAdapter } from "../adapters/logger.adapter";
 import { ITransport } from "../interfaces/transport.interface";
 import { APIService } from "../services/api.service";
+import { EnvironmentService } from "../services/environment.service";
 import { UtilsService } from "../services/utils.service";
-import { LoggerAdapter } from "../adapters/logger.adapter";
-import { EnvironmentService } from "services/environment.service";
 
 @singleton()
 export default class HttpTransport implements ITransport {
