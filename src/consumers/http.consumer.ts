@@ -307,7 +307,7 @@ export class HttpConsumer implements IConsumer {
             response = await this.request(schema, command);
           }
         } catch (error) {
-          console.log({ error });
+          console.error({ error });
         }
       }
     }
