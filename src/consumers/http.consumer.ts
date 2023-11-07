@@ -14,6 +14,7 @@ import { LoggerAdapter } from "../adapters/logger.adapter";
 
 @singleton()
 export class HttpConsumer implements IConsumer {
+  private cache: Record<string, number> = {};
   private setting: ISetting;
   private transport: ITransport;
 
@@ -27,8 +28,12 @@ export class HttpConsumer implements IConsumer {
   ) {}
 
   // FUNCTIONS
-  private compile(template: string, data: Record<string, any> = {}) {
-    return this.interpolationService.interpolate(template, data);
+  private compile(
+    template: string,
+    data: Record<string, any> = {},
+    scope: any = {}
+  ) {
+    return this.interpolationService.interpolate(template, data, scope);
   }
 
   private compileBody(headers = {}, body: string, scope: any) {
@@ -57,6 +62,37 @@ export class HttpConsumer implements IConsumer {
     }
 
     return ApiResource || Entity;
+  }
+
+  private handleRange(command: Record<string, any>) {
+    if (command.range) {
+      command.scope = {
+        ...(command.scope || {}),
+        current: String(command.range?.current?.value),
+        end: String(command.range?.end?.value),
+      };
+    }
+
+    if (command.range) {
+      ["current", "end"].forEach((direction) => {
+        if (command.range?.[direction]?.type) {
+          switch (command.range?.[direction]?.type) {
+            case "INT_DECREMENT":
+              command.range[direction].value =
+                Number(command.range[direction].value) -
+                Number(command.range[direction].step);
+              break;
+            case "INT_INCREMENT":
+              command.range[direction].value =
+                Number(command.range[direction].value) +
+                Number(command.range[direction].step);
+              break;
+            default:
+              throw new Error("INVALID STEP TYPE");
+          }
+        }
+      });
+    }
   }
 
   private searchDataPath = (data: any, path: string) => {
@@ -105,11 +141,25 @@ export class HttpConsumer implements IConsumer {
         : undefined,
       method,
       timeout,
-      url: this.compile(url),
+      url: this.compile(url, scope),
     };
 
+    this.loggerAdapter.log(
+      "info",
+      "REQUESTING",
+      JSON.stringify(requestCompiled)
+    );
+
+    if (!this.cache[schema.Entity.toUpperCase()]) {
+      this.cache[schema.Entity.toUpperCase()] = 0;
+    }
+
+    this.cache[schema.Entity.toUpperCase()]++;
+
     fs.writeFileSync(
-      `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-request.json`,
+      `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-request-${`0000${
+        this.cache[schema.Entity.toUpperCase()]
+      }`.slice(-5)}.json`,
       JSON.stringify(requestCompiled)
     );
 
@@ -159,6 +209,13 @@ export class HttpConsumer implements IConsumer {
       ]);
 
       await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+
+      if (
+        this.environmentService.get("RAW_ONLY") &&
+        !resource.startsWith("raw")
+      ) {
+        return response;
+      }
 
       await Promise.all([
         this.utilsService.writeJSON(resource, data),
@@ -225,16 +282,32 @@ export class HttpConsumer implements IConsumer {
       );
 
       for (const index in queries) {
-        const query = queries[index];
-        const command = JSON.parse(query.Command);
-        this.interpolationService.setPage(0);
-        fs.writeFileSync(
-          `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}.json`,
-          query.Command
-        );
-        let response = await this.request(schema, command);
-        while (response && response.length && command.paginates) {
-          response = await this.request(schema, command);
+        try {
+          const query = queries[index];
+          const command = JSON.parse(query.Command);
+          this.interpolationService.setPage(0);
+          fs.writeFileSync(
+            `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-${
+              query.Id
+            }.json`,
+            query.Command
+          );
+
+          this.handleRange(command);
+
+          let response = await this.request(schema, command);
+
+          const { range } = command;
+
+          while ((response && response.length && command.paginates) || range) {
+            if (range && String(range.current.value) === String(range.stop)) {
+              break;
+            }
+            this.handleRange(command);
+            response = await this.request(schema, command);
+          }
+        } catch (error) {
+          console.log({ error });
         }
       }
     }
