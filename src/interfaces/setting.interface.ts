@@ -16,6 +16,7 @@ export interface IParameter {
 export interface IQuery {
   Command: string;
   Entity: string;
+  Id: string;
 }
 
 export interface ISchedule {
