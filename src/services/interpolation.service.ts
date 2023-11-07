@@ -31,6 +31,10 @@ const defaultModifiers = [
     },
   },
   {
+    key: "sub_day",
+    transform: (val, data) => moment(val).subtract(1, "d"),
+  },
+  {
     key: "subDay",
     transform: (val, data) => moment(val).subtract(1, "d"),
   },
@@ -116,6 +120,7 @@ const getValueFromObject = (value, data) => {
 
 class Interpolator {
   private aliases: [];
+  private delimiterIndex: 0;
   private modifiers: [];
 
   constructor(private readonly options = defaultOptions) {
@@ -132,16 +137,20 @@ class Interpolator {
     return this;
   }
 
+  set delimiter(value) {
+    this.options.delimiter = value;
+  }
+
   get delimiter() {
     return this.options.delimiter;
   }
 
   delimiterStart() {
-    return this.options.delimiter[0];
+    return this.options.delimiter[this.delimiterIndex];
   }
 
   delimiterEnd() {
-    return this.options.delimiter[1];
+    return this.options.delimiter[this.delimiterIndex + 1];
   }
 
   registerModifier(key, transform) {
@@ -159,13 +168,19 @@ class Interpolator {
     return this;
   }
 
-  parseRules(str) {
-    const regex = `${this.delimiterStart()}([^}]+)${this.delimiterEnd()}`;
-    const execRegex = new RegExp(regex, "gi");
-    const matches = str.match(execRegex);
+  parseRules(str, data) {
+    this.delimiterIndex = 0;
+    for (let i = 0; i < this.delimiter.length; i += 2) {
+      const regex = `${this.delimiterStart()}([^}]+)${this.delimiterEnd()}`;
+      const execRegex = new RegExp(regex, "gi");
+      const matches = str.match(execRegex);
+      if (matches?.length) {
+        str = this.parseFromRules(str, data, this.extractRules(matches));
+      }
+      this.delimiterIndex += 2;
+    }
 
-    // const parsableMatches = matches.map((match) => ({ key: removeDelimiter(match), replaceWith: match }));
-    return matches ? this.extractRules(matches) : [];
+    return str;
   }
 
   extractRules(matches) {
@@ -231,12 +246,7 @@ class Interpolator {
   }
 
   parse(str = "", data = {}) {
-    const rules = this.parseRules(str);
-    if (rules && rules.length > 0) {
-      return this.parseFromRules(str, data, rules);
-    }
-
-    return str;
+    return this.parseRules(str, data);
   }
 
   parseFromRules(str, data, rules) {
@@ -328,11 +338,19 @@ export class InterpolationService {
   };
 
   private readonly interpolator = new Interpolator({
-    delimiter: ["{{", "}}", "{{ ", " }}"],
+    delimiter: ["<%=", "%>", "{{", "}}", "{{ ", " }}"],
   });
 
-  public interpolate(template: string, data: Record<string, any> = {}) {
-    return this.interpolator.parse(template, { ...this.data, ...data });
+  public interpolate(
+    template: string,
+    data: Record<string, any> = {},
+    scope: any = {}
+  ) {
+    return this.interpolator.parse(template, {
+      ...this.data,
+      ...scope,
+      ...data,
+    });
   }
 
   public setPage = (value) => (page = value);
