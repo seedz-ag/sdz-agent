@@ -27,18 +27,15 @@ export default class HttpTransport implements ITransport {
         "info",
         `SENDING CHUNK ${chunk.length} LINES TO /${resource}`
       );
+
+      if (this.environmentService.get("THROTTLE")) {
+        await this.apiService.sendResource(resource, chunk);
+        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+        continue;
+      }
+
       promises.push(this.apiService.sendResource(resource, chunk));
     }
-
-    if (this.environmentService.get("THROTTLE")) {
-      await promises.reduce(async (acc: any, curr: any) => {
-        await acc;
-        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
-        return curr;
-      }, promises);
-      return;
-    }
-
     await Promise.all(promises);
   }
 }
