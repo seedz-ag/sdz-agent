@@ -153,7 +153,7 @@ export class DatabaseConsumer implements IConsumer {
             ),
           ]);
 
-          this.utilsService.wait(this.environmentService.get("THROTTLE"));
+          await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
           await Promise.all([
             this.utilsService.writeJSON(
@@ -163,7 +163,7 @@ export class DatabaseConsumer implements IConsumer {
             this.transport.send(schema.ApiResource || schema.Entity, data),
           ]);
 
-          this.utilsService.wait(this.environmentService.get("THROTTLE"));
+          await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
           page++;
 
