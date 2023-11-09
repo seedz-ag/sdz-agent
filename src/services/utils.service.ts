@@ -18,12 +18,22 @@ export class UtilsService {
     const split = Number(
       length || this.environmentService.get("CHUNK_SIZE") || 1000
     );
+
     const fn = (arr: any, split: number, acc: any = []): any => {
       return arr.length <= split
         ? [...acc, arr]
         : fn(arr.slice(split), split, [...acc, arr.slice(0, split)]);
     };
+
     return fn(data, split);
+  }
+
+  public calculateRetryTime(retry: number, baseTime: number): number {
+    let time = baseTime;
+    for (let i = 0; i < retry; i ++) {
+      time = 2 * time;
+    }
+    return time;
   }
 
   public extractDatabaseConfig(parameters: IParameter[]) {
