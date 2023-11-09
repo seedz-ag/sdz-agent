@@ -5,13 +5,15 @@ import { LoggerAdapter } from "../adapters/logger.adapter";
 import { EnvironmentService } from "./environment.service";
 import { IDiscovery } from "../interfaces/discovery.interface";
 import { ISetting } from "../interfaces/setting.interface";
+import { UtilsService } from "./utils.service";
 
 @singleton()
 export class APIService {
   constructor(
     private readonly environmentService: EnvironmentService,
     private readonly httpClientAdapter: HttpClientAdapter,
-    private readonly loggerAdapter: LoggerAdapter
+    private readonly loggerAdapter: LoggerAdapter,
+    private readonly utilsService: UtilsService
   ) {}
 
   private getHeaders() {
@@ -56,18 +58,36 @@ export class APIService {
     return setting;
   }
 
-  public async sendResource(resource: string, data: unknown) {
+  public async sendResource(
+    resource: string,
+    data: unknown,
+    tries = 1
+  ): Promise<void> {
     this.loggerAdapter.log(
       "info",
-      `SENDING RESOURCE ${this.environmentService.get("API_URL")}${resource}`
+      `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
+        "API_URL"
+      )}${resource}`
     );
-    await this.httpClientAdapter.post(
-      `${this.environmentService.get("API_URL")}${resource}`,
-      data,
-      {
-        headers: this.getHeaders(),
+
+    try {
+      await this.httpClientAdapter.post(
+        `${this.environmentService.get("API_URL")}${resource}`,
+        data,
+        {
+          headers: this.getHeaders(),
+        }
+      );
+    } catch (error) {
+      if (tries <= this.environmentService.get("RETRIES")) {
+        await this.utilsService.wait(
+          this.utilsService.calculateRetryTime(tries, 60_000)
+        );
+        tries++;
+        return await this.sendResource(resource, data, tries);
       }
-    );
+      throw error;
+    }
   }
 
   public async touchSetting() {

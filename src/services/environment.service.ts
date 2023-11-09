@@ -20,6 +20,10 @@ const environmentSchema = z.object({
     .optional()
     .transform((value: unknown) => "true" === value || true === value || false),
   QUERY: z.string().optional(),
+  RETRIES: z
+    .string()
+    .default("3")
+    .transform((value: unknown) => Number(value)),
   RAW_ONLY: z
     .string()
     .optional()
