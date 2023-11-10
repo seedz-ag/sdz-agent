@@ -54,10 +54,13 @@ export class ConfigureCommand implements ICommand {
     CLIENT_SECRET,
   }: ValidateCredentialsInput): Promise<boolean> {
     try {
-      await this.httpClientAdapter.post(`https://api.integration.seedz.ag/integration/v1/auth`, {
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-      });
+      await this.httpClientAdapter.post(
+        `https://api.integration.seedz.ag/integration/v1/auth`,
+        {
+          clientId: CLIENT_ID,
+          clientSecret: CLIENT_SECRET,
+        }
+      );
       return true;
     } catch {
       return false;
@@ -74,7 +77,7 @@ export class ConfigureCommand implements ICommand {
         })) as any;
 
         if (!CONTINUE) {
-          process.exit(1)
+          process.exit(1);
         }
       }
 
@@ -100,18 +103,21 @@ export class ConfigureCommand implements ICommand {
 
       const { CLIENT_ID, CLIENT_SECRET } = await this.askForCredentials();
 
-       writeFileSync(
+      writeFileSync(
         ".env",
         `API_URL=${`https://api.integration.seedz.ag/integration/v1/`}
 CLIENT_ID=${CLIENT_ID}
 CLIENT_SECRET=${CLIENT_SECRET}`
       );
 
-      console.log(colors.green(`✔`), colors.bold(`PRODUCTION CONFIGURATION SAVED.`));
-      process.exit(1)
+      console.log(
+        colors.green(`✔`),
+        colors.bold(`PRODUCTION CONFIGURATION SAVED.`)
+      );
+      process.exit(1);
     } catch {
       console.log(colors.magenta(`✖`), colors.bold(`CONFIGURATION CANCELLED.`));
-      process.exit(1)
+      process.exit(1);
     }
   }
 }
