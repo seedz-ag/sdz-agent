@@ -1,15 +1,20 @@
 import { config } from "dotenv";
+import { argv } from "process";
 import { singleton } from "tsyringe";
 import { z } from "zod";
 
 const environmentSchema = z.object({
-  API_URL: z.string().url(),
+  ...(argv.includes("configure")
+    ? {}
+    : {
+        API_URL: z.string().url(),
+        CLIENT_ID: z.string(),
+        CLIENT_SECRET: z.string(),
+      }),
   CHUNK_SIZE: z
     .string()
     .optional()
     .transform((value: unknown) => Number(value)),
-  CLIENT_ID: z.string(),
-  CLIENT_SECRET: z.string(),
   ENV: z.enum(["DEV", "SND", "PRD"]).optional(),
   EXTRACT_LAST_N_DAYS: z
     .string()

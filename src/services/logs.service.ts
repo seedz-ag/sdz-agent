@@ -1,10 +1,9 @@
 import { glob } from "fast-glob";
 import { createReadStream, unlinkSync } from "fs";
 import { createInterface } from "readline";
-import fs from "fs";
+import { Stream } from "stream";
 import { singleton } from "tsyringe";
 import { APIService } from "./api.service";
-import { Stream } from "stream";
 import { UtilsService } from "./utils.service";
 
 type LogsServiceConsumeInput = {
@@ -48,6 +47,7 @@ export class LogsService {
 
   public async consumeOutput() {
     const files = await glob("./output/*.log");
+
     for (const file of files) {
       const list: string[][] = [];
 
@@ -68,7 +68,8 @@ export class LogsService {
           await this.apiService.sendLog(chunk);
         }
       }
-        files.forEach(fs.unlinkSync)
+
+      files.forEach(unlinkSync);
     }
   }
 }

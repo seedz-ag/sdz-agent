@@ -1,14 +1,13 @@
 import "reflect-metadata";
 import colors from "colors";
 import { binary, clock, dots, earth } from "cli-spinners";
-import ora from "ora";
+import ora, { Ora } from "ora";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
 import { getContainer } from "./container";
-import { APIService } from "./services/api.service";
-import { EnvironmentService } from "./services/environment.service";
-import { UtilsService } from "./services/utils.service";
+import { APILoggerAdapter } from "./adapters/api-logger.adapter";
+import { ConsoleLoggerAdapter } from "./adapters/console-logger.adapter";
 import { LoggerAdapter } from "./adapters/logger.adapter";
 import { CheckCommand } from "./commands/check.command";
 import { ConfigureCommand } from "./commands/configure.command";
@@ -16,6 +15,9 @@ import { ExecuteCommand } from "./commands/execute.command";
 import { SchedulerCommand } from "./commands/scheduler.command";
 import { UpdateCommand } from "./commands/update.command";
 import { ListenCommand } from "./commands/listen.command";
+import { APIService } from "./services/api.service";
+import { EnvironmentService } from "./services/environment.service";
+import { UtilsService } from "./services/utils.service";
 import { LogsService } from "./services/logs.service";
 
 process.env.CLI = "1";
@@ -33,24 +35,25 @@ const mergeEnv = (args: Record<string, any>) => {
 
 (async () => {
   const container = await getContainer();
-
-  const apiService = container.resolve(APIService);
+  const utilsService = container.resolve(UtilsService);
 
   const loggerAdapter = container.resolve(LoggerAdapter);
-
-  loggerAdapter.addPipe((timestamp, level, ...args) =>
-    apiService.sendLog([[level, timestamp, ...args]])
-  );
-
   const logsService = container.resolve(LogsService);
+  const apiLoggerAdapter = container.resolve(APILoggerAdapter);
 
   try {
     loggerAdapter.log("info", "CONSUMING LOG");
     await logsService.consumeOutput();
-    loggerAdapter.log("info", "LOG CONSUMED");
-  } catch (e) {
-    loggerAdapter.log("warn", "IMPOSSIBLE TO CONSUME LOG, MAYBE ANOTHER TIME");
+  } catch (error: any) {
+    loggerAdapter.log(
+      "error",
+      "IMPOSSIBLE TO CONSUME LOG, MAYBE ANOTHER TIME",
+      `ERROR: ${error.status}`
+    );
   }
+
+  const apiLoggerStream = loggerAdapter.pipe(apiLoggerAdapter);
+  apiLoggerStream.on("close", () => apiLoggerAdapter.uncork());
 
   yargs(hideBin(process.argv))
     .scriptName("")
@@ -81,8 +84,6 @@ const mergeEnv = (args: Record<string, any>) => {
         const checkCommand = container.resolve(CheckCommand);
 
         const loggerAdapter = container.resolve(LoggerAdapter);
-
-        const utilsService = container.resolve(UtilsService);
 
         const spinner = ora({
           text: "RUNNING ",
@@ -168,8 +169,6 @@ const mergeEnv = (args: Record<string, any>) => {
         }
 
         spinner.succeed("DONE");
-
-        utilsService.killProcess(0);
       }
     )
     .command("configure", "Configures Agent", async (argv) => {
@@ -218,10 +217,21 @@ const mergeEnv = (args: Record<string, any>) => {
         mergeEnv(argv);
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
-        if (environmentService.get("USE_CONSOLE_LOG")) {
-          loggerAdapter.addPipe(async (timestamp, level, ...args) =>
-            console.log([level, timestamp, ...args])
-          );
+
+        let spinner: Ora | undefined;
+
+        if (!environmentService.get("USE_CONSOLE_LOG")) {
+          spinner = ora({
+            text: "RUNNING ",
+            spinner: binary,
+          });
+
+          (global as any).spinner = spinner;
+
+          spinner.start();
+        } else {
+          const consoleLoggerAdapter = container.resolve(ConsoleLoggerAdapter);
+          loggerAdapter.pipe(consoleLoggerAdapter);
         }
 
         const env = environmentService.get("ENV");
@@ -236,24 +246,15 @@ const mergeEnv = (args: Record<string, any>) => {
           environmentService.parse();
         }
         const executeCommand = container.resolve(ExecuteCommand);
-        const utilsService = container.resolve(UtilsService);
-
-        const spinner = ora({
-          text: "RUNNING ",
-          spinner: binary,
-        });
-
-        (global as any).spinner = spinner;
-
-        spinner.start();
 
         try {
           await executeCommand.execute();
-          spinner.succeed("DONE");
-        } catch (error) {
-          spinner.fail("ERROR");
+          !!spinner && spinner.succeed("DONE");
+        } catch (error: any) {
+          loggerAdapter.log("error", error?.response?.data || error.message);
+          !!spinner && spinner.fail("ERROR");
         } finally {
-          utilsService.killProcess();
+          loggerAdapter.push(null);
         }
       }
     )
@@ -345,11 +346,8 @@ const mergeEnv = (args: Record<string, any>) => {
         (global as any).spinner = spinner;
 
         mergeEnv(argv);
-        try {
-          await schedulerCommand.execute();
-        } catch {
-          await schedulerCommand.rescue();
-        }
+
+        await schedulerCommand.execute();
 
         spinner.fail("STOPED");
       }
@@ -387,4 +385,15 @@ const mergeEnv = (args: Record<string, any>) => {
     .strictCommands()
     .demandCommand(1)
     .parse();
+
+  await new Promise<void>((resolve, reject) => {
+    apiLoggerStream.on("close", () => {
+      resolve();
+      utilsService.killProcess();
+    });
+    apiLoggerStream.on("error", () => {
+      reject();
+      utilsService.killProcess();
+    });
+  });
 })();
