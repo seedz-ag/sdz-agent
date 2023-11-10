@@ -1,5 +1,7 @@
 import "reflect-metadata";
 import { Lifecycle, container } from "tsyringe";
+import { APILoggerAdapter } from "./adapters/api-logger.adapter";
+import { ConsoleLoggerAdapter } from "./adapters/console-logger.adapter";
 import { CSVAdapter } from "./adapters/csv.adapter";
 import { FTPAdapter } from "./adapters/ftp.adapter";
 import { HttpClientAdapter } from "./adapters/http-client.adapter";
@@ -24,6 +26,16 @@ import { VPNService } from "./services/vpn.service";
 
 export const getContainer = async () => {
   // ADAPTERS
+  container.register(
+    APILoggerAdapter,
+    { useClass: APILoggerAdapter },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    ConsoleLoggerAdapter,
+    { useClass: ConsoleLoggerAdapter },
+    { lifecycle: Lifecycle.Singleton }
+  );
   container.register(
     CSVAdapter,
     { useClass: CSVAdapter },

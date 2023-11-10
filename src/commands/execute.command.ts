@@ -63,16 +63,13 @@ export class ExecuteCommand implements ICommand {
       } catch (e: any) {
         this.loggerAdapter.log(
           "error",
-          `SDZ-AGENT ERROR WHILING FIND SETTING: ${e.response.data}`
+          `SDZ-AGENT ERROR WHILING FIND SETTING:`,
+          e.response.data
         );
       }
 
       if (!setting) {
-        this.loggerAdapter.log(
-          "error",
-          "SDZ-AGENT COULDN'T FIND SETTING, ABORTING."
-        );
-        throw new Error();
+        throw new Error("SDZ-AGENT COULDN'T FIND SETTING, ABORTING.");
       }
 
       if (setting.Security) {
@@ -92,8 +89,7 @@ export class ExecuteCommand implements ICommand {
 
       const transport = transports[setting.Channel.toUpperCase()];
       if (!transport) {
-        this.loggerAdapter.log("error", "TRANSPORT NOT FOUND");
-        throw new Error();
+        throw new Error("TRANSPORT NOT FOUND");
       }
       this.loggerAdapter.log("info", `TRANSPORT RESOLVED`);
 
@@ -111,13 +107,8 @@ export class ExecuteCommand implements ICommand {
       if (this.vpnService.isConnected()) {
         await this.vpnService.disconnect();
       }
-
-      await this.logService.consumeOutput();
     } catch (error: any) {
-      this.loggerAdapter.log("error", error.message);
-      await this.logService.consumeOutput();
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      throw new Error();
+      throw error;
     }
   }
 }

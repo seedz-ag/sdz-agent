@@ -36,7 +36,13 @@ export class SchedulerCommand implements ICommand {
     try {
       await new Promise<void>(async (resolve, reject) => {
         this.loggerAdapter.log("info", "STARTING SCHEDULER");
-        let setting: ISetting = await this.apiService.getSetting();
+        let setting: ISetting;
+        try {
+          setting = await this.apiService.getSetting();
+        } catch (error) {
+          reject(error);
+          return;
+        }
         let child = this.fork(setting.Schedules);
         if ("true" === process.env.LISTEN) {
           this.listenCommand.execute();
@@ -46,11 +52,15 @@ export class SchedulerCommand implements ICommand {
             reject();
             return;
           }
-          const verify = await this.apiService.getSetting();
-          if (JSON.stringify(setting) !== JSON.stringify(verify)) {
-            child.kill();
-            setting = verify;
-            child = this.fork(setting.Schedules);
+          try {
+            const verify = await this.apiService.getSetting();
+            if (JSON.stringify(setting) !== JSON.stringify(verify)) {
+              child.kill();
+              setting = verify;
+              child = this.fork(setting.Schedules);
+            }
+          } catch (error) {
+            reject(error);
           }
         }, 60000);
       });
