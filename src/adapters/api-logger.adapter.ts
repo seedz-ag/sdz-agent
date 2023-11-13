@@ -38,11 +38,12 @@ export class APILoggerAdapter extends Writable {
 
     this.apiService
       .sendLog(
-        chunks.map(({ chunk }) =>
-          chunk.data.map((item) =>
+        chunks.map(({ chunk }) => {
+          const [timestamp, level, ...args] = chunk.data;
+          return [level, timestamp, ...args].map((item) =>
             "string" !== typeof item ? JSON.stringify(item) : item
-          )
-        )
+          );
+        })
       )
       .then(() => {
         if (!pages.length) {
@@ -67,6 +68,6 @@ export class APILoggerAdapter extends Writable {
 
   private writeToFile(timestamp: string, level: string, ...args: any[]) {
     const file = `output/${DateTime.now().toFormat("yyyy-LL-dd")}.log`;
-    appendFileSync(file, JSON.stringify([level, timestamp, ...args]) + "\n");
+    appendFileSync(file, JSON.stringify([timestamp, level, ...args]) + "\n");
   }
 }

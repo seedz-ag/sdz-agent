@@ -65,7 +65,9 @@ export class LogsService {
       if (list.length) {
         const chunks = this.utilsService.chunkData(list, 100);
         for (const chunk of chunks) {
-          await this.apiService.sendLog(chunk);
+          await this.apiService.sendLog(chunk.map((item) => {
+            return [item[1], item[0], item[2]]
+          }))
         }
       }
 
