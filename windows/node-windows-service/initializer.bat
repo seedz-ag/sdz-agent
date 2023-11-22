@@ -1,1 +1,1 @@
-bin\run -S
+agent scheduler
