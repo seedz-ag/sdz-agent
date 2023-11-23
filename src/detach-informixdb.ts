@@ -11,15 +11,10 @@ try {
 
   console.log("DETACHING INFORMIXDB");
 
-  contents = contents
-    .replace(
-      'const sdz_agent_database_informix_1 = __importDefault(require("sdz-agent-database-informix"));\n',
-      ""
-    )
-    .replace(
-      "            informix: sdz_agent_database_informix_1.default,\n",
-      ""
-    );
+  contents = [
+    'const sdz_agent_database_informix_1 = __importDefault(require("sdz-agent-database-informix"));\n',
+    "            informix: sdz_agent_database_informix_1.default,\n",
+  ].reduce((acc, curr) => acc.replace(curr, ""), contents);
 
   console.log("WRITING FILE");
 
