@@ -4,52 +4,62 @@ O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de con
 
 ## Requisitos
 
-OS: Ubuntu LTS 20.04
+OS: Ubuntu LTS 22.04
 RAM: 4GB
-HD: 20GB 
-
-### Instalacão
-
-Esse projeto usa o `Node 12.14`, `Yarn 1.x`, `Cmake 3.x`, `g++ 9.x` certifique que a maquina contém essas versões instaladas.
-É necessário configuar o arquivo `config.json` na raiz do projeto com os dados referentes a autenticacão na plataforma.
-É necessário que seja realizada configuracão dos Dtos dentro de `config/dto`.
-Para executar o projeto execute o Yarn na raiz, depois o bash `./bin/run` em ambientes Linux, e `run /bin/run.cmd` em ambientes Windows.
+HD: 20GB
 
 #### Pacotes dependentes:
 
 - sdz-agent-common
-- sdz-agent-data
 - sdz-agent-database
-- sdz-agent-sftp
-- sdz-agent-types
 
-##### Estrutura de arquivos
+### Instalacão
 
-```
- sdz-agent
-|__📁bin
-    |__📃run
-    |__📃run.cmd
-|__📁config
-    |__📁dto
-    |__📃index.ts
-|__📁src
-    |__📁src
-        |__📃call.ts
-        |__📃extract-schedule-config.ts
-    |__📃bootstrap.ts
-    |__📃callstack.ts
-    |__📃job.ts
-    |__📃schedule.ts
-|__⚙️.gitignore
-|__⚙️config.json
-|__📃index.js
-|__📃index.ts
-|__⚙️LICENCE
-|__⚙️package.json
-|__📃README.md
-|__⚙️tsconfig.json
-```
+Esse projeto usa o `Node 18.17`, `libodbc1`, `Cmake >= 3.x`, `g++ >= 9.x` certifique que a maquina contém essas versões instaladas.
+É necessário configuar o arquivo `.env` na raiz do projeto com os dados referentes a autenticacão na plataforma.
+
+1. Clone o repositório do agent para uma pasta local
+2. Execute a instalação das dependências `npm i`
+3. Configure o .env com as credenciais e a url da API do ambiente desejado
+
+#### Utilização:
+
+- ##### \*nix
+
+`./agent`
+`./agent --help`
+
+- ##### Microsoft
+
+`agent.cmd`
+`agent.cmd --help`
+
+#### Agendamento:
+
+- ##### \*nix
+    Utilizar o gerenciador de serviços PM2
+    ```
+    npm i -g pm2
+
+    pm2 start "agent scheduler"
+
+    pm2 save
+    ```
+
+- ##### Windows
+    Utilizar o gerenciador de serviços do Windows
+
+    ```
+    windows\node-windows-service\install.bat
+    ```
+
+    Lembre-se de ativar o serviço no ```services.msc``` e de utilizar um usuário com permissão para a inicialização do serviço
+
+##### Problemas conhecidos
+
+1. Caso encontre problemas para compilar o ODBC da dependência do Informix DB no Windows, você pode utilizar o comando abaixo para remover a dependência do Agent:
+
+`npm run detach-informixdb`
 
 ###### LGPD
 
