@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 export LD_LIBRARY_PATH=$(pwd)/node_modules/sdz-agent-database-oracle/instantclient_21_3/ 
 export INFORMIXDIR=$(pwd)/node_modules/informixdb/installer/onedb-odbc-driver
-ts-node --pretty --logError --swc ./src/cli  $1 "${@:2:99}"
+npx ts-node --pretty --logError --swc ./src/cli  $1 "${@:2:99}"
