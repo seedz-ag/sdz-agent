@@ -9,26 +9,29 @@ import { ListenExecuteCommand } from "./listen-execute.command";
 import { ListenShellCommand } from "./listen-shell.command";
 import { ListenQueryCommand } from "./listen-query.command";
 import { LoggerAdapter } from "../adapters/logger.adapter";
-import { LogsService } from "../services/logs.service";
+import { EnvironmentService } from "../services/environment.service";
 
 config();
 
 @singleton()
 export class ListenCommand implements ICommand {
   constructor(
+    private readonly environmentService: EnvironmentService,
     private readonly executeCommand: ListenExecuteCommand,
     private readonly loggerAdapger: LoggerAdapter,
-    private readonly logService: LogsService,
     private readonly queryCommand: ListenQueryCommand,
     private readonly responseCommand: ListenResponseCommand,
-    private readonly shellCommand: ListenShellCommand
+    private readonly shellCommand: ListenShellCommand,
   ) {}
 
   public execute() {
     return new Promise<void>(async (resolve, reject) => {
       this.loggerAdapger.log("info", "START LISTENING COMMANDS");
       const commands: any = {
-        Execute: (args: any) => this.executeCommand.execute(args),
+        Execute: (args: any) => {
+          this.environmentService.parse();
+          return this.executeCommand.execute(args);
+        },
         Ping: (message: any) => {
           // if (process.env.LOG_PING) this.loggerAdapger.log("info", message.args);
         },

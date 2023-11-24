@@ -57,7 +57,6 @@ export class EnvironmentService {
   private environment: Environment;
 
   constructor() {
-    config();
     this.parse();
   }
 
@@ -70,6 +69,7 @@ export class EnvironmentService {
 
   parse() {
     try {
+      config({ override: true });
       this.environment = environmentSchema.parse(process.env);
     } catch (error: any) {
       throw error.format();
