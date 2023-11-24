@@ -1,12 +1,11 @@
 import { singleton } from "tsyringe";
 import { ExecuteCommand } from "./execute.command";
-import { EnvironmentService } from "../services/environment.service";
 import { ICommand } from "../interfaces/command.interface";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { UtilsService } from "../services/utils.service";
 
 export type ListenExecuteCommandExecuteInput = {
-  args: string[];
+  args: { arg: string; value: string }[][];
 };
 
 @singleton()
@@ -24,14 +23,19 @@ export class ListenExecuteCommand
   }: ListenExecuteCommandExecuteInput): Promise<boolean> {
     this.loggerAdapter.log("info", `COMMAND ${args}`);
 
-    if (args) {
-      this.utilsService.mergeEnv(
-        args.reduce<Record<string, string>>((previous, current) => {
-          const [key, value] = current.replace("--", "").split("=");
-          previous[key.trim()] = value && value.trim();
-          return previous;
-        }, {})
-      );
+    if (Array.isArray(args) && args.length) {
+      args.forEach((args) => {
+        this.utilsService.mergeEnv(
+          args.reduce<Record<string, string>>((previous, current) => {
+            const { arg, value } = current;
+            if (arg) {
+              const key = arg.replace(/(--|\=)/g, "");
+              previous[key] = value && value.trim();
+            }
+            return previous;
+          }, {})
+        );
+      });
     }
 
     return new Promise(async (resolve, reject) => {
