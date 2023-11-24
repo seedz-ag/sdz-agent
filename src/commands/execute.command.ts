@@ -8,8 +8,9 @@ import HttpTransport from "../transports/http.transport";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { APIService } from "../services/api.service";
 import { ConsumerResolverService } from "../services/consumer-resolver.service";
-import { LogsService } from "../services/logs.service";
 import { VPNService } from "../services/vpn.service";
+import { EnvironmentService } from "../services/environment.service";
+import { UtilsService } from "../services/utils.service";
 
 config();
 
@@ -25,14 +26,26 @@ export class ExecuteCommand implements ICommand {
   constructor(
     private readonly apiService: APIService,
     private readonly consumerResolverService: ConsumerResolverService,
+    private readonly environmentService: EnvironmentService,
     private readonly httpTransport: HttpTransport,
     private readonly loggerAdapter: LoggerAdapter,
-    private readonly logService: LogsService,
+    private readonly utilsService: UtilsService,
     private readonly vpnService: VPNService
   ) {}
 
   public async execute() {
     try {
+      const env = this.environmentService.get("ENV");
+
+      if (env) {
+        const discovery = (await this.apiService.discovery())[env];
+        this.utilsService.mergeEnv({
+          API_URL: discovery?.API_URL,
+          CLIENT_ID: discovery?.CREDENTIALS.CLIENT_ID,
+          CLIENT_SECRET: discovery?.CREDENTIALS.CLIENT_SECRET,
+        });
+        this.environmentService.parse();
+      }
       this.loggerAdapter.log("info", "STARTING EXECUTE COMMAND");
 
       //CLEAR OLD FILES
