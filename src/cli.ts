@@ -15,23 +15,11 @@ import { ExecuteCommand } from "./commands/execute.command";
 import { SchedulerCommand } from "./commands/scheduler.command";
 import { UpdateCommand } from "./commands/update.command";
 import { ListenCommand } from "./commands/listen.command";
-import { APIService } from "./services/api.service";
 import { EnvironmentService } from "./services/environment.service";
 import { UtilsService } from "./services/utils.service";
 import { LogsService } from "./services/logs.service";
 
 process.env.CLI = "1";
-
-const mergeEnv = (args: Record<string, any>) => {
-  Object.assign(
-    process.env,
-    Object.fromEntries(
-      Object.entries(args)
-        .filter(([key]) => !["_", "$0"].includes(key))
-        .map(([key, value]) => [key.toUpperCase().replace(/-/g, "_"), value])
-    )
-  );
-};
 
 (async () => {
   const container = await getContainer();
@@ -77,7 +65,7 @@ const mergeEnv = (args: Record<string, any>) => {
           return;
         }
 
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
 
@@ -98,7 +86,7 @@ const mergeEnv = (args: Record<string, any>) => {
 
         argv.VERBOSE = "true";
 
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
         environmentService.parse();
 
         if ("all" === response.type || "datasource" === response.type) {
@@ -172,7 +160,7 @@ const mergeEnv = (args: Record<string, any>) => {
       }
     )
     .command("configure", "Configures Agent", async (argv) => {
-      mergeEnv(argv);
+      utilsService.mergeEnv(argv);
       const environmentService = container.resolve(EnvironmentService);
       environmentService.parse();
       const configureCommand = container.resolve(ConfigureCommand);
@@ -214,7 +202,7 @@ const mergeEnv = (args: Record<string, any>) => {
             type: "boolean",
           }),
       async (argv) => {
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
 
@@ -234,17 +222,6 @@ const mergeEnv = (args: Record<string, any>) => {
           loggerAdapter.pipe(consoleLoggerAdapter);
         }
 
-        const env = environmentService.get("ENV");
-        if (env) {
-          const apiService = container.resolve(APIService);
-          const discovery = (await apiService.discovery())[env];
-          mergeEnv({
-            API_URL: discovery?.API_URL,
-            CLIENT_ID: discovery?.CREDENTIALS.CLIENT_ID,
-            CLIENT_SECRET: discovery?.CREDENTIALS.CLIENT_SECRET,
-          });
-          environmentService.parse();
-        }
         const executeCommand = container.resolve(ExecuteCommand);
 
         try {
@@ -275,7 +252,7 @@ const mergeEnv = (args: Record<string, any>) => {
             type: "boolean",
           }),
       async (argv) => {
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
         const listenScheduler = container.resolve(ListenCommand);
@@ -289,7 +266,7 @@ const mergeEnv = (args: Record<string, any>) => {
 
         (global as any).spinner = spinner;
 
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
 
         let retries = Number(argv.retries);
 
@@ -331,7 +308,7 @@ const mergeEnv = (args: Record<string, any>) => {
             type: "boolean",
           }),
       async (argv) => {
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
         const schedulerCommand = container.resolve(SchedulerCommand);
@@ -345,7 +322,7 @@ const mergeEnv = (args: Record<string, any>) => {
 
         (global as any).spinner = spinner;
 
-        mergeEnv(argv);
+        utilsService.mergeEnv(argv);
 
         await schedulerCommand.execute();
 
@@ -353,7 +330,7 @@ const mergeEnv = (args: Record<string, any>) => {
       }
     )
     .command("update", "Updates Agent code", async (argv) => {
-      mergeEnv(argv);
+      utilsService.mergeEnv(argv);
       const environmentService = container.resolve(EnvironmentService);
       environmentService.parse();
       const updateCommand = container.resolve(UpdateCommand);
