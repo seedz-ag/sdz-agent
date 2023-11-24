@@ -46,6 +46,7 @@ export class ExecuteCommand implements ICommand {
         });
         this.environmentService.parse();
       }
+
       this.loggerAdapter.log("info", "STARTING EXECUTE COMMAND");
 
       //CLEAR OLD FILES
