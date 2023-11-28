@@ -67,10 +67,13 @@ export class EnvironmentService {
     return this.environment[key] as any;
   }
 
-  parse() {
+  parse(override?: Record<string, any>) {
     try {
       config({ override: true });
-      this.environment = environmentSchema.parse(process.env);
+      this.environment = environmentSchema.parse({
+        ...process.env,
+        ...override,
+      });
     } catch (error: any) {
       throw error.format();
     }
