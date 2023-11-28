@@ -89,8 +89,7 @@ export class EnvironmentService {
           {}),
       });
     } catch (error: any) {
-      console.log({ error });
-      // throw error.format();
+      throw error.format();
     }
   }
 }
