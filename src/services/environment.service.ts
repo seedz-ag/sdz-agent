@@ -77,19 +77,20 @@ export class EnvironmentService {
     try {
       config({ override: true });
 
-      const env = this.get("ENV");
-
       this.environment = environmentSchema.parse({
         ...process.env,
-        ...((env && {
-          API_URL: this.discovery[env]?.API_URL,
-          CLIENT_ID: this.discovery[env]?.CREDENTIALS.CLIENT_ID,
-          CLIENT_SECRET: this.discovery[env]?.CREDENTIALS.CLIENT_SECRET,
+        ...((this.environment.ENV && {
+          API_URL: this.discovery[this.environment.ENV]?.API_URL,
+          CLIENT_ID:
+            this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_ID,
+          CLIENT_SECRET:
+            this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_SECRET,
         }) ||
           {}),
       });
     } catch (error: any) {
-      throw error.format();
+      console.log({ error });
+      // throw error.format();
     }
   }
 }
