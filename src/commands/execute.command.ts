@@ -10,7 +10,6 @@ import { APIService } from "../services/api.service";
 import { ConsumerResolverService } from "../services/consumer-resolver.service";
 import { VPNService } from "../services/vpn.service";
 import { EnvironmentService } from "../services/environment.service";
-import { UtilsService } from "../services/utils.service";
 
 config();
 
@@ -29,7 +28,6 @@ export class ExecuteCommand implements ICommand {
     private readonly environmentService: EnvironmentService,
     private readonly httpTransport: HttpTransport,
     private readonly loggerAdapter: LoggerAdapter,
-    private readonly utilsService: UtilsService,
     private readonly vpnService: VPNService
   ) {}
 
@@ -39,12 +37,11 @@ export class ExecuteCommand implements ICommand {
 
       if (env) {
         const discovery = (await this.apiService.discovery())[env];
-        this.utilsService.mergeEnv({
+        this.environmentService.parse({
           API_URL: discovery?.API_URL,
           CLIENT_ID: discovery?.CREDENTIALS.CLIENT_ID,
           CLIENT_SECRET: discovery?.CREDENTIALS.CLIENT_SECRET,
         });
-        this.environmentService.parse();
       }
 
       this.loggerAdapter.log("info", "STARTING EXECUTE COMMAND");
