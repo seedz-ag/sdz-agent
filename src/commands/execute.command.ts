@@ -36,12 +36,8 @@ export class ExecuteCommand implements ICommand {
       const env = this.environmentService.get("ENV");
 
       if (env) {
-        const discovery = (await this.apiService.discovery())[env];
-        this.environmentService.parse({
-          API_URL: discovery?.API_URL,
-          CLIENT_ID: discovery?.CREDENTIALS.CLIENT_ID,
-          CLIENT_SECRET: discovery?.CREDENTIALS.CLIENT_SECRET,
-        });
+        this.environmentService.setDiscovery(await this.apiService.discovery());
+        this.environmentService.parse();
       }
 
       this.loggerAdapter.log("info", "STARTING EXECUTE COMMAND");
