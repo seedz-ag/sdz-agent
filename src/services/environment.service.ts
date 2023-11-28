@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { IDiscovery, IDiscoveryBody } from "interfaces/discovery.interface";
 import { argv } from "process";
 import { singleton } from "tsyringe";
 import { z } from "zod";
@@ -54,10 +55,15 @@ type Environment = z.infer<typeof environmentSchema>;
 
 @singleton()
 export class EnvironmentService {
+  private discovery: IDiscovery = {};
   private environment: Environment;
 
   constructor() {
     this.parse();
+  }
+
+  setDiscovery(discovery: IDiscovery) {
+    this.discovery = discovery;
   }
 
   get<T extends keyof Environment>(
@@ -67,12 +73,20 @@ export class EnvironmentService {
     return this.environment[key] as any;
   }
 
-  parse(override?: Record<string, any>) {
+  parse() {
     try {
       config({ override: true });
+
+      const env = this.get("ENV");
+
       this.environment = environmentSchema.parse({
         ...process.env,
-        ...override,
+        ...((env && {
+          API_URL: this.discovery[env]?.API_URL,
+          CLIENT_ID: this.discovery[env]?.CREDENTIALS.CLIENT_ID,
+          CLIENT_SECRET: this.discovery[env]?.CREDENTIALS.CLIENT_SECRET,
+        }) ||
+          {}),
       });
     } catch (error: any) {
       throw error.format();
