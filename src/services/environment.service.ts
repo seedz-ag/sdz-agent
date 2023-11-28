@@ -15,12 +15,12 @@ const environmentSchema = z.object({
   CHUNK_SIZE: z
     .string()
     .optional()
-    .transform((value: unknown) => Number(value)),
+    .transform((value: unknown) => Number(value) || 500),
   ENV: z.enum(["DEV", "SND", "PRD"]).optional(),
   EXTRACT_LAST_N_DAYS: z
     .string()
     .optional()
-    .transform((value: unknown) => Number(value)),
+    .transform((value: unknown) => Number(value) || 0),
   FOREVER: z
     .string()
     .optional()
@@ -79,13 +79,14 @@ export class EnvironmentService {
 
       this.environment = environmentSchema.parse({
         ...process.env,
-        ...((this.environment.ENV && {
-          API_URL: this.discovery[this.environment.ENV]?.API_URL,
-          CLIENT_ID:
-            this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_ID,
-          CLIENT_SECRET:
-            this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_SECRET,
-        }) ||
+        ...((this.environment?.ENV &&
+          this.discovery && {
+            API_URL: this.discovery[this.environment.ENV]?.API_URL,
+            CLIENT_ID:
+              this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_ID,
+            CLIENT_SECRET:
+              this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_SECRET,
+          }) ||
           {}),
       });
     } catch (error: any) {
