@@ -55,7 +55,7 @@ type Environment = z.infer<typeof environmentSchema>;
 
 @singleton()
 export class EnvironmentService {
-  private discovery: IDiscovery = {};
+  private discovery: IDiscovery;
   private environment: Environment;
 
   constructor() {
