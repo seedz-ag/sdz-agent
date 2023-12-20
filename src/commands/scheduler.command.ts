@@ -64,6 +64,7 @@ export class SchedulerCommand implements ICommand {
           }
         }, 60000);
       });
+      process.exit(1);
     } catch (error) {
       await this.rescue();
     }
