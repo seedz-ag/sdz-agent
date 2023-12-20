@@ -42,6 +42,7 @@ export class ListenExecuteCommand
       try {
         await this.executeCommand.execute();
         resolve(true);
+        process.exit(1);
       } catch (e) {
         console.log(e);
         reject(e);
