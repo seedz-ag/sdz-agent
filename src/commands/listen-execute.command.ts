@@ -41,11 +41,12 @@ export class ListenExecuteCommand
     return new Promise(async (resolve, reject) => {
       try {
         await this.executeCommand.execute();
-        resolve(true);
+        //resolve(true);
         process.exit(1);
       } catch (e) {
         console.log(e);
-        reject(e);
+        process.exit(0);
+        //reject(e);
       }
     });
   }
