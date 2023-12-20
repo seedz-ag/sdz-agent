@@ -41,7 +41,7 @@ export class ListenExecuteCommand
     return new Promise(async (resolve, reject) => {
       try {
         await this.executeCommand.execute();
-        //resolve(true);
+        this.loggerAdapter.log("info", `EXIT EXIT EXIT EXIT`);
         process.exit(1);
       } catch (e) {
         console.log(e);
