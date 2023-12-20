@@ -165,6 +165,7 @@ process.env.CLI = "1";
       environmentService.parse();
       const configureCommand = container.resolve(ConfigureCommand);
       await configureCommand.execute();
+      utilsService.killProcess();
     })
     .command(
       "run",
@@ -232,6 +233,7 @@ process.env.CLI = "1";
           !!spinner && spinner.fail("ERROR");
         } finally {
           loggerAdapter.push(null);
+          utilsService.killProcess();
         }
       }
     )
@@ -288,6 +290,7 @@ process.env.CLI = "1";
         }
 
         spinner.fail("STOPPED");
+        utilsService.killProcess();
       }
     )
     .command(
@@ -327,6 +330,7 @@ process.env.CLI = "1";
         await schedulerCommand.execute();
 
         spinner.fail("STOPED");
+        utilsService.killProcess();
       }
     )
     .command("update", "Updates Agent code", async (argv) => {
