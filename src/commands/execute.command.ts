@@ -116,7 +116,7 @@ export class ExecuteCommand implements ICommand {
       }
 
       console.log("info", "EXITING PROCESS");
-      const timeout = new Promise((resolve) =>
+      await new Promise((resolve) =>
         setTimeout(async () => {
           console.log("info", "EXIT PROCESS DONE");
           process.exit(1);
