@@ -114,14 +114,6 @@ export class ExecuteCommand implements ICommand {
       if (this.vpnService.isConnected()) {
         await this.vpnService.disconnect();
       }
-
-      this.loggerAdapter.log("info", "EXITING PROCESS");
-      await new Promise((resolve) =>
-        setTimeout(async () => {
-          this.loggerAdapter.log("info", "EXIT PROCESS DONE");
-          process.exit(1);
-        }, 6000)
-      );
     } catch (error: any) {
       throw error;
     }
