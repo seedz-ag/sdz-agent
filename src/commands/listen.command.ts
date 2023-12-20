@@ -21,7 +21,7 @@ export class ListenCommand implements ICommand {
     private readonly loggerAdapger: LoggerAdapter,
     private readonly queryCommand: ListenQueryCommand,
     private readonly responseCommand: ListenResponseCommand,
-    private readonly shellCommand: ListenShellCommand,
+    private readonly shellCommand: ListenShellCommand
   ) {}
 
   public execute() {
