@@ -1,4 +1,6 @@
 import { fork } from "child_process";
+import kill from "tree-kill";
+
 import { writeFile } from "fs";
 import { singleton } from "tsyringe";
 import { ConfigDatabaseInterface } from "sdz-agent-types";
@@ -30,7 +32,7 @@ export class UtilsService {
 
   public calculateRetryTime(retry: number, baseTime: number): number {
     let time = baseTime;
-    for (let i = 0; i < retry; i ++) {
+    for (let i = 0; i < retry; i++) {
       time = 2 * time;
     }
     return time;
@@ -69,6 +71,7 @@ export class UtilsService {
   }
 
   public killProcess(exitCode = 1): Promise<void> {
+    kill(process.pid);
     process.exit(exitCode);
   }
 
