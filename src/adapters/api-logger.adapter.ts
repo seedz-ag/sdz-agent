@@ -45,13 +45,13 @@ export class APILoggerAdapter extends Writable {
           );
         })
       )
-      .then(() => {
-        if (!pages.length) {
-          this.cork();
-          process.nextTick(() => this.uncork());
-        }
-      })
-      .catch((error) => {
+      // .then(() => {
+      //   if (!pages.length) {
+      //     this.cork();
+      //     process.nextTick(() => this.uncork());
+      //   }
+      // })
+      .then((error) => {
         chunks.forEach(({ chunk }) => {
           const [timestamp, level, ...message] = chunk.data;
           this.writeToFile(timestamp, level, ...message);

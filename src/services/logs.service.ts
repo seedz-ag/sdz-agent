@@ -46,32 +46,27 @@ export class LogsService {
   }
 
   public async consumeOutput() {
-    const files = await glob("./output/*.log");
-
-    for (const file of files) {
-      const list: string[][] = [];
-
-      await this.consume({
-        file,
-        onLine: async (line: string) => {
-          if (!line) {
-            return;
-          }
-
-          list.push(JSON.parse(line));
-        },
-      });
-
-      if (list.length) {
-        const chunks = this.utilsService.chunkData(list, 100);
-        for (const chunk of chunks) {
-          await this.apiService.sendLog(chunk.map((item) => {
-            return [item[1], item[0], item[2]]
-          }))
-        }
-      }
-
-      files.forEach(unlinkSync);
-    }
+    // const files = await glob("./output/*.log");
+    // for (const file of files) {
+    //   const list: string[][] = [];
+    //   await this.consume({
+    //     file,
+    //     onLine: async (line: string) => {
+    //       if (!line) {
+    //         return;
+    //       }
+    //       list.push(JSON.parse(line));
+    //     },
+    //   });
+    //   if (list.length) {
+    //     const chunks = this.utilsService.chunkData(list, 100);
+    //     for (const chunk of chunks) {
+    //       await this.apiService.sendLog(chunk.map((item) => {
+    //         return [item[1], item[0], item[2]]
+    //       }))
+    //     }
+    //   }
+    //   files.forEach(unlinkSync);
+    // }
   }
 }
