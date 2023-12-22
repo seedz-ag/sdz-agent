@@ -21,7 +21,7 @@ export class ListenCommand implements ICommand {
     private readonly loggerAdapger: LoggerAdapter,
     private readonly queryCommand: ListenQueryCommand,
     private readonly responseCommand: ListenResponseCommand,
-    private readonly shellCommand: ListenShellCommand,
+    private readonly shellCommand: ListenShellCommand
   ) {}
 
   public execute() {
@@ -47,6 +47,7 @@ export class ListenCommand implements ICommand {
         ).toString("base64")}`,
       };
       try {
+        this.loggerAdapger.log("info", "STREAM OPEN");
         const stream = await httpAdapter.get<Stream>(
           `${process.env.API_URL}commands`,
           {
