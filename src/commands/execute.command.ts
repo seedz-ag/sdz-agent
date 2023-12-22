@@ -10,6 +10,7 @@ import { APIService } from "../services/api.service";
 import { ConsumerResolverService } from "../services/consumer-resolver.service";
 import { VPNService } from "../services/vpn.service";
 import { EnvironmentService } from "../services/environment.service";
+import kill from "tree-kill";
 
 config();
 
@@ -114,6 +115,7 @@ export class ExecuteCommand implements ICommand {
       if (this.vpnService.isConnected()) {
         await this.vpnService.disconnect();
       }
+      kill(process.pid);
     } catch (error: any) {
       throw error;
     }
