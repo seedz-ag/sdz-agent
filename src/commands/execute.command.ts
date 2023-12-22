@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import fs from "fs";
 import glob from "fast-glob";
+import kill from "tree-kill";
 import { singleton } from "tsyringe";
 import { ICommand } from "../interfaces/command.interface";
 import { ISetting } from "../interfaces/setting.interface";
@@ -10,7 +11,6 @@ import { APIService } from "../services/api.service";
 import { ConsumerResolverService } from "../services/consumer-resolver.service";
 import { VPNService } from "../services/vpn.service";
 import { EnvironmentService } from "../services/environment.service";
-import kill from "tree-kill";
 
 config();
 
