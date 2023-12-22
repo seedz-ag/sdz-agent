@@ -46,46 +46,46 @@ export class ListenCommand implements ICommand {
           `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`
         ).toString("base64")}`,
       };
-      // try {
-      //   this.loggerAdapger.log("info", "STREAM OPEN");
-      //   const stream = await httpAdapter.get<Stream>(
-      //     `${process.env.API_URL}commands`,
-      //     {
-      //       headers,
-      //       responseType: "stream",
-      //       timeout: 2_147_483_647,
-      //     }
-      //   );
+      try {
+        this.loggerAdapger.log("info", "STREAM OPEN");
+        const stream = await httpAdapter.get<Stream>(
+          `${process.env.API_URL}commands`,
+          {
+            headers,
+            responseType: "stream",
+            timeout: 2_147_483_647,
+          }
+        );
 
-      //   stream.on("data", async (data: Buffer) => {
-      //     const message = JSON.parse(data.toString());
-      //     const { arguments: args = [], command, sender } = message;
-      //     try {
-      //       const result = await commands[command]({ args });
-      //       !["Ping", "Response"].includes(command) &&
-      //         this.responseCommand.execute({ args: [result], channel: sender });
-      //     } catch (error) {
-      //       this.loggerAdapger.log("error", error);
-      //       reject(error);
-      //     }
-      //   });
+        stream.on("data", async (data: Buffer) => {
+          const message = JSON.parse(data.toString());
+          const { arguments: args = [], command, sender } = message;
+          try {
+            const result = await commands[command]({ args });
+            !["Ping", "Response"].includes(command) &&
+              this.responseCommand.execute({ args: [result], channel: sender });
+          } catch (error) {
+            this.loggerAdapger.log("error", error);
+            reject(error);
+          }
+        });
 
-      //   stream.on("error", async (error: any) => {
-      //     this.loggerAdapger.log("error", error);
-      //     reject(error);
-      //   });
+        stream.on("error", async (error: any) => {
+          this.loggerAdapger.log("error", error);
+          reject(error);
+        });
 
-      //   stream.on("end", async () => {
-      //     this.loggerAdapger.log("info", "STREAM CLOSED");
-      //     resolve();
-      //   });
-      // } catch (e: any) {
-      //   this.loggerAdapger.log(
-      //     "info",
-      //     `STREAM CLOSED ${e.response.status} - ${e.response.statusText}`
-      //   );
-      //   reject(e);
-      // }
+        stream.on("end", async () => {
+          this.loggerAdapger.log("info", "STREAM CLOSED");
+          resolve();
+        });
+      } catch (e: any) {
+        this.loggerAdapger.log(
+          "info",
+          `STREAM CLOSED ${e.response.status} - ${e.response.statusText}`
+        );
+        reject(e);
+      }
     });
   }
 }
