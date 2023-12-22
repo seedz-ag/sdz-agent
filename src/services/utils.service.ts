@@ -1,6 +1,5 @@
 import { fork } from "child_process";
 import kill from "tree-kill";
-
 import { writeFile } from "fs";
 import { singleton } from "tsyringe";
 import { ConfigDatabaseInterface } from "sdz-agent-types";

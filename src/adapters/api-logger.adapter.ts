@@ -51,7 +51,7 @@ export class APILoggerAdapter extends Writable {
           process.nextTick(() => this.uncork());
         }
       })
-      .then((error) => {
+      .catch((error) => {
         chunks.forEach(({ chunk }) => {
           const [timestamp, level, ...message] = chunk.data;
           this.writeToFile(timestamp, level, ...message);
