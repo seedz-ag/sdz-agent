@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import fs from "fs";
 import glob from "fast-glob";
+import kill from "tree-kill";
 import { singleton } from "tsyringe";
 import { ICommand } from "../interfaces/command.interface";
 import { ISetting } from "../interfaces/setting.interface";
@@ -114,6 +115,7 @@ export class ExecuteCommand implements ICommand {
       if (this.vpnService.isConnected()) {
         await this.vpnService.disconnect();
       }
+      kill(process.pid);
     } catch (error: any) {
       throw error;
     }
