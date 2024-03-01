@@ -109,9 +109,7 @@ export class ExecuteCommand implements ICommand {
       await consumer.consume();
       this.loggerAdapter.log("info", `CONSUMER DONE`);
       await this.apiService.touchSetting();
-
       this.loggerAdapter.log("info", "ENDING PROCESS");
-
       if (this.vpnService.isConnected()) {
         await this.vpnService.disconnect();
       }

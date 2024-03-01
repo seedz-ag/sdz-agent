@@ -304,6 +304,11 @@ process.env.CLI = "1";
             default: true,
             type: "boolean",
           })
+          .option("use-console-log", {
+            alias: "c",
+            describe: "Use Console Log",
+            type: "boolean",
+          })
           .option("forever", {
             alias: "f",
             describe: "Restarts scheduler on any interruption",
@@ -315,21 +320,27 @@ process.env.CLI = "1";
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
         const schedulerCommand = container.resolve(SchedulerCommand);
+        
+        let spinner : Ora|undefined
 
-        const spinner = ora({
-          text: "WORKING ",
-          spinner: clock,
-        });
+        if (!environmentService.get("USE_CONSOLE_LOG")) {
+          spinner = ora({
+            text: "WORKING ",
+            spinner: clock,
+          });
 
-        spinner.start();
+          (global as any).spinner = spinner;
 
-        (global as any).spinner = spinner;
-
+          spinner.start();
+        } else {
+          const consoleLoggerAdapter = container.resolve(ConsoleLoggerAdapter);
+          loggerAdapter.pipe(consoleLoggerAdapter);
+        }
         utilsService.mergeEnv(argv);
 
         await schedulerCommand.execute();
 
-        spinner.fail("STOPED");
+        spinner && spinner.fail("STOPPED");
         utilsService.killProcess();
       }
     )
