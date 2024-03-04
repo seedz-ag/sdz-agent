@@ -9,6 +9,8 @@ import { UtilsService } from "../services/utils.service";
 
 @singleton()
 export class SchedulerCommand implements ICommand {
+  private interval: NodeJS.Timeout;
+
   constructor(
     private readonly apiService: APIService,
     private readonly environtmentService: EnvironmentService,
@@ -36,18 +38,23 @@ export class SchedulerCommand implements ICommand {
     try {
       await new Promise<void>(async (resolve, reject) => {
         this.loggerAdapter.log("info", "STARTING SCHEDULER");
+
         let setting: ISetting;
+
         try {
           setting = await this.apiService.getSetting();
         } catch (error) {
           reject(error);
           return;
         }
+
         let child = this.fork(setting.Schedules);
+
         if ("true" === process.env.LISTEN) {
           this.listenCommand.execute();
         }
-        setInterval(async () => {
+
+        this.interval = setInterval(async () => {
           if (!child) {
             reject();
             return;
@@ -65,6 +72,7 @@ export class SchedulerCommand implements ICommand {
         }, 60000);
       });
     } catch (error) {
+      clearInterval(this.interval);
       await this.rescue();
     }
   }

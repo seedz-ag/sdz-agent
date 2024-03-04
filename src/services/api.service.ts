@@ -68,7 +68,7 @@ export class APIService {
       `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
         "API_URL"
       )}${resource}`
-    );
+    ); 
 
     try {
       await this.httpClientAdapter.post(
@@ -78,7 +78,13 @@ export class APIService {
           headers: this.getHeaders(),
         }
       );
-    } catch (error) {
+    } catch (error: any) {
+      this.loggerAdapter.log(
+        "error",
+        `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
+          "API_URL"
+        )}${resource}-${error.response.data}`
+      ); 
       if (tries <= this.environmentService.get("RETRIES")) {
         await this.utilsService.wait(
           this.utilsService.calculateRetryTime(tries, 60_000)
@@ -95,23 +101,35 @@ export class APIService {
       "info",
       `TOUCH SETTING ${this.environmentService.get("API_URL")}settings`
     );
-    await this.httpClientAdapter.patch(
-      `${this.environmentService.get("API_URL")}settings`,
-      {},
-      {
-        headers: this.getHeaders(),
-      }
-    );
+    try{
+      await this.httpClientAdapter.patch(
+        `${this.environmentService.get("API_URL")}settings`,
+        {},
+        {
+          headers: this.getHeaders(),
+        }
+      );      
+    }catch(error: any){
+      this.loggerAdapter.log(
+      "error",
+      `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${error.response.data}`        
+      );
+    }
   }
 
   public async sendLog(log: string[][]) {
-    await this.httpClientAdapter.post(
-      `${this.environmentService.get("API_URL")}logs`,
-      log,
-      {
+    await this.httpClientAdapter
+      .post(`${this.environmentService.get("API_URL")}logs`, log, {
         headers: this.getHeaders(),
         timeout: 5000,
-      }
-    );
+      })
+      .catch((e: any) => {
+        this.loggerAdapter.log(
+          "error",
+          `ERROR ${this.environmentService.get("API_URL")}logs-${
+            e.response.data
+          }`
+        );
+      });
   }
 }
