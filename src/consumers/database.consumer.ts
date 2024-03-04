@@ -166,7 +166,6 @@ export class DatabaseConsumer implements IConsumer {
           await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
           page++;
-
           response = await respository.execute(sql.Command, page, limit);
         }
       }
