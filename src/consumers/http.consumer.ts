@@ -37,13 +37,42 @@ export class HttpConsumer implements IConsumer {
   }
 
   private compileBody(headers = {}, body: string, scope: any) {
-    this.loggerAdapter.log("info", `COMPILE Body`);
+    this.loggerAdapter.log("info", `COMPILE BODY`);
+    if ("string" !== typeof body) {
+      return JSON.parse(this.compile(JSON.stringify(body)), scope);
+    }
     if (get(headers, "Content-Type") === "application/json") {
       return JSON.parse(this.compile(body), scope);
     }
     return this.compile(body, scope);
   }
 
+  private async authenticate(authentication: any) {
+    const {
+      username,
+      usernameKey = "username",
+      password,
+      passwordKey = "password",
+      url,
+      path,
+      method = "POST",
+    } = authentication;
+
+    const requestCompiled = {
+      data: {
+        [usernameKey]: username,
+        [passwordKey]: password,
+      },
+      method,
+      url,
+    };
+    return this.httpClientAdapter.request(requestCompiled).then((data: any) => {
+      if (!!path) {
+        return get(data, path);
+      }
+      return data;
+    });
+  }
   private getResourceName({
     ApiResource,
     Entity,
@@ -125,15 +154,26 @@ export class HttpConsumer implements IConsumer {
   };
 
   private async request(schema: ISchema, request: any): Promise<unknown[]> {
-    const { body, dataPath, headers, method, scope, timeout, url } = request;
+    const {
+      body,
+      dataPath,
+      headers,
+      method,
+      scope = {},
+      timeout,
+      url,
+      authentication,
+    } = request;
     this.loggerAdapter.log("info", `GETTING RESOURCE`);
-    const resource = this.getResourceName(schema);
-
+    const resource = await this.getResourceName(schema);
+    if (!!authentication) {
+      const token = await this.authenticate(authentication);
+      scope.Authorization = token;
+    }
     this.loggerAdapter.log(
       "info",
       `RUNNING EXTRACTION FOR RESOURCE: ${resource}`
     );
-
     const requestCompiled = {
       data: body ? this.compileBody(headers, body, scope) : undefined,
       headers: headers
@@ -307,6 +347,11 @@ export class HttpConsumer implements IConsumer {
             response = await this.request(schema, command);
           }
         } catch (error) {
+          this.loggerAdapter.log(
+            "error",
+            `CONSUMING ${schema.Entity.toLocaleUpperCase()}`
+          );
+
           console.error({ error });
         }
       }

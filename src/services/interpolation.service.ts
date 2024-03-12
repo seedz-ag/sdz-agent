@@ -333,8 +333,11 @@ class Interpolator {
 export class InterpolationService {
   private data = {
     now: moment(),
+    NOW: moment(),
     tomorrow: moment().add(1, "d"),
+    TOMORROW: moment().add(1, "d"),
     yesterday: moment().subtract(1, "d"),
+    YESTERDAY: moment().subtract(1, "d"),
   };
 
   private readonly interpolator = new Interpolator({

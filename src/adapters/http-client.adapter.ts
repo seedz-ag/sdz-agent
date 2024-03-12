@@ -83,7 +83,7 @@ export class HttpClientAdapter {
     method,
     responseType,
     timeout,
-    url
+    url,
   }: HttpClientAdapterRequestInput<T>): Promise<T> {
     const response = await axios({
       data,
@@ -91,7 +91,7 @@ export class HttpClientAdapter {
       method,
       responseType,
       timeout,
-      url
+      url,
     });
     return response.data;
   }
