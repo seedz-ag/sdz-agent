@@ -37,7 +37,10 @@ export class HttpConsumer implements IConsumer {
   }
 
   private compileBody(headers = {}, body: string, scope: any) {
-    this.loggerAdapter.log("info", `COMPILE Body`);
+    this.loggerAdapter.log("info", `COMPILE BODY`);
+    if ("string" !== typeof body) {
+      return JSON.parse(this.compile(JSON.stringify(body)), scope);
+    }
     if (get(headers, "Content-Type") === "application/json") {
       return JSON.parse(this.compile(body), scope);
     }
@@ -65,7 +68,7 @@ export class HttpConsumer implements IConsumer {
     };
     return this.httpClientAdapter.request(requestCompiled).then((data: any) => {
       if (!!path) {
-        return get(JSON.parse(data.replace(/'/g, '"')), path);
+        return get(data, path);
       }
       return data;
     });
@@ -171,7 +174,6 @@ export class HttpConsumer implements IConsumer {
       "info",
       `RUNNING EXTRACTION FOR RESOURCE: ${resource}`
     );
-    // console.log(headers, body, scope);
     const requestCompiled = {
       data: body ? this.compileBody(headers, body, scope) : undefined,
       headers: headers
