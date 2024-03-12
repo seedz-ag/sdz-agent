@@ -1,14 +1,14 @@
 trigger:
   branches:
     include:
-      - feature/http
+      - main
 
 resources:
   repositories:
     - repository: template
       type: git
       name: Platform Engineering/templates-pipeline
-      ref: main
+      ref: master
 
 extends:
   template: ecs/fargate/seedz-integration/nodejs/agent-saas.yaml@template
