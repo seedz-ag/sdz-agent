@@ -1,0 +1,19 @@
+trigger:
+  branches:
+    include:
+      - feature/http
+
+resources:
+  repositories:
+    - repository: template
+      type: git
+      name: Platform Engineering/templates-pipeline
+      ref: main
+
+extends:
+  template: ecs/fargate/seedz-integration/nodejs/agent-saas.yaml@template
+  parameters:
+    env:
+      AWS_ACC_ID: ${{secrets.AWS_ACC_ID}}
+    REPO_NAME: sdz_agent
+    SNYK_ORG: seedz-integracao
