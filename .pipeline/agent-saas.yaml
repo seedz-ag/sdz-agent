@@ -10,9 +10,12 @@ resources:
       name: Platform Engineering/templates-pipeline
       ref: master
 
+variables:
+  - group: sdz-agent-v2
+
 extends:
   template: ecs/fargate/seedz-integration/nodejs/agent-saas.yaml@template
   parameters:
+    AWS_ACC_ID: ${{ variables.AWS_ACC_ID }}
     REPO_NAME: sdz_agent
-    AWS_ACC_ID: $AWS_ACC_ID
     SNYK_ORG: seedz-integracao
