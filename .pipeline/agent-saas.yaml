@@ -12,3 +12,5 @@ variables:
   - group: sdz-agent-v2
 extends:
   template: ecs/fargate/seedz-integration/nodejs/agent-saas.yaml@template
+  parameters:
+    AWS_ACC_ID: ${{ variables.AWS_ACC_ID }}
