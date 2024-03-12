@@ -13,7 +13,6 @@ resources:
 extends:
   template: ecs/fargate/seedz-integration/nodejs/agent-saas.yaml@template
   parameters:
-    env:
-      AWS_ACC_ID:
+    AWS_ACC_ID: ""
     REPO_NAME: sdz_agent
     SNYK_ORG: seedz-integracao
