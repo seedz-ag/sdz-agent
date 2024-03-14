@@ -254,6 +254,7 @@ export class HttpConsumer implements IConsumer {
         this.environmentService.get("RAW_ONLY") &&
         !resource.startsWith("raw")
       ) {
+        this.loggerAdapter.log("warn", `SENDING EXTRACTION TO RAW ONLY`);
         return response;
       }
 
