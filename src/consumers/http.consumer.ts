@@ -224,13 +224,11 @@ export class HttpConsumer implements IConsumer {
       .catch(async (error) => {
         this.loggerAdapter.log(
           "error",
-          `TRYING(${tries + 1}) TO REQUESTING ${resource}-${
-            error?.response?.data || ""
-          }`
+          `TRYING(${tries}) TO REQUESTING ${resource}[${error?.response || ""}]`
         );
         if (tries <= (this.environmentService.get("RETRIES") || 3)) {
           await this.utilsService.wait(
-            this.utilsService.calculateRetryTime(tries, 60_000)
+            this.utilsService.calculateRetryTime(tries, 30_000)
           );
           return await this.request(schema, request, tries + 1);
         }
