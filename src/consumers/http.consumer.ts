@@ -228,9 +228,9 @@ export class HttpConsumer implements IConsumer {
             error?.response?.data || ""
           }`
         );
-        if (tries <= (this.environmentService.get("RETRIES") || 1)) {
+        if (tries <= (this.environmentService.get("RETRIES") || 3)) {
           await this.utilsService.wait(
-            this.utilsService.calculateRetryTime(tries, 1_000)
+            this.utilsService.calculateRetryTime(tries, 60_000)
           );
           return await this.request(schema, request, tries + 1);
         }
