@@ -153,7 +153,11 @@ export class HttpConsumer implements IConsumer {
     }
   };
 
-  private async request(schema: ISchema, request: any): Promise<unknown[]> {
+  private async request(
+    schema: ISchema,
+    request: any,
+    tries = 1
+  ): Promise<unknown[]> {
     const {
       body,
       dataPath,
@@ -216,6 +220,21 @@ export class HttpConsumer implements IConsumer {
           return this.searchDataPath(data, dataPath);
         }
         return data;
+      })
+      .catch(async (error) => {
+        this.loggerAdapter.log(
+          "error",
+          `TRYING(${tries + 1}) TO REQUESTING ${resource}-${
+            error?.response?.data || ""
+          }`
+        );
+        if (tries <= (this.environmentService.get("RETRIES") || 1)) {
+          await this.utilsService.wait(
+            this.utilsService.calculateRetryTime(tries, 1_000)
+          );
+          return await this.request(schema, request, tries + 1);
+        }
+        throw error;
       });
 
     if (!Array.isArray(response)) {
