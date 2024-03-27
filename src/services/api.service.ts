@@ -92,7 +92,7 @@ export class APIService {
         "error",
         `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
           "API_URL"
-        )}${resource}-${error.response.data}`
+        )}${resource}-${error.response?.data || ""}`
       );
       if (tries <= this.environmentService.get("RETRIES")) {
         await this.utilsService.wait(
@@ -137,7 +137,6 @@ export class APIService {
     await this.httpClientAdapter
       .post(
         `${process.env.API_URL}logs`,
-        // log,
         (!ENV && log) ||
           log.map((data) => [
             data[0],
@@ -151,7 +150,6 @@ export class APIService {
         }
       )
       .catch((e: any) => {
-        console.log(e);
         this.loggerAdapter.log(
           "error",
           `ERROR ${process.env.API_URL}logs ${e?.response?.data || ""}`
