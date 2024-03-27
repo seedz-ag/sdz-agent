@@ -27,6 +27,15 @@ export class APIService {
     };
   }
 
+  private getHeadersLogs() {
+    return {
+      Authorization: `Basic ${Buffer.from(
+        `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`
+      ).toString("base64")}`,
+      "sdz-request-id": randomUUID(),
+    };
+  }
+
   public async discovery() {
     this.loggerAdapter.log("info", "DISCOVERING");
     return this.httpClientAdapter.get<IDiscovery>(
@@ -68,7 +77,7 @@ export class APIService {
       `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
         "API_URL"
       )}${resource}`
-    ); 
+    );
 
     try {
       await this.httpClientAdapter.post(
@@ -84,7 +93,7 @@ export class APIService {
         `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
           "API_URL"
         )}${resource}-${error.response.data}`
-      ); 
+      );
       if (tries <= this.environmentService.get("RETRIES")) {
         await this.utilsService.wait(
           this.utilsService.calculateRetryTime(tries, 60_000)
@@ -101,34 +110,51 @@ export class APIService {
       "info",
       `TOUCH SETTING ${this.environmentService.get("API_URL")}settings`
     );
-    try{
+    try {
       await this.httpClientAdapter.patch(
         `${this.environmentService.get("API_URL")}settings`,
         {},
         {
           headers: this.getHeaders(),
         }
-      );      
-    }catch(error: any){
+      );
+    } catch (error: any) {
       this.loggerAdapter.log(
-      "error",
-      `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${error.response.data}`        
+        "error",
+        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${
+          error.response.data
+        }`
       );
     }
   }
 
   public async sendLog(log: string[][]) {
+    const ENV =
+      process.env.CLIENT_ID !== this.environmentService.get("CLIENT_ID")
+        ? "SND"
+        : false;
+
     await this.httpClientAdapter
-      .post(`${this.environmentService.get("API_URL")}logs`, log, {
-        headers: this.getHeaders(),
-        timeout: 5000,
-      })
+      .post(
+        `${process.env.API_URL}logs`,
+        // log,
+        (!ENV && log) ||
+          log.map((data) => [
+            data[0],
+            data[1],
+            ENV ? `[${ENV}] - ${data[2]}` : `${data[2]}`,
+            ...data.slice(3),
+          ]),
+        {
+          headers: this.getHeadersLogs(),
+          timeout: 5000,
+        }
+      )
       .catch((e: any) => {
+        console.log(e);
         this.loggerAdapter.log(
           "error",
-          `ERROR ${this.environmentService.get("API_URL")}logs-${
-            e.response.data
-          }`
+          `ERROR ${process.env.API_URL}logs ${e?.response?.data || ""}`
         );
       });
   }
