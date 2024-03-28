@@ -21,7 +21,7 @@ export class ListenExecuteCommand
   public async execute({
     args,
   }: ListenExecuteCommandExecuteInput): Promise<boolean> {
-    this.loggerAdapter.log("info", `COMMAND ${args}`);
+    this.loggerAdapter.log("info", `COMMAND ${JSON.stringify(args)}`);
     if (Array.isArray(args) && args.length) {
       args.forEach((args) => {
         this.utilsService.mergeEnv(
@@ -33,8 +33,8 @@ export class ListenExecuteCommand
             }
             return previous;
           }, {})
-          );
-        });
+        );
+      });
     }
     return new Promise(async (resolve, reject) => {
       try {
