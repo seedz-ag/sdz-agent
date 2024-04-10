@@ -1,8 +1,12 @@
-import axios, { Axios } from "axios";
+import axios, { Axios, AxiosRequestHeaders } from "axios";
 import https from "https";
 import { singleton } from "tsyringe";
 
 import { IHttpClientRequestConfig } from "../interfaces/http-client-request-config.interface";
+
+type HttpClientAdapterGetClientInput = {
+  rejectUnauthorized?: boolean;
+};
 
 type HttpClientAdapterRequestInput<T = any> = {
   data?: T;
@@ -12,7 +16,9 @@ type HttpClientAdapterRequestInput<T = any> = {
 
 @singleton()
 export class HttpClientAdapter {
-  private getClient(rejectUnauthorized?: boolean): Axios {
+  private getClient({
+    rejectUnauthorized,
+  }: HttpClientAdapterGetClientInput): Axios {
     return axios.create({
       httpsAgent: new https.Agent({
         rejectUnauthorized,
@@ -20,15 +26,20 @@ export class HttpClientAdapter {
     });
   }
 
+  private isInsecure(headers: AxiosRequestHeaders) {
+    return Object.keys(headers)
+      .map((key) => key.toUpperCase())
+      .includes("INSECURE");
+  }
+
   public async delete<T>(
     url: string,
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).delete<T>(
-      url,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).delete<T>(url, config);
     return data;
   }
 
@@ -37,10 +48,9 @@ export class HttpClientAdapter {
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).get<T>(
-      url,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).get<T>(url, config);
     return data;
   }
 
@@ -49,10 +59,9 @@ export class HttpClientAdapter {
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).head<T>(
-      url,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).head<T>(url, config);
     return data;
   }
 
@@ -61,10 +70,9 @@ export class HttpClientAdapter {
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).options(
-      url,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).options(url, config);
     return data;
   }
 
@@ -74,11 +82,9 @@ export class HttpClientAdapter {
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).patch<T>(
-      url,
-      payload,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).patch<T>(url, payload, config);
     return data;
   }
 
@@ -88,11 +94,9 @@ export class HttpClientAdapter {
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).post<T>(
-      url,
-      payload,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).post<T>(url, payload, config);
     return data;
   }
 
@@ -102,11 +106,9 @@ export class HttpClientAdapter {
     config: IHttpClientRequestConfig = {}
   ): Promise<T> {
     const { headers = {} } = config;
-    const { data } = await this.getClient(!("insecure" in headers)).put<T>(
-      url,
-      payload,
-      config
-    );
+    const { data } = await this.getClient({
+      rejectUnauthorized: !this.isInsecure(headers),
+    }).put<T>(url, payload, config);
     return data;
   }
 
@@ -122,7 +124,7 @@ export class HttpClientAdapter {
       data,
       headers,
       httpsAgent: new https.Agent({
-        rejectUnauthorized: !("insecure" in (headers || {})),
+        rejectUnauthorized: !this.isInsecure(headers || {}),
       }),
       method,
       responseType,
