@@ -12,68 +12,101 @@ type HttpClientAdapterRequestInput<T = any> = {
 
 @singleton()
 export class HttpClientAdapter {
-  private client: Axios = axios.create({
-    httpsAgent: new https.Agent({
-      rejectUnauthorized: false,
-    }),
-  });
+  private getClient(rejectUnauthorized?: boolean): Axios {
+    return axios.create({
+      httpsAgent: new https.Agent({
+        rejectUnauthorized,
+      }),
+    });
+  }
 
   public async delete<T>(
     url: string,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.delete<T>(url, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).delete<T>(
+      url,
+      config
+    );
     return data;
   }
 
   public async get<T>(
     url: string,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.get<T>(url, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).get<T>(
+      url,
+      config
+    );
     return data;
   }
 
   public async head<T>(
     url: string,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.head<T>(url, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).head<T>(
+      url,
+      config
+    );
     return data;
   }
 
   public async options<T>(
     url: string,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.options(url, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).options(
+      url,
+      config
+    );
     return data;
   }
 
   public async patch<T, K = any>(
     url: string,
     payload: K,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.patch<T>(url, payload, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).patch<T>(
+      url,
+      payload,
+      config
+    );
     return data;
   }
 
   public async post<T, K = any>(
     url: string,
     payload: K,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.post<T>(url, payload, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).post<T>(
+      url,
+      payload,
+      config
+    );
     return data;
   }
 
   public async put<T, K = any>(
     url: string,
     payload: K,
-    config?: IHttpClientRequestConfig
+    config: IHttpClientRequestConfig = {}
   ): Promise<T> {
-    const { data } = await this.client.put<T>(url, payload, config);
+    const { headers = {} } = config;
+    const { data } = await this.getClient(!("insecure" in headers)).put<T>(
+      url,
+      payload,
+      config
+    );
     return data;
   }
 
@@ -89,7 +122,7 @@ export class HttpClientAdapter {
       data,
       headers,
       httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
+        rejectUnauthorized: !("insecure" in (headers || {})),
       }),
       method,
       responseType,
