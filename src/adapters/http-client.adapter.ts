@@ -88,6 +88,9 @@ export class HttpClientAdapter {
     const response = await axios({
       data,
       headers,
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false,
+      }),
       method,
       responseType,
       timeout,
