@@ -13,6 +13,7 @@ process.on("message", async (buffer: Buffer) => {
   const schedules = JSON.parse(buffer.toString());
 
   for (const schedule of schedules) {
+    
     loggerAdapter.log(`info`, `SCHEDULING JOB AT ${schedule.CronExpression}`);
     scheduleJob(schedule.CronExpression, async () => {
       try {
