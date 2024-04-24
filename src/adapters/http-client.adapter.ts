@@ -16,6 +16,8 @@ type HttpClientAdapterRequestInput<T = any> = {
 
 @singleton()
 export class HttpClientAdapter {
+  private forbiddenHeaders = ["Certificate-Authority"];
+
   private getClient({
     rejectUnauthorized,
   }: HttpClientAdapterGetClientInput): Axios {
@@ -26,8 +28,21 @@ export class HttpClientAdapter {
     });
   }
 
+  private filterHeaders(headers: AxiosRequestHeaders) {
+    return Object.keys(headers)
+      .filter((key) => !this.forbiddenHeaders.includes(key))
+      .reduce<Record<string, string>>((acc, key) => {
+        acc[key] = String(headers[key]);
+        return acc;
+      }, {});
+  }
+
   private getCertificate(headers: AxiosRequestHeaders) {
-    return headers['Certificate-Authority'] && String(headers['Certificate-Authority']) || undefined
+    return (
+      (headers["Certificate-Authority"] &&
+        String(headers["Certificate-Authority"])) ||
+      undefined
+    );
   }
 
   private isInsecure(headers: AxiosRequestHeaders) {
@@ -126,7 +141,7 @@ export class HttpClientAdapter {
   }: HttpClientAdapterRequestInput<T>): Promise<T> {
     const response = await axios({
       data,
-      headers,
+      headers: this.filterHeaders(headers || {}),
       httpsAgent: new https.Agent({
         rejectUnauthorized: !this.isInsecure(headers || {}),
         ca: this.getCertificate(headers || {}),
