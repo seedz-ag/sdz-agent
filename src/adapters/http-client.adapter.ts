@@ -26,6 +26,10 @@ export class HttpClientAdapter {
     });
   }
 
+  private getCertificate(headers: AxiosRequestHeaders) {
+    return headers['Certificate-Authority'] && String(headers['Certificate-Authority']) || undefined
+  }
+
   private isInsecure(headers: AxiosRequestHeaders) {
     return Object.keys(headers)
       .map((key) => key.toUpperCase())
@@ -125,6 +129,7 @@ export class HttpClientAdapter {
       headers,
       httpsAgent: new https.Agent({
         rejectUnauthorized: !this.isInsecure(headers || {}),
+        ca: this.getCertificate(headers || {}),
       }),
       method,
       responseType,
