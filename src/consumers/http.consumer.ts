@@ -2,6 +2,7 @@ import { get } from "dot-wild";
 import fs from "fs";
 import { singleton } from "tsyringe";
 import parser from "xml2json";
+import { CSVAdapter } from "../adapters/csv.adapter";
 import { IConsumer } from "../interfaces/consumer.interface";
 import { ISetting, ISchema } from "../interfaces/setting.interface";
 import { ITransport } from "../interfaces/transport.interface";
@@ -24,7 +25,8 @@ export class HttpConsumer implements IConsumer {
     private readonly hydratorService: HydratorService,
     private readonly interpolationService: InterpolationService,
     private readonly loggerAdapter: LoggerAdapter,
-    private readonly utilsService: UtilsService
+    private readonly utilsService: UtilsService,
+    private readonly csv: CSVAdapter,
   ) {}
 
   // FUNCTIONS
@@ -212,6 +214,9 @@ export class HttpConsumer implements IConsumer {
       .then((data) => {
         if (get(headers, "Accept") === "application/xml") {
           return parser.toJson(data, { object: true });
+        }
+        if (get(headers, "Accept") === "application/csv") {
+          return this.csv.parseToJson(data, { delimiter:"," });
         }
         return data;
       })

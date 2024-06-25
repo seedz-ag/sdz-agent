@@ -104,6 +104,24 @@ export class CSVAdapter {
         .on("end", () => resolve(result));
     });
   }
+  /**
+   * Read a CSV file.
+   *
+   * @param {string} data
+   * @param {CsvOptionsInterface} options
+   * @returns {Promise<any>}
+   */
+  parseToJson(data: string, options: CsvOptionsInterface) {
+    return new Promise((resolve): any => {
+      let result: Array<string> = [];
+          csv.parseString(data, {
+            headers: true,
+            ...options,
+          })
+        .on("data", (row: string) => result.push(row))
+        .on("end", () => resolve(result));
+    });
+  }
 
   /**
    * Write a file.
