@@ -6,8 +6,22 @@ import {
   AbstractRepository,
 } from "sdz-agent-types";
 import { RedshiftAdapter } from "./redshift.adapter";
+import { MysqlAdapter } from "./mysql.adapter";
+import { MssqlAdapter } from "./mssql.adapter";
+import { FirebirdAdapter } from "./firebird.adapter";
+import { InformixAdapter } from "./informix.adapter";
+import { OdbcAdapter } from "./odbc.adapter";
+import { OracleAdapter } from "./oracle.adapter";
+import { PostgresAdapter } from "./postgres.adapter";
 
 const DATABASE_ADAPTERS = {
+  FIREBIRD: FirebirdAdapter,
+  INFORMIX: InformixAdapter,
+  MYSQL: MysqlAdapter,
+  MSSQL: MssqlAdapter,
+  ODBC: OdbcAdapter,
+  ORACLE: OracleAdapter,
+  POSTGRES: PostgresAdapter,
   REDSHIFT: RedshiftAdapter,
 };
 

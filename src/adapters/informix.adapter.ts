@@ -7,8 +7,7 @@ import informix from "informixdb";
 let informixConnect: any;
 
 export class InformixAdapter implements IDatabaseAdapter {
-  private connection: any
-    ;
+  private connection: any;
   private version: any;
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
