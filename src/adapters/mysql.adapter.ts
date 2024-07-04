@@ -5,13 +5,8 @@ import { ConfigDatabaseInterface } from "sdz-agent-types";
 
 export class MysqlAdapter implements IDatabaseAdapter {
   private connection: Connection;
-  private version: any;
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
-
-  buildQuery(query: string): string {
-    return query;
-  }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -26,15 +21,13 @@ export class MysqlAdapter implements IDatabaseAdapter {
   async connect(): Promise<void> {
     if (!this.connection) {
       try {
-        this.connection = await mysql.createConnection(
-          {
-            user: this.config.username,
-            password: this.config.password,
-            host: this.config.host,
-            database: this.config.schema,
-            port: this.config.port,
-          }
-        );
+        this.connection = await mysql.createConnection({
+          user: this.config.username,
+          password: this.config.password,
+          host: this.config.host,
+          database: this.config.schema,
+          port: this.config.port,
+        });
       } catch (e) {
         console.log(e);
       }
@@ -42,44 +35,51 @@ export class MysqlAdapter implements IDatabaseAdapter {
   }
 
   async count(query: string): Promise<number> {
-    const resultSet = await this.execute(`SELECT COUNT (*) AS total FROM (${this.buildQuery(query)}) as tab1`);
-    const obj: any = {}
-    Object.keys(resultSet).map((key: any) => obj[key.toLowerCase()] = resultSet[key])
-    return obj[0].total;
+    try {
+      const [{ total }] = await this.execute(
+        `SELECT COUNT (*) AS total FROM (${query}) as tab1`
+      );
+      return total;
+    } catch (exception) {
+      // LOG QUERY EXCEPTION ERROR
+      throw exception;
+    }
   }
 
-  disconnect(): Promise<void> {
-    return this.connection.end();
+  async disconnect(): Promise<void> {
+    try {
+      return await this.connection.end();
+    } catch (exception) { }
   }
 
   async execute(query: string): Promise<DatabaseRow[]> {
-    let resultSet: DatabaseRow[] = [];
     if (!this.connection) {
       await this.connect();
     }
+
     try {
-      const response = await this.connection.query<RowDataPacket[]>(query);
-      if (response) {
-        resultSet = response[0];
-      }
-    } catch (e) {
-      console.log(e);
+      const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
+      return resultSet;
+    } catch (exception) {
+      // LOG QUERY EXCEPTION ERROR
+      throw exception;
     }
-    return resultSet;
   }
 
   async getVersion() {
-    return ''
+    const [resultSet] = await this.execute("SELECT VERSION() as version");
+    return resultSet.version;
   }
 
-  query(query: string, page?: number, limit?: number): Promise<any> {
+  query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]> {
     const statement = [
       query,
       limit ? `LIMIT ${limit}` : null,
       page && limit ? `OFFSET ${page * limit}` : null,
     ]
-      .filter((item) => !!item)
+      .filter(Boolean)
       .join(" ");
-    return this.query(statement);
+
+    return this.execute(statement);
   }
 }

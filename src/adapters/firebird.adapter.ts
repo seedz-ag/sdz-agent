@@ -43,7 +43,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
     }
   }
 
-  async count(entity) {
+  async count(entity: string) {
     const resultSet = await this.execute(`SELECT COUNT (*) as total FROM (${this.buildQuery(entity)}) as total`);
     const obj = {};
 
@@ -94,6 +94,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
 
     return this.getConnector().execute(statement);
   }
+
 
   private setConfig(config: any): this {
     const options: any = {};

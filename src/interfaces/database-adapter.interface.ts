@@ -3,7 +3,8 @@ export interface DatabaseRow {
 }
 
 export interface IDatabaseAdapter {
-    buildQuery(query: string): string;
+    buildQuery?(query: string): string;
+    checkConnection?(): Promise<boolean>;
     connect(): Promise<void>;
     count(query: string): Promise<number>;
     disconnect(): Promise<void>;

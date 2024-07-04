@@ -30,7 +30,7 @@ export class ExecuteCommand implements ICommand {
     private readonly httpTransport: HttpTransport,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly vpnService: VPNService
-  ) {}
+  ) { }
 
   public async execute() {
     try {
