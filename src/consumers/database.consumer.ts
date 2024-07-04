@@ -20,7 +20,7 @@ export class DatabaseConsumer implements IConsumer {
     private readonly hydratorService: HydratorService,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   public async consume() {
     this.loggerAdapter.log("info", `CONNETING TO DATABASE`);
@@ -139,8 +139,8 @@ export class DatabaseConsumer implements IConsumer {
           const data = !this.utilsService.needsToHydrate(schema)
             ? response
             : response.map((row: Record<string, string>) =>
-                this.hydratorService.hydrate(schema.Maps, row)
-              );
+              this.hydratorService.hydrate(schema.Maps, row)
+            );
 
           await Promise.all([
             this.utilsService.writeJSON(
