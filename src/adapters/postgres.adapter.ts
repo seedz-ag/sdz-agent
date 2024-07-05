@@ -7,9 +7,6 @@ export class PostgresAdapter implements IDatabaseAdapter {
   private connection: Client;
   constructor(private readonly config: ConfigDatabaseInterface) { }
 
-  buildQuery(): string {
-    return "";
-  }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -20,8 +17,6 @@ export class PostgresAdapter implements IDatabaseAdapter {
       }
     }
   }
-
-
 
   async connect(): Promise<void> {
     if (!this.connection) {
@@ -77,6 +72,6 @@ export class PostgresAdapter implements IDatabaseAdapter {
     ]
       .filter((item) => !!item)
       .join(" ");
-    return this.query(statement);
+    return this.execute(statement);
   }
 }

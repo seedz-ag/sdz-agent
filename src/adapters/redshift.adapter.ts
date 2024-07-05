@@ -7,10 +7,6 @@ export class RedshiftAdapter implements IDatabaseAdapter {
     private connection: Redshift;
     constructor(private readonly config: ConfigDatabaseInterface) { }
 
-    buildQuery(): string {
-        return "";
-    }
-
     async close(): Promise<void> {
         if (this.connection) {
             try {
@@ -62,7 +58,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
     }
 
     async getVersion(): Promise<string> {
-        return this.connection;
+        return '';
     }
 
     query(query: string, page?: number, limit?: number): Promise<any> {
@@ -73,6 +69,6 @@ export class RedshiftAdapter implements IDatabaseAdapter {
         ]
             .filter((item) => !!item)
             .join(" ");
-        return this.query(statement);
+        return this.execute(statement);
     }
 }

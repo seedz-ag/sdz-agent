@@ -1,5 +1,5 @@
 import { DatabaseRow } from "sdz-agent-types";
-import { MongoClient } from "mongodb";
+import { MongoClient, Collection } from "mongodb";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "sdz-agent-types";
 
@@ -8,11 +8,6 @@ export class MongodbAdapter implements IDatabaseAdapter {
   private version: any;
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
-
-  buildQuery(query: string) {
-    return ''
-  }
-
   async close(): Promise<void> {
     if (this.connection) {
       try {
@@ -37,11 +32,6 @@ export class MongodbAdapter implements IDatabaseAdapter {
     }
   }
 
-  async count(query: string): Promise<number> {
-    //
-    return 1
-  }
-
   disconnect(): Promise<void> {
     return this.connection.close();
   }
@@ -52,10 +42,10 @@ export class MongodbAdapter implements IDatabaseAdapter {
       await this.connect();
     }
     try {
-      const input: any = JSON.parse(query);
+      const input = JSON.parse(query);
       const database = this.connection.db(this.config.schema);
-      const collection: any = database.collection(input["collection"]);
-      const command: any = collection[input["command"]].bind(collection);
+      const collection = database.collection(input["collection"]);
+      const command = collection[input["command"]].bind(collection);
       resultSet = await command<any[]>(input[input["command"]]).toArray();
       return resultSet;
     } catch (e) {
@@ -71,8 +61,8 @@ export class MongodbAdapter implements IDatabaseAdapter {
   query(query: string, page?: number, limit?: number): Promise<any> {
     return this.execute(
       query
-        .replace(/:skip/g, String(page * limit))
-        .replace(/:limit/, String(limit))
-    );
+        .replace(/:skip/g, String((page || 1) * (limit || 1))
+          .replace(/:limit/, String(limit))
+        ))
   }
 }

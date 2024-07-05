@@ -9,12 +9,10 @@ let informixConnect: any;
 export class InformixAdapter implements IDatabaseAdapter {
   private connection: any;
   private version: any;
+  private dsn: any;
+
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
-
-  buildQuery(query: string): string {
-    return query;
-  }
 
   close() {
     if (informixConnect) {

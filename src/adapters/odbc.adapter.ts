@@ -9,10 +9,6 @@ export class OdbcAdapter implements IDatabaseAdapter {
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
 
-  buildQuery(query: string): string {
-    return query;
-  }
-
   async close(): Promise<void> {
     if (this.connection) {
       try {
@@ -26,33 +22,39 @@ export class OdbcAdapter implements IDatabaseAdapter {
   async connect(): Promise<void> {
     if (!this.connection) {
       try {
-        this.connection = await odbc.connect(this.config);
+        this.connection = await odbc.connect(
+          {
+            connectionString: this.config.host,
+            loginTimeout: 999,
+            connectionTimeout: 999,
+          }
+
+        );
       } catch (e) {
         console.log(e);
       }
     }
   }
 
-  async count(query: string): Promise<number> {
-    const resultSet = await this.execute(`SELECT COUNT (*) AS total FROM (${this.buildQuery(query)}) as tab1`);
-    const obj: any = {}
-    Object.keys(resultSet).map((key) => obj[key.toLowerCase()] = resultSet[key])
-    return obj[0].total;
-  }
-
   disconnect(): Promise<void> {
     return this.connection.close();
   }
 
-  execute(query: string, page?: number, limit?: number): Promise<any> {
-    const statement = [
-      this.buildQuery(query),
-      "undefined" !== typeof page && limit ? `ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY` : null,
-    ]
-
-      .filter((item) => !!item)
-      .join(" ");
-    return this.connection.query(statement);
+  async execute(query: string) {
+    let resultSet: any = [];
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      const response = await this.connection.query(query);
+      if (response.length) {
+        resultSet = response.map(rows => rows);
+      }
+    }
+    catch (e) {
+      console.log(e);
+    }
+    return resultSet;
   }
 
   async getVersion() {
@@ -62,11 +64,10 @@ export class OdbcAdapter implements IDatabaseAdapter {
   query(query: string, page?: number, limit?: number): Promise<any> {
     const statement = [
       query,
-      limit ? `LIMIT ${limit}` : null,
-      page && limit ? `OFFSET ${page * limit}` : null,
+      "undefined" !== typeof page && limit ? `ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY` : null,
     ]
       .filter((item) => !!item)
       .join(" ");
-    return this.query(statement);
+    return this.connection.execute(statement);
   }
 }

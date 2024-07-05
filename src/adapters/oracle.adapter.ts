@@ -74,14 +74,11 @@ export class OracleAdapter implements IDatabaseAdapter {
     }
     if (!this.version) {
       const query = "SELECT * FROM PRODUCT_COMPONENT_VERSION";
-      const { rows } = await this.connection.execute<DatabaseRow[]>(query);
+      const { rows } = await this.connection.execute<any>(query);
       this.version = rows ? rows[0]["VERSION"].split(".").shift() : "";
     }
-
     return this.version;
   }
-
-
 
   query(query: string, page?: number, limit?: number): Promise<any> {
     const statement = [
