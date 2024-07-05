@@ -36,13 +36,6 @@ export class InformixAdapter implements IDatabaseAdapter {
     }
   }
 
-  async count(entity) {
-    const resultSet = await this.execute(`SELECT COUNT (*) as total FROM (${this.buildQuery(entity)}) as total`);
-    const obj = {};
-
-    Object.keys(resultSet).map((key) => obj[key.toLowerCase()] = resultSet[key]);
-    return obj[0].TOTAL;
-  }
 
   disconnect(): Promise<void> {
     return this.connection.end();

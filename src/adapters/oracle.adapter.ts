@@ -9,10 +9,6 @@ export class OracleAdapter implements IDatabaseAdapter {
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
 
-  buildQuery(query): string {
-    return query;
-  }
-
   async close(): Promise<void> {
     if (this.connection) {
       try {
@@ -41,15 +37,6 @@ export class OracleAdapter implements IDatabaseAdapter {
     }
   }
 
-  async count(query: string): Promise<any> {
-    const total = (
-      await this.execute(
-        `SELECT COUNT (*) as total FROM (${this.buildQuery(query)})`
-      )
-    )[0].TOTAL;
-    return total;
-  }
-
   disconnect(): Promise<void> {
     return this.connection.close();
   }
@@ -60,7 +47,7 @@ export class OracleAdapter implements IDatabaseAdapter {
     }
     if (+this.version > 11) {
       const statement = [
-        this.buildQuery(query),
+        query,
         page && limit ? `OFFSET ${page * limit} ROWS` : null,
         limit ? `FETCH NEXT ${limit} ROWS ONLY` : null,
       ]
@@ -73,8 +60,8 @@ export class OracleAdapter implements IDatabaseAdapter {
     tmp = tmp.join("FROM");
     const statement = [
       `SELECT * FROM (${tmp})`,
-      limit ? `WHERE OFFSET  > ${Math.max(page, 0) * limit}` : null,
-      limit ? `AND OFFSET <= ${Math.max(page + 1, 1) * limit}` : null,
+      limit ? `WHERE OFFSET  > ${Math.max(page || 0, 0) * limit}` : null,
+      limit ? `AND OFFSET <= ${Math.max(page || 0 + 1, 1) * limit}` : null,
     ]
       .filter((item) => !!item)
       .join(" ");
@@ -104,6 +91,6 @@ export class OracleAdapter implements IDatabaseAdapter {
     ]
       .filter((item) => !!item)
       .join(" ");
-    return this.query(statement);
+    return this.execute(statement);
   }
 }

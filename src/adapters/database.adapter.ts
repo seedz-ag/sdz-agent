@@ -82,18 +82,6 @@ export class DatabaseAdapter implements IDatabaseAdapter {
     }
   }
 
-  count(query: string): Promise<number> {
-    return this.adapter.count(this.buildQuery(query));
-  }
-
-  async disconnect(): Promise<void> {
-    try {
-      await this.adapter.disconnect();
-    } catch (exception) {
-      console.error({ exception });
-    }
-  }
-
   private defaultBuildQuery(query: string) {
     const parameters = [...this.parameters];
 

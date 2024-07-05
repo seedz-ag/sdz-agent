@@ -34,17 +34,6 @@ export class MysqlAdapter implements IDatabaseAdapter {
     }
   }
 
-  async count(query: string): Promise<number> {
-    try {
-      const [{ total }] = await this.execute(
-        `SELECT COUNT (*) AS total FROM (${query}) as tab1`
-      );
-      return total;
-    } catch (exception) {
-      // LOG QUERY EXCEPTION ERROR
-      throw exception;
-    }
-  }
 
   async disconnect(): Promise<void> {
     try {

@@ -6,8 +6,7 @@ export interface IDatabaseAdapter {
     buildQuery?(query: string): string;
     checkConnection?(): Promise<boolean>;
     connect(): Promise<void>;
-    count(query: string): Promise<number>;
-    disconnect(): Promise<void>;
+    disconnect?(): Promise<void>;
     execute(query: string): Promise<DatabaseRow[]>;
     getVersion(): Promise<string>;
     query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]>;
