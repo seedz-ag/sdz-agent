@@ -28,8 +28,19 @@ export class FirebirdAdapter implements IDatabaseAdapter {
   async connect(): Promise<any> {
     if (!this.connection) {
       try {
+        const connectionString = {
+          host: this.config.host,
+          port: this.config.port,
+          database: this.config.schema,
+          user: this.config.username,
+          password: this.config.password,
+          lowercase_keys: false, // set to true to lowercase keys
+          pageSize: 4096,        // default when creating database
+          retryConnectionInterval: 1000 // reconnect interval in case of connection drop
+        }
+
         this.connection = await new Promise(resolve => {
-          Firebird.attach(this.config, function (err, db) {
+          Firebird.attach(connectionString, function (err, db) {
             if (err) {
               throw err;
             }
@@ -43,14 +54,6 @@ export class FirebirdAdapter implements IDatabaseAdapter {
     }
   }
 
-  async count(entity: string) {
-    const resultSet = await this.execute(`SELECT COUNT (*) as total FROM (${this.buildQuery(entity)}) as total`);
-    const obj = {};
-
-    Object.keys(resultSet).map((key) => obj[key.toLowerCase()] = resultSet[key]);
-    return obj[0].TOTAL;
-  }
-
   disconnect(): Promise<void> {
     return this.connection.end();
   }
@@ -62,7 +65,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
     }
     try {
       const response = await new Promise(resolve => {
-        this.connection.query(query, function (err, result) {
+        this.connection.query(query, function (err: any, result: DatabaseRow[]) {
           if (err) {
             throw err;
           }
@@ -92,23 +95,6 @@ export class FirebirdAdapter implements IDatabaseAdapter {
       this.buildQuery(query).replace(/^SELECT/gi, '')
     ].filter(v => !!v).join(' ')
 
-    return this.getConnector().execute(statement);
-  }
-
-
-  private setConfig(config: any): this {
-    const options: any = {};
-    options.host = config.host;
-    options.port = config.port;
-    options.database = config.schema;
-    options.user = config.username;
-    options.password = config.password;
-    options.lowercase_keys = false; // set to true to lowercase keys
-    options.role = null;            // default
-    options.pageSize = 4096;        // default when creating database
-    options.pageSize = 4096;        // default when creating database
-    options.retryConnectionInterval = 1000; // reconnect interval in case of connection drop
-    this.config = { ...options };
-    return this;
+    return this.execute(statement);
   }
 }

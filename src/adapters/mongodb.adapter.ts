@@ -44,9 +44,9 @@ export class MongodbAdapter implements IDatabaseAdapter {
     try {
       const input = JSON.parse(query);
       const database = this.connection.db(this.config.schema);
-      const collection = database.collection(input["collection"]);
-      const command = collection[input["command"]].bind(collection);
-      resultSet = await command<any[]>(input[input["command"]]).toArray();
+      const collection: any = database.collection(input["collection"]);
+      const command: any = collection[input["command"]].bind(collection);
+      resultSet = await (command)(input[input["command"]]).toArray();
       return resultSet;
     } catch (e) {
       console.log(e);

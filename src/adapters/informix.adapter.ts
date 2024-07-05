@@ -25,9 +25,20 @@ export class InformixAdapter implements IDatabaseAdapter {
   }
 
   async connect() {
+    const options = {
+      host: this.config.host,
+      port: this.config.port,
+      database: this.config.schema,
+      user: this.config.username,
+      password: this.config.password,
+      lowercase_keys: false, // set to true to lowercase keys
+      role: null,            // default
+      pageSize: 4096,        // default when creating database
+      retryConnectionInterval: 1000 // reconnect interval in case of connection drop
+    }
     if (!informixConnect) {
       try {
-        informixConnect = informix.openSync(this.dsn);
+        informixConnect = await informix.openSync(options);
       } catch (e) {
         console.log(e);
       }
@@ -39,7 +50,7 @@ export class InformixAdapter implements IDatabaseAdapter {
     return this.connection.end();
   }
 
-  async execute(query: string): Promise<DatabaseRow[]> {
+  async execute(query: string): Promise<any> {
     let resultSet = [];
     if (!informixConnect) {
       this.connect();
@@ -58,30 +69,14 @@ export class InformixAdapter implements IDatabaseAdapter {
   }
 
   query(query: string, page?: number, limit?: number): Promise<any> {
-
     const statement = [
       "SELECT",
       limit && `FIRST ${limit}`,
       limit && page && `SKIP ${limit * page}`,
-      this.buildQuery(query).replace(/^SELECT/gi, '')
+      query.replace(/^SELECT/gi, '')
     ].filter(v => !!v).join(' ')
 
-    return this.getConnector().execute(statement);
+    return this.connection.execute(statement);
   }
 
-  private setConfig(config: any): this {
-    const options: any = {};
-    options.host = config.host;
-    options.port = config.port;
-    options.database = config.schema;
-    options.user = config.username;
-    options.password = config.password;
-    options.lowercase_keys = false; // set to true to lowercase keys
-    options.role = null;            // default
-    options.pageSize = 4096;        // default when creating database
-    options.pageSize = 4096;        // default when creating database
-    options.retryConnectionInterval = 1000; // reconnect interval in case of connection drop
-    this.config = { ...options };
-    return this;
-  }
 }

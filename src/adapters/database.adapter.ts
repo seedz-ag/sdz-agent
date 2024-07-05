@@ -109,10 +109,9 @@ export class DatabaseAdapter implements IDatabaseAdapter {
       );
 
     this.loggerAdapter.log("info", `RESOLVED EXTRACTION N DAYS: ${days}`);
-
     if (days) {
       parameters.push({
-        Key: "EXTRACT_LAST_N_DAYS",
+        Key: "START_DATE",
         Value: `${moment()
           .subtract(days, "days")
           .format("YYYY-MM-DD")} 00:00:00`,
@@ -120,7 +119,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
     }
 
     return parameters.reduce((query, { Key, Value }) => {
-      return query.replace(new RegExp(`/{${Key}}/g`), Value);
+      return query.replace(new RegExp(`{${Key}}`, 'g'), Value);
     }, query);
   }
 

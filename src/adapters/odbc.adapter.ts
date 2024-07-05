@@ -68,6 +68,6 @@ export class OdbcAdapter implements IDatabaseAdapter {
     ]
       .filter((item) => !!item)
       .join(" ");
-    return this.connection.execute(statement);
+    return this.execute(statement);
   }
 }
