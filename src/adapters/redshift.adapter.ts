@@ -1,5 +1,5 @@
 import { DatabaseRow } from "../interfaces/database-row.interface";
-import * as Redshift from "node-redshift-connector";
+import Redshift from "node-redshift-connector";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
@@ -42,6 +42,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
     }
 
     async execute(query: string): Promise<DatabaseRow[]> {
+        console.log(query)
         let resultSet: DatabaseRow[] = [];
         if (!this.connection) {
             await this.connect();
