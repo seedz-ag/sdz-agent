@@ -27,13 +27,13 @@ export class DatabaseConsumer implements IConsumer {
 
     const config = this.utilsService.extractDatabaseConfig(this.setting.Parameters);
 
-    const driver = (this.setting.Parameters.find(({ Key }) => "DATABASE_DRIVER" === Key)?.Value)?.toLocaleUpperCase()
+    const driver: any = (this.setting.Parameters.find(({ Key }) => "DATABASE_DRIVER" === Key)?.Value)?.toLocaleUpperCase()
 
     if (!driver) {
       this.loggerAdapter.log("error", `DATABASE DRIVER NOT FOUND`);
       return
     }
-    await this.databaseAdapter.initialize('MYSQL', config, this.setting.Parameters);
+    await this.databaseAdapter.initialize(driver.toLocaleUpperCase(), config, this.setting.Parameters);
 
     this.loggerAdapter.log("info", `DATABASE CONNECTED`);
 

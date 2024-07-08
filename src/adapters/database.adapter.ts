@@ -8,14 +8,14 @@ import {
   // DatabasePackage,
   // AbstractRepository,
 } from "sdz-agent-types";
-// import { RedshiftAdapter } from "./redshift.adapter";
+import { RedshiftAdapter } from "./redshift.adapter";
 import { MysqlAdapter } from "./mysql.adapter";
-// import { MssqlAdapter } from "./mssql.adapter";
-// import { FirebirdAdapter } from "./firebird.adapter";
-// import { InformixAdapter } from "./informix.adapter";
-// import { OdbcAdapter } from "./odbc.adapter";
-// import { OracleAdapter } from "./oracle.adapter";
-// import { PostgresAdapter } from "./postgres.adapter";
+import { MssqlAdapter } from "./mssql.adapter";
+import { FirebirdAdapter } from "./firebird.adapter";
+import { InformixAdapter } from "./informix.adapter";
+import { OdbcAdapter } from "./odbc.adapter";
+import { OracleAdapter } from "./oracle.adapter";
+import { PostgresAdapter } from "./postgres.adapter";
 import { singleton } from "tsyringe";
 import { EnvironmentService } from "../services/environment.service";
 import { LoggerAdapter } from "./logger.adapter";
@@ -24,14 +24,14 @@ import { IParameter } from "interfaces/setting.interface";
 import { DateTime } from "luxon";
 
 const DATABASE_ADAPTERS = {
-  // FIREBIRD: FirebirdAdapter,
-  // INFORMIX: InformixAdapter,
+  FIREBIRD: FirebirdAdapter,
+  INFORMIX: InformixAdapter,
   MYSQL: MysqlAdapter,
-  // MSSQL: MssqlAdapter,
-  // ODBC: OdbcAdapter,
-  // ORACLE: OracleAdapter,
-  // POSTGRES: PostgresAdapter,
-  // REDSHIFT: RedshiftAdapter,
+  MSSQL: MssqlAdapter,
+  ODBC: OdbcAdapter,
+  ORACLE: OracleAdapter,
+  POSTGRES: PostgresAdapter,
+  REDSHIFT: RedshiftAdapter,
 };
 
 type DatabaseDriver = keyof typeof DATABASE_ADAPTERS;
