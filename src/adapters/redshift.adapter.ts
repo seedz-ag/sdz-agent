@@ -63,13 +63,19 @@ export class RedshiftAdapter implements IDatabaseAdapter {
     }
 
     query(query: string, page?: number, limit?: number): Promise<any> {
-        const statement = [
-            query,
-            limit ? `LIMIT ${limit}` : null,
-            page && limit ? `OFFSET ${page * limit}` : null,
-        ]
-            .filter((item) => !!item)
-            .join(" ");
-        return this.execute(statement);
+        // const statement = [
+        //     query,
+        //     limit ? `LIMIT ${limit}` : null,
+        //     page && limit ? `OFFSET ${page * limit}` : null,
+        // ]
+        //     .filter((item) => !!item)
+        //     .join(" ");
+        // return this.execute(statement);
+
+        return this.execute(
+            query
+                .replace(/:skip/g, String((page || 0) * (limit || 1)))
+                .replace(/:limit/g, String(limit || 1000)))
     }
 }
+
