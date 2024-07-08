@@ -16,6 +16,7 @@ import { LoggerAdapter } from "./logger.adapter";
 import moment from "moment";
 import { IParameter } from "interfaces/setting.interface";
 import { DateTime } from "luxon";
+import { MongodbAdapter } from "./mongodb.adapter";
 
 
 interface ConfigDatabaseInterface {
@@ -35,6 +36,7 @@ const DATABASE_ADAPTERS = {
   INFORMIX: InformixAdapter,
   MYSQL: MysqlAdapter,
   MSSQL: MssqlAdapter,
+  MONGODB: MongodbAdapter,
   ODBC: OdbcAdapter,
   ORACLE: OracleAdapter,
   POSTGRES: PostgresAdapter,
