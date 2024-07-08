@@ -61,8 +61,7 @@ export class MongodbAdapter implements IDatabaseAdapter {
   query(query: string, page?: number, limit?: number): Promise<any> {
     return this.execute(
       query
-        .replace(/:skip/g, String((page || 1) * (limit || 1))
-          .replace(/:limit/, String(limit || 1000))
-        ))
+        .replace(/:skip/g, String((page || 1) * (limit || 1)))
+        .replace(/:limit/g, String(limit || 1000)))
   }
 }
