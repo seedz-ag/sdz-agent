@@ -1,6 +1,6 @@
 import { config } from "dotenv";
-import Database from "sdz-agent-database";
 import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { DatabaseAdapter } from "adapters/database.adapter";
 import { singleton } from "tsyringe";
 
 import { ICommand } from "../interfaces/command.interface";
@@ -16,12 +16,11 @@ type ListenQueryCommandExecuteInput = {
 
 @singleton()
 export class ListenQueryCommand
-  implements ICommand<ListenQueryCommandExecuteInput, any>
-{
+  implements ICommand<ListenQueryCommandExecuteInput, any> {
   constructor(
     private readonly apiService: APIService,
     private readonly loggerAdapter: LoggerAdapter
-  ) {}
+  ) { }
 
   public async execute({ args }: ListenQueryCommandExecuteInput) {
     this.loggerAdapter.log("info", "command", args[0]);
@@ -29,7 +28,7 @@ export class ListenQueryCommand
     let setting: ISetting | undefined;
     try {
       setting = await this.apiService.getSetting();
-    } catch {}
+    } catch { }
 
     const setingDatabase = setting?.Parameters.filter(({ Key }) =>
       Key.startsWith("DATABASE_")
@@ -40,8 +39,13 @@ export class ListenQueryCommand
     }, {} as Record<string, string>) as unknown as ConfigDatabaseInterface;
 
     if (setingDatabase) {
-      const database = new Database(setingDatabase);
-      const result = await database.getConnector().execute(args[0]);
+
+      //TODO
+      // const database = new Database(setingDatabase);
+      // const result = await database.getConnector().execute(args[0]);
+
+
+
       this.loggerAdapter.log("info", result);
       return result;
     }
