@@ -50,7 +50,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
         try {
             const response = await this.connection.query<any[]>(query);
             if (response) {
-                resultSet = response[0];
+                resultSet = response["rows"];
             }
         } catch (e) {
             console.log(e);
@@ -63,23 +63,14 @@ export class RedshiftAdapter implements IDatabaseAdapter {
     }
 
     query(query: string, page?: number, limit?: number): Promise<any> {
-        // const statement = [
-        //     query,
-        //     limit ? `LIMIT ${limit}` : null,
-        //     page && limit ? `OFFSET ${page * limit}` : null,
-        // ]
-        //     .filter((item) => !!item)
-        //     .join(" ");
-        // return this.execute(statement);
-
-        limit = 1;
-        return this.execute(
-            query
-                .replace(/:skip/g, String((page || 0) * (limit || 1)))
-                .replace(/:offset/g, String(limit || 1000))
-                .replace(/:limit/g, String(limit || 1000))
-                .replace(/:where/g, String(`1 = 1`))
-        )
+        const statement = [
+            query,
+            limit ? `LIMIT ${limit}` : null,
+            page && limit ? `OFFSET ${page * limit}` : null,
+        ]
+            .filter((item) => !!item)
+            .join(" ");
+        return this.execute(statement);
     }
 }
 
