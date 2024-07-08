@@ -81,13 +81,6 @@ export class OracleAdapter implements IDatabaseAdapter {
   }
 
   query(query: string, page?: number, limit?: number): Promise<any> {
-    const statement = [
-      query,
-      limit ? `LIMIT ${limit}` : null,
-      page && limit ? `OFFSET ${page * limit}` : null,
-    ]
-      .filter((item) => !!item)
-      .join(" ");
-    return this.execute(statement);
+    return this.execute(query, page, limit);
   }
 }
