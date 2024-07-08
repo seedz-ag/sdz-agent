@@ -1,6 +1,7 @@
 import { DatabaseRow } from "sdz-agent-types";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+
 
 import informix from "informixdb";
 

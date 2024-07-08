@@ -19,6 +19,7 @@
     "informixdb": "^2.2.1",
     "luxon": "^3.4.2",
     "moment": "^2.29.4",
+    "mongodb": "^6.8.0",
     "mssql": "^11.0.1",
     "mysql2": "^3.10.2",
     "network-speed": "^2.1.1",

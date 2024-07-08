@@ -2,12 +2,6 @@ import {
   DatabaseRow,
   IDatabaseAdapter,
 } from "interfaces/database-adapter.interface";
-import {
-  ConfigDatabaseInterface,
-  // Connector,
-  // DatabasePackage,
-  // AbstractRepository,
-} from "sdz-agent-types";
 import { RedshiftAdapter } from "./redshift.adapter";
 import { MysqlAdapter } from "./mysql.adapter";
 import { MssqlAdapter } from "./mssql.adapter";
@@ -23,6 +17,19 @@ import moment from "moment";
 import { IParameter } from "interfaces/setting.interface";
 import { DateTime } from "luxon";
 
+
+interface ConfigDatabaseInterface {
+  host?: string;
+  locale?: string;
+  schema?: string;
+  password?: string;
+  port?: number;
+  server?: string;
+  service?: string;
+  username?: string;
+  connectionString?: string;
+}
+
 const DATABASE_ADAPTERS = {
   FIREBIRD: FirebirdAdapter,
   INFORMIX: InformixAdapter,
@@ -35,15 +42,6 @@ const DATABASE_ADAPTERS = {
 };
 
 type DatabaseDriver = keyof typeof DATABASE_ADAPTERS;
-
-// import Firebird from "sdz-agent-database-firebird";
-// import Informix from "sdz-agent-database-informix";
-
-// import MongoDB from "sdz-agent-database-mongodb";
-// import MSSQL from "sdz-agent-database-mssql";
-// import MySQL from "sdz-agent-database-mysql";
-// import Oracle from "sdz-agent-database-oracle";
-// import ODBC from "sdz-agent-database-odbc";
 
 @singleton()
 export class DatabaseAdapter implements IDatabaseAdapter {

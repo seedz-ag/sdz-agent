@@ -1,7 +1,7 @@
-import { DatabaseRow } from "sdz-agent-types";
-import { MongoClient, Collection } from "mongodb";
+import { DatabaseRow } from "../interfaces/database-row.interface";
+import { MongoClient } from "mongodb";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
 export class MongodbAdapter implements IDatabaseAdapter {
   private connection: MongoClient;

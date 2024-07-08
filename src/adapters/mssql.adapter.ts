@@ -1,7 +1,7 @@
-import { DatabaseRow } from "sdz-agent-types";
+import { DatabaseRow } from "../interfaces/database-row.interface";
 import mssql, { Connection, ConnectionPool } from "mssql";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
 export class MssqlAdapter implements IDatabaseAdapter {
   private connection: ConnectionPool;

@@ -1,7 +1,7 @@
-import { DatabaseRow } from "sdz-agent-types";
+import { DatabaseRow } from "../interfaces/database-row.interface";
 import { Client } from "pg";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
 export class PostgresAdapter implements IDatabaseAdapter {
   private connection: Client;
