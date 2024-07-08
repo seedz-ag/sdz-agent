@@ -46,8 +46,8 @@ export class ListenQueryCommand
 
 
 
-      this.loggerAdapter.log("info", result);
-      return result;
+      // this.loggerAdapter.log("info", result);
+      // return result;
     }
   }
 }
