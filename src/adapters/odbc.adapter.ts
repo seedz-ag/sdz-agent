@@ -24,7 +24,7 @@ export class OdbcAdapter implements IDatabaseAdapter {
       try {
         this.connection = await odbc.connect(
           {
-            connectionString: this.config.host,
+            connectionString: this.config.host || '',
             loginTimeout: 999,
             connectionTimeout: 999,
           }

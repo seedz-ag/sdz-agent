@@ -24,7 +24,7 @@ export class MssqlAdapter implements IDatabaseAdapter {
         this.connection = await mssql.connect({
           user: this.config.username,
           password: this.config.password,
-          server: this.config.host,
+          server: this.config.host || '',
           database: this.config.schema,
           port: Number(this.config.port),
           requestTimeout: 999999,
