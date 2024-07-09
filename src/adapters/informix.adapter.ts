@@ -1,4 +1,4 @@
-import { DatabaseRow } from "sdz-agent-types";
+import { DatabaseRow } from "../interfaces/database-row.interface";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
