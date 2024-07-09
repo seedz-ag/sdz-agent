@@ -1,6 +1,6 @@
 import * as csv from "fast-csv";
 import * as fs from "fs";
-import { CsvOptionsInterface } from "sdz-agent-types";
+import { CsvOptionsInterface } from "../interfaces/csv.interface";
 import { singleton } from "tsyringe";
 import { LoggerAdapter } from "./logger.adapter";
 
@@ -67,14 +67,14 @@ export class CSVAdapter {
     return {
       ...(this.legacy
         ? {
-            delimiter: ";",
-            writeHeaders: true,
-          }
+          delimiter: ";",
+          writeHeaders: true,
+        }
         : {
-            delimiter: ",",
-            quoteColumns: true,
-            quoteHeaders: true,
-          }),
+          delimiter: ",",
+          quoteColumns: true,
+          quoteHeaders: true,
+        }),
       escape: '"',
       writeHeaders: true,
     };
@@ -114,10 +114,10 @@ export class CSVAdapter {
   parseToJson(data: string, options: CsvOptionsInterface) {
     return new Promise((resolve): any => {
       let result: Array<string> = [];
-          csv.parseString(data, {
-            headers: true,
-            ...options,
-          })
+      csv.parseString(data, {
+        headers: true,
+        ...options,
+      })
         .on("data", (row: string) => result.push(row))
         .on("end", () => resolve(result));
     });
