@@ -1,13 +1,13 @@
 import { config } from "dotenv";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
-import { DatabaseAdapter } from "adapters/database.adapter";
+import { DatabaseAdapter } from "../adapters/database.adapter";
 import { singleton } from "tsyringe";
 
 import { ICommand } from "../interfaces/command.interface";
 import { ISetting } from "../interfaces/setting.interface";
 import { APIService } from "../services/api.service";
 import { LoggerAdapter } from "../adapters/logger.adapter";
-import { UtilsService } from "services/utils.service";
+import { UtilsService } from "../services/utils.service";
 
 config();
 
