@@ -5,6 +5,7 @@ import kill from "tree-kill";
 import { singleton } from "tsyringe";
 import { ICommand } from "../interfaces/command.interface";
 import { ISetting } from "../interfaces/setting.interface";
+import S3Transport from "../transports/s3.transport";
 import HttpTransport from "../transports/http.transport";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { APIService } from "../services/api.service";
@@ -29,6 +30,7 @@ export class ExecuteCommand implements ICommand {
     private readonly environmentService: EnvironmentService,
     private readonly httpTransport: HttpTransport,
     private readonly loggerAdapter: LoggerAdapter,
+    private readonly s3Transport: S3Transport,
     private readonly vpnService: VPNService
   ) { }
 
@@ -92,6 +94,7 @@ export class ExecuteCommand implements ICommand {
       );
       const transports: Record<string, any> = {
         AGENT: this.httpTransport,
+        S3: this.s3Transport,
         SAAS: this.httpTransport,
       };
 
