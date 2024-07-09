@@ -41,31 +41,8 @@ export class OracleAdapter implements IDatabaseAdapter {
     return this.connection.close();
   }
 
-  async execute(query: string, page?: number, limit?: number): Promise<any> {
-    if (!this.version) {
-      this.version = Number(await this.getVersion())
-    }
-    if (+this.version > 11) {
-      const statement = [
-        query,
-        page && limit ? `OFFSET ${page * limit} ROWS` : null,
-        limit ? `FETCH NEXT ${limit} ROWS ONLY` : null,
-      ]
-        .filter((item) => !!item)
-        .join(" ");
-      return await this.connection.execute(statement);
-    }
-    let tmp: any = query.split(/from/gi);
-    tmp[0] = `${tmp[0]}, ROWNUM AS OFFSET `;
-    tmp = tmp.join("FROM");
-    const statement = [
-      `SELECT * FROM (${tmp})`,
-      limit ? `WHERE OFFSET  > ${Math.max(page || 0, 0) * limit}` : null,
-      limit ? `AND OFFSET <= ${Math.max(page || 0 + 1, 1) * limit}` : null,
-    ]
-      .filter((item) => !!item)
-      .join(" ");
-    return await this.connection.execute(statement);
+  async execute(query: string): Promise<any> {
+    return await this.connection.execute(query);
   }
 
   async getVersion() {
@@ -80,7 +57,31 @@ export class OracleAdapter implements IDatabaseAdapter {
     return this.version;
   }
 
-  query(query: string, page?: number, limit?: number): Promise<any> {
-    return this.execute(query, page, limit);
+  async query(query: string, page?: number, limit?: number): Promise<any> {
+    if (!this.version) {
+      this.version = Number(await this.getVersion())
+    }
+    if (+this.version > 11) {
+      const statement = [
+        query,
+        page && limit ? `OFFSET ${page * limit} ROWS` : null,
+        limit ? `FETCH NEXT ${limit} ROWS ONLY` : null,
+      ]
+        .filter((item) => !!item)
+        .join(" ");
+      return await this.execute(statement);
+    }
+    let tmp: any = query.split(/from/gi);
+    tmp[0] = `${tmp[0]}, ROWNUM AS OFFSET `;
+    tmp = tmp.join("FROM");
+    const statement = [
+      `SELECT * FROM (${tmp})`,
+      limit ? `WHERE OFFSET  > ${Math.max(page || 0, 0) * limit}` : null,
+      limit ? `AND OFFSET <= ${Math.max(page || 0 + 1, 1) * limit}` : null,
+    ]
+      .filter((item) => !!item)
+      .join(" ");
+
+    return this.execute(query);
   }
 }
