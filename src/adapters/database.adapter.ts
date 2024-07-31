@@ -40,7 +40,7 @@ const DATABASE_ADAPTERS = {
   ODBC: OdbcAdapter,
   ORACLE: OracleAdapter,
   POSTGRES: PostgresAdapter,
-  REDSHIFT: RedshiftAdapter,
+  REDSHIFT: PostgresAdapter,
 };
 
 type DatabaseDriver = keyof typeof DATABASE_ADAPTERS;
