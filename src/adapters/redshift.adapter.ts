@@ -42,7 +42,6 @@ export class RedshiftAdapter implements IDatabaseAdapter {
     }
 
     async execute(query: string): Promise<DatabaseRow[]> {
-        console.log(query)
         let resultSet: DatabaseRow[] = [];
         if (!this.connection) {
             await this.connect();
@@ -62,7 +61,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
         return '';
     }
 
-    query(query: string, page?: number, limit?: number): Promise<any> {
+    async query(query: string, page?: number, limit?: number): Promise<any> {
         const statement = [
             query,
             limit ? `LIMIT ${limit}` : null,

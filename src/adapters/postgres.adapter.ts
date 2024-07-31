@@ -48,9 +48,9 @@ export class PostgresAdapter implements IDatabaseAdapter {
     if (!this.connection) {
       await this.connect();
     }
-    console.log(query)
     try {
       const response: any = await this.connection.query<any[]>(query);
+      console.log(response)
       if (response) {
         resultSet = response[0];
       }
@@ -65,7 +65,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
     return "n/a";
   }
 
-  query(query: string, page?: number, limit?: number): Promise<any> {
+  async query(query: string, page?: number, limit?: number): Promise<any> {
     const statement = [
       query,
       limit ? `LIMIT ${limit}` : null,
