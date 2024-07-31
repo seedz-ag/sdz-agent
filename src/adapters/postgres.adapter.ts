@@ -48,6 +48,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
     if (!this.connection) {
       await this.connect();
     }
+    console.log(query)
     try {
       const response: any = await this.connection.query<any[]>(query);
       if (response) {
