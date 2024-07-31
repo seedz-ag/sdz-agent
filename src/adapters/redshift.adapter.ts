@@ -61,7 +61,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
         return '';
     }
 
-    async query(query: string, page?: number, limit?: number): Promise<any> {
+    query(query: string, page?: number, limit?: number): Promise<any> {
         const statement = [
             query,
             limit ? `LIMIT ${limit}` : null,

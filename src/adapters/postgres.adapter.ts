@@ -50,9 +50,8 @@ export class PostgresAdapter implements IDatabaseAdapter {
     }
     try {
       const response: any = await this.connection.query<any[]>(query);
-      console.log(response)
       if (response) {
-        resultSet = response[0];
+        resultSet = response.flatMap((row: any) => row);
       }
     } catch (e) {
       console.log(e);
