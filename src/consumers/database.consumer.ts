@@ -120,7 +120,6 @@ export class DatabaseConsumer implements IConsumer {
               this.hydratorService.hydrate(schema.Maps, row)
             );
 
-
           if (this.setting.Channel !== "S3") {
             await Promise.all([
               this.utilsService.writeJSON(

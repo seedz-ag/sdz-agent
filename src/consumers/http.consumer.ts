@@ -259,21 +259,19 @@ export class HttpConsumer implements IConsumer {
           this.hydratorService.hydrate(schema.Maps, row)
         );
 
-      const rawResource = this.setting.Channel === "S3" ? resource : `raw-${resource}`
-      console.log({ rawResource })
-      await Promise.all([
-        this.utilsService.writeJSON(`${rawResource}`, response),
-        this.transport.send(`${rawResource}`, response),
-      ]);
+      if (this.setting.Channel !== "S3") {
+        await Promise.all([
+          this.utilsService.writeJSON(`raw-${resource}}`, response),
+          this.transport.send(`raw-${resource}`, response),
+        ]);
 
-      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
-      if (this.setting.Channel === "S3" ||
-        (this.environmentService.get("RAW_ONLY") &&
-          !resource.startsWith("raw"))
-      ) {
-        this.loggerAdapter.log("warn", `SENDING EXTRACTION TO RAW ONLY`);
-        return response;
+        if (this.environmentService.get("RAW_ONLY") && !resource.startsWith("raw")
+        ) {
+          this.loggerAdapter.log("warn", `SENDING EXTRACTION TO RAW ONLY`);
+          return response;
+        }
       }
 
       await Promise.all([
