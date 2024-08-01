@@ -44,5 +44,6 @@ export interface ISetting {
   Schedules: ISchedule[];
   Schemas: ISchema[];
   Security: ISecurity;
-  TenantId: string
+  TenantId: string;
+  Id: string;
 }
