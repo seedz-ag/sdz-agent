@@ -120,18 +120,21 @@ export class DatabaseConsumer implements IConsumer {
               this.hydratorService.hydrate(schema.Maps, row)
             );
 
-          await Promise.all([
-            this.utilsService.writeJSON(
-              `raw-${schema.ApiResource || schema.Entity}`,
-              response
-            ),
-            this.transport.send(
-              `raw/${schema.ApiResource || schema.Entity}`,
-              response
-            ),
-          ]);
 
-          await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+          if (this.setting.Channel !== "S3") {
+            await Promise.all([
+              this.utilsService.writeJSON(
+                `raw-${schema.ApiResource || schema.Entity}`,
+                response
+              ),
+              this.transport.send(
+                `raw/${schema.ApiResource || schema.Entity}`,
+                response
+              ),
+            ]);
+
+            await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+          }
 
           await Promise.all([
             this.utilsService.writeJSON(
