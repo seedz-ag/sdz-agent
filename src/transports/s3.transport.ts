@@ -34,6 +34,10 @@ export default class S3Transport implements ITransport {
   }
 
   private upload(resource: string, chunk: unknown[]) {
+    console.log(this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
+      `${this.setting.TenantId}/${resource}/${moment().format(
+        "YYYY-mm-dd"
+      )}/${randomUUID()}.json`)
     return this.s3.putObject({
       Body: JSON.stringify(chunk),
       Bucket: this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
