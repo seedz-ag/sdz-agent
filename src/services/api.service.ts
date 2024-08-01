@@ -119,6 +119,7 @@ export class APIService {
         }
       );
     } catch (error: any) {
+      console.log(error)
       this.loggerAdapter.log(
         "error",
         `TOUCH SETTING ${this.environmentService.get("API_URL")}settings - ${error.response.data
