@@ -94,8 +94,8 @@ export class ExecuteCommand implements ICommand {
       );
       const transports: Record<string, any> = {
         AGENT: this.httpTransport,
-        SAAS_S3: this.s3Transport,
         SAAS: this.httpTransport,
+        SAAS_S3: this.s3Transport,
       };
 
       const transport = transports[setting.Channel.toUpperCase()];
