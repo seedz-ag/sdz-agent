@@ -259,7 +259,7 @@ export class HttpConsumer implements IConsumer {
           this.hydratorService.hydrate(schema.Maps, row)
         );
 
-      if (this.setting.Channel !== "S3") {
+      if (this.setting.Channel !== "SAAS_S3") {
         await Promise.all([
           this.utilsService.writeJSON(`raw-${resource}}`, response),
           this.transport.send(`raw-${resource}`, response),
