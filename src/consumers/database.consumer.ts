@@ -48,7 +48,6 @@ export class DatabaseConsumer implements IConsumer {
       return;
     }
 
-
     const scope = this.environmentService.get("SCHEMA");
 
     if (scope) {
