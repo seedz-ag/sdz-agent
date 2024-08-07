@@ -119,6 +119,7 @@ export class DatabaseConsumer implements IConsumer {
               this.hydratorService.hydrate(schema.Maps, row)
             );
 
+
           if (this.setting.Channel !== "SAAS_S3") {
             await Promise.all([
               this.utilsService.writeJSON(
@@ -133,13 +134,13 @@ export class DatabaseConsumer implements IConsumer {
 
             await this.utilsService.wait(this.environmentService.get("THROTTLE"));
           }
-
+          const resource = this.setting.Channel === "SAAS_S3" ? schema.Entity : schema.ApiResource;
           await Promise.all([
             this.utilsService.writeJSON(
               schema.ApiResource || schema.Entity,
               data
             ),
-            this.transport.send(schema.ApiResource || schema.Entity, data),
+            this.transport.send(resource || schema.Entity, data),
           ]);
 
           await this.utilsService.wait(this.environmentService.get("THROTTLE"));
