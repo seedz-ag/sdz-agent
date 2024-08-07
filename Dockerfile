@@ -40,8 +40,9 @@ RUN npm i -g ts-node
 RUN cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/cli/libthcli.so /lib
 RUN cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/esql/libifgl* /lib
 ENV INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driver
-ENV LD_LIBRARY_PATH=/opt/sdz-agent/node_modules/sdz-agent-database-oracle/instantclient_21_3/
-RUN unzip /opt/sdz-agent/node_modules/sdz-agent-database-oracle/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/node_modules/sdz-agent-database-oracle/
+
+ENV LD_LIBRARY_PATH=/opt/sdz-agent/assets/instantclient_21_3/
+RUN unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
 
 RUN chmod u+x ./agent
 
