@@ -262,8 +262,9 @@ export class HttpConsumer implements IConsumer {
       if (this.setting.Channel !== "SAAS_S3") {
         await Promise.all([
           this.utilsService.writeJSON(`raw-${resource}}`, response),
-          this.transport.send(`raw-${resource}`, response),
+          this.transport.send(`raw/${resource}`, response),
         ]);
+
 
         await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
