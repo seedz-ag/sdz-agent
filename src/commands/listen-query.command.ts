@@ -1,12 +1,13 @@
 import { config } from "dotenv";
-import Database from "sdz-agent-database";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { DatabaseAdapter } from "../adapters/database.adapter";
 import { singleton } from "tsyringe";
 
 import { ICommand } from "../interfaces/command.interface";
 import { ISetting } from "../interfaces/setting.interface";
 import { APIService } from "../services/api.service";
 import { LoggerAdapter } from "../adapters/logger.adapter";
+import { UtilsService } from "../services/utils.service";
 
 config();
 
@@ -16,12 +17,15 @@ type ListenQueryCommandExecuteInput = {
 
 @singleton()
 export class ListenQueryCommand
-  implements ICommand<ListenQueryCommandExecuteInput, any>
-{
+  implements ICommand<ListenQueryCommandExecuteInput, any> {
   constructor(
     private readonly apiService: APIService,
-    private readonly loggerAdapter: LoggerAdapter
-  ) {}
+    private readonly databaseAdapter: DatabaseAdapter,
+    private readonly loggerAdapter: LoggerAdapter,
+    private readonly utilsService: UtilsService
+
+
+  ) { }
 
   public async execute({ args }: ListenQueryCommandExecuteInput) {
     this.loggerAdapter.log("info", "command", args[0]);
@@ -29,7 +33,7 @@ export class ListenQueryCommand
     let setting: ISetting | undefined;
     try {
       setting = await this.apiService.getSetting();
-    } catch {}
+    } catch { }
 
     const setingDatabase = setting?.Parameters.filter(({ Key }) =>
       Key.startsWith("DATABASE_")
@@ -39,11 +43,18 @@ export class ListenQueryCommand
       return previous;
     }, {} as Record<string, string>) as unknown as ConfigDatabaseInterface;
 
-    if (setingDatabase) {
-      const database = new Database(setingDatabase);
-      const result = await database.getConnector().execute(args[0]);
+    if (setingDatabase && setting) {
+      const driver: any = (setting?.Parameters.find(({ Key }) => "DATABASE_DRIVER" === Key)?.Value)?.toLocaleUpperCase()
+      const config = setting ? this.utilsService.extractDatabaseConfig(setting.Parameters) : null
+      if (!driver || !config) {
+        this.loggerAdapter.log("error", `DATABASE DRIVER NOT FOUND`);
+        return
+      }
+      await this.databaseAdapter.initialize(driver.toLocaleUpperCase(), config, setting.Parameters);
+      const result = await this.databaseAdapter.execute(args[0])
       this.loggerAdapter.log("info", result);
       return result;
     }
   }
+
 }

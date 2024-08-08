@@ -7,7 +7,8 @@ export class ArgsService {
   constructor() {
     this.args = (yargs(process.argv) as any).argv;
   }
-  public get(key: string) {
+  public get(key?: string) {
+    if (!key) return this.args;
     return this.args[key];
   }
 }

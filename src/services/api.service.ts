@@ -14,7 +14,7 @@ export class APIService {
     private readonly httpClientAdapter: HttpClientAdapter,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   private getHeaders() {
     return {
@@ -92,7 +92,7 @@ export class APIService {
         "error",
         `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
           "API_URL"
-        )}${resource}-${error.response?.data || ""}`
+        )}${resource} - ${error?.response?.data || ""}`
       );
       if (tries <= this.environmentService.get("RETRIES")) {
         await this.utilsService.wait(
@@ -121,8 +121,7 @@ export class APIService {
     } catch (error: any) {
       this.loggerAdapter.log(
         "error",
-        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${
-          error.response.data
+        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings - ${error.response?.data || ""
         }`
       );
     }
@@ -138,12 +137,12 @@ export class APIService {
       .post(
         `${process.env.API_URL}logs`,
         (!ENV && log) ||
-          log.map((data) => [
-            data[0],
-            data[1],
-            ENV ? `[${ENV}] - ${data[2]}` : `${data[2]}`,
-            ...data.slice(3),
-          ]),
+        log.map((data) => [
+          data[0],
+          data[1],
+          ENV ? `[${ENV}] - ${data[2]}` : `${data[2]}`,
+          ...data.slice(3),
+        ]),
         {
           headers: this.getHeadersLogs(),
           timeout: 5000,

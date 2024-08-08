@@ -2,7 +2,7 @@ import { fork } from "child_process";
 import kill from "tree-kill";
 import { writeFile } from "fs";
 import { singleton } from "tsyringe";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 import { IParameter, ISchema } from "../interfaces/setting.interface";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { EnvironmentService } from "./environment.service";
@@ -13,7 +13,7 @@ export class UtilsService {
   constructor(
     private readonly environmentService: EnvironmentService,
     private readonly loggerAdapter: LoggerAdapter
-  ) {}
+  ) { }
 
   public chunkData<T = unknown>(data: T[], length?: number): T[][] {
     const split = Number(
