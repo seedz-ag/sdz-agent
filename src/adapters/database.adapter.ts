@@ -61,28 +61,6 @@ export class DatabaseAdapter implements IDatabaseAdapter {
   ) { }
 
   buildQuery(query: string): string {
-    return "function" === typeof this.adapter.buildQuery
-      ? this.adapter.buildQuery(query)
-      : this.defaultBuildQuery(query);
-  }
-
-  checkConnection() {
-    return "function" === typeof this.adapter.checkConnection
-      ? this.adapter.checkConnection()
-      : this.defaultCheckConnection();
-  }
-
-  async connect(): Promise<void> {
-    try {
-      this.adapter = new DATABASE_ADAPTERS[this.driver](this.config);
-      // ATTEMPT TO CONNECT
-      await this.adapter.connect();
-    } catch (exception) {
-      console.error({ exception });
-    }
-  }
-
-  private defaultBuildQuery(query: string) {
     const parameters = [...this.parameters];
 
     const lastExtraction = String(
@@ -109,6 +87,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
       );
 
     this.loggerAdapter.log("info", `RESOLVED EXTRACTION N DAYS: ${days}`);
+
     if (days) {
       parameters.push({
         Key: "START_DATE",
@@ -118,6 +97,28 @@ export class DatabaseAdapter implements IDatabaseAdapter {
       });
     }
 
+    return "function" === typeof this.adapter.buildQuery
+      ? this.adapter.buildQuery(query, parameters)
+      : this.defaultBuildQuery(query, parameters);
+  }
+
+  checkConnection() {
+    return "function" === typeof this.adapter.checkConnection
+      ? this.adapter.checkConnection()
+      : this.defaultCheckConnection();
+  }
+
+  async connect(): Promise<void> {
+    try {
+      this.adapter = new DATABASE_ADAPTERS[this.driver](this.config);
+      // ATTEMPT TO CONNECT
+      await this.adapter.connect();
+    } catch (exception) {
+      console.error({ exception });
+    }
+  }
+
+  private defaultBuildQuery(query: string, parameters: IParameter[]) {
     return parameters.reduce((query, { Key, Value }) => {
       return query.replace(new RegExp(`{${Key}}`, 'g'), Value);
     }, query);

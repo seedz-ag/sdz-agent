@@ -2,11 +2,21 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import mssql, { Connection, ConnectionPool } from "mssql";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { IParameter } from "interfaces/setting.interface";
 
 export class MssqlAdapter implements IDatabaseAdapter {
   private connection: ConnectionPool;
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
+
+  public buildQuery(query: string, parameters: IParameter[]) {
+    console.log(parameters.reduce((query, { Key, Value }) => {
+      return query.replace(new RegExp(`{${Key}}`, 'g'), Key !== "START_DATE" ? Value : `'${Value}'`);
+    }, query))
+    return parameters.reduce((query, { Key, Value }) => {
+      return query.replace(new RegExp(`{${Key}}`, 'g'), Key !== "START_DATE" ? Value : `'${Value}'`);
+    }, query);
+  }
 
   async close(): Promise<void> {
     if (this.connection) {

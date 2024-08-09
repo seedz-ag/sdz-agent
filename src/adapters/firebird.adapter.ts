@@ -1,8 +1,9 @@
-import { DatabaseRow } from "../interfaces/database-row.interface";
+import * as databaseRowInterface from "../interfaces/database-row.interface";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
 import Firebird from "node-firebird";
+import { IParameter } from "interfaces/setting.interface";
 
 export class FirebirdAdapter implements IDatabaseAdapter {
   private connection: any
@@ -10,10 +11,6 @@ export class FirebirdAdapter implements IDatabaseAdapter {
   private version: any;
 
   constructor(private readonly config: ConfigDatabaseInterface) { }
-
-  buildQuery(query: string): string {
-    return query;
-  }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -58,14 +55,14 @@ export class FirebirdAdapter implements IDatabaseAdapter {
     return this.connection.end();
   }
 
-  async execute(query: string): Promise<DatabaseRow[]> {
-    let resultSet: DatabaseRow[] = [];
+  async execute(query: string): Promise<databaseRowInterface.DatabaseRow[]> {
+    let resultSet: databaseRowInterface.DatabaseRow[] = [];
     if (!this.connection) {
       await this.connect();
     }
     try {
       const response = await new Promise(resolve => {
-        this.connection.query(query, function (err: any, result: DatabaseRow[]) {
+        this.connection.query(query, function (err: any, result: databaseRowInterface.DatabaseRow[]) {
           if (err) {
             throw err;
           }
@@ -73,7 +70,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
         });
       })
       if (response) {
-        resultSet = response as DatabaseRow[];
+        resultSet = response as databaseRowInterface.DatabaseRow[];
       }
     } catch (e) {
       console.log(e);
@@ -92,7 +89,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
       "SELECT",
       limit && `FIRST ${limit}`,
       limit && page && `SKIP ${limit * page}`,
-      this.buildQuery(query).replace(/^SELECT/gi, '')
+      query.replace(/^SELECT/gi, '')
     ].filter(v => !!v).join(' ')
 
     return this.execute(statement);
