@@ -1,9 +1,11 @@
+import { IParameter } from "./setting.interface";
+
 export interface DatabaseRow {
     [key: string]: any;
 }
 
 export interface IDatabaseAdapter {
-    buildQuery?(query: string): string;
+    buildQuery?(query: string, parameters: IParameter[]): string;
     checkConnection?(): Promise<boolean>;
     connect(): Promise<void>;
     disconnect?(): Promise<void>;
