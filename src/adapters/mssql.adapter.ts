@@ -10,9 +10,6 @@ export class MssqlAdapter implements IDatabaseAdapter {
   constructor(private readonly config: ConfigDatabaseInterface) { }
 
   public buildQuery(query: string, parameters: IParameter[]) {
-    console.log(parameters.reduce((query, { Key, Value }) => {
-      return query.replace(new RegExp(`{${Key}}`, 'g'), Key !== "START_DATE" ? Value : `'${Value}'`);
-    }, query))
     return parameters.reduce((query, { Key, Value }) => {
       return query.replace(new RegExp(`{${Key}}`, 'g'), Key !== "START_DATE" ? Value : `'${Value}'`);
     }, query);
