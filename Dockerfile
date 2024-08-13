@@ -23,7 +23,7 @@ RUN mkdir -p /var/log/supervisor
 
 # Install NVM
 ENV NVM_DIR=/opt/sdz-agent/.nvm
-ENV NODE_VERSION=18.16.1
+ENV NODE_VERSION=20.16.0
 RUN mkdir .nvm
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash 
 ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
