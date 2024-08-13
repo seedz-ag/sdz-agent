@@ -42,7 +42,12 @@ export class OracleAdapter implements IDatabaseAdapter {
   }
 
   async execute(query: string): Promise<any> {
-    return await this.connection.execute(query);
+    const response = await this.connection.execute(query);
+    let resultSet: any = [];
+    if (response) {
+      resultSet = response.rows;
+    }
+    return resultSet;
   }
 
   async getVersion() {
@@ -82,6 +87,6 @@ export class OracleAdapter implements IDatabaseAdapter {
       .filter((item) => !!item)
       .join(" ");
 
-    return this.execute(query);
+    return this.execute(statement);
   }
 }
