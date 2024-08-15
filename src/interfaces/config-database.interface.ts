@@ -7,5 +7,6 @@ export interface ConfigDatabaseInterface {
     server?: string;
     service?: string;
     username?: string;
+    connectionstring?: string;
     connectionString?: string;
 }
