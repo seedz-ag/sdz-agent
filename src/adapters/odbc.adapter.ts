@@ -64,7 +64,8 @@ export class OdbcAdapter implements IDatabaseAdapter {
   query(query: string, page?: number, limit?: number): Promise<any> {
     const statement = [
       query,
-      "undefined" !== typeof page && limit ? `ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY` : null,
+      limit ? `LIMIT ${limit}` : null,
+      page && limit ? `OFFSET ${page * limit}` : null,
     ]
       .filter((item) => !!item)
       .join(" ");
