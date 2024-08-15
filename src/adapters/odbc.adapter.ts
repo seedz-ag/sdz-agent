@@ -24,7 +24,7 @@ export class OdbcAdapter implements IDatabaseAdapter {
       try {
         this.connection = await odbc.connect(
           {
-            connectionString: this.config.host || '',
+            connectionString: this.config.connectionstring || this.config.connectionString || '',
             loginTimeout: 999,
             connectionTimeout: 999,
           }
@@ -46,7 +46,7 @@ export class OdbcAdapter implements IDatabaseAdapter {
       await this.connect();
     }
     try {
-      const response = await this.connection.query(query);
+      const response = await this.connection.query<DatabaseRow>(query);
       if (response.length) {
         resultSet = response.map(rows => rows);
       }
