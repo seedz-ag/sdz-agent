@@ -108,7 +108,10 @@ export class DatabaseAdapter implements IDatabaseAdapter {
 
   async connect(): Promise<void> {
     try {
-      this.adapter = new DATABASE_ADAPTERS[this.driver](this.config);
+
+      const driver = this.driver.toLocaleUpperCase() as keyof typeof DATABASE_ADAPTERS;
+
+      this.adapter = new DATABASE_ADAPTERS[driver](this.config);
       // ATTEMPT TO CONNECT
       await this.adapter.connect();
     } catch (exception) {

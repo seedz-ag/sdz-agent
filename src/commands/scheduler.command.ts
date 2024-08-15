@@ -43,7 +43,9 @@ export class SchedulerCommand implements ICommand {
 
         try {
           setting = await this.apiService.getSetting();
-        } catch (error) {
+        } catch (error: any) {
+          this.loggerAdapter.log("info", `SCHEDULER ERROR WHILE GETING SETING: ${error?.response?.data?.toUpperCase()}`);
+          await this.utilsService.wait(300000)
           reject(error);
           return;
         }
