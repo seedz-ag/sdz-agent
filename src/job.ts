@@ -11,6 +11,7 @@ process.on("message", async (buffer: Buffer) => {
   const executeCommand = container.resolve(ExecuteCommand);
   const loggerAdapter = container.resolve(LoggerAdapter);
   const schedules = JSON.parse(buffer.toString());
+  loggerAdapter.log(`info`, `SCHEDULING JOBS ${schedules}`);
 
   for (const schedule of schedules) {
     loggerAdapter.log(`info`, `SCHEDULING JOB AT ${schedule.CronExpression}`);
