@@ -63,6 +63,7 @@ export class SchedulerCommand implements ICommand {
             return;
           }
           try {
+            this.loggerAdapter.log("info", "VERIFY SETTING");
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
               this.loggerAdapter.log("info", "SETTING UPDATED");
