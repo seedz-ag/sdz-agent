@@ -25,6 +25,7 @@ export class SchedulerCommand implements ICommand {
 
   private fork(schedules: ISchedule[]) {
     try {
+      this.loggerAdapter.log("info", `FORK SCHEDULER JOB schedules ${JSON.stringify(schedules)}`);
       const child = this.utilsService.fork("./src/job");
       child.send(JSON.stringify(schedules));
       return child;
