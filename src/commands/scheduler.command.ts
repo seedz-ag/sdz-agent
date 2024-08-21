@@ -53,6 +53,7 @@ export class SchedulerCommand implements ICommand {
         let child = this.fork(setting.Schedules);
 
         if ("true" === process.env.LISTEN) {
+          this.loggerAdapter.log("info", "EXECUTE LISTEN ON SCHEDULER");
           this.listenCommand.execute();
         }
 
@@ -64,6 +65,7 @@ export class SchedulerCommand implements ICommand {
           try {
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
+              this.loggerAdapter.log("info", "SETTING UPDATED");
               child.kill(1);
               setting = verify;
               child = this.fork(setting.Schedules);
