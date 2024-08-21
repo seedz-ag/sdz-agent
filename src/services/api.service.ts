@@ -148,11 +148,12 @@ export class APIService {
           timeout: 5000,
         }
       )
-      .catch((e: any) => {
+      .catch(async (e: any) => {
         this.loggerAdapter.log(
           "error",
-          `ERROR ${process.env.API_URL}logs ${e?.response?.data || ""}`
+          `ERROR ${process.env.API_URL}logs ${e?.response?.data?.message.toUpperCase() || e?.response?.data || e}`
         );
+        await this.utilsService.wait(300000)
       });
   }
 }
