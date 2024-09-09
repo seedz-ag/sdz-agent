@@ -59,23 +59,16 @@ export default class S3Transport implements ITransport {
       this.setting = await this.apiService.getSetting();
     }
 
-    const promises: Promise<any>[] = [];
-
     for (const chunk of this.utilsService.chunkData(data)) {
       this.loggerAdapter.log(
         "info",
         `SENDING CHUNK ${chunk.length} LINES TO /${resource}`
       );
 
-      if (this.environmentService.get("THROTTLE")) {
-        await this.upload(resource, chunk);
-        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
-        continue;
-      }
+      await this.upload(resource, chunk);
 
-      promises.push(this.upload(resource, chunk));
+      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
     }
 
-    await Promise.all(promises);
   }
 }
