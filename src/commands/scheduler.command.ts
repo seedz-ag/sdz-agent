@@ -64,7 +64,7 @@ export class SchedulerCommand implements ICommand {
           try {
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
-              child.kill(1);
+              this.utilsService.killProcess();
               setting = verify;
               child = this.fork(setting.Schedules);
             }
