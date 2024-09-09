@@ -98,7 +98,7 @@ export class UtilsService {
   }
 
   public wait(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, this.getRandomThrotle(ms)));
   }
 
   public writeJSON(entity: string, data: any, exception = false) {
@@ -133,5 +133,11 @@ export class UtilsService {
         });
       })
     );
+  }
+
+  private getRandomThrotle(min: number) {
+    const max = min + 2500;
+    const random = Math.random() * (max - min) + min;
+    return Number(random.toFixed(0))
   }
 }
