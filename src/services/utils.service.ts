@@ -69,9 +69,10 @@ export class UtilsService {
     );
   }
 
-  public killProcess(exitCode = 1): Promise<void> {
-    kill(process.pid);
-    process.exit(exitCode);
+  async killProcess(pid = 1): Promise<void> {
+    kill(pid);
+    await this.wait(2000);
+    process.exit(1);
   }
 
   public mergeEnv(args: Record<string, any>) {
