@@ -57,16 +57,15 @@ export class SchedulerCommand implements ICommand {
         }
 
         this.interval = setInterval(async () => {
-          if (!child) {
+          if (!child?.pid) {
             reject();
             return;
           }
           try {
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
-              await this.utilsService.killProcess(child.pid);
-              setting = verify;
-              child = this.fork(setting.Schedules);
+              process.kill(child.pid, "SIGKILL");
+              process.kill(process.pid, "SIGKILL");
             }
           } catch (error) {
             reject(error);
