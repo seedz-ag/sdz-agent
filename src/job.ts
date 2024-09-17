@@ -3,6 +3,7 @@ import { scheduleJob } from "node-schedule";
 import { getContainer } from "./container";
 import { ExecuteCommand } from "./commands/execute.command";
 import { LoggerAdapter } from "./adapters/logger.adapter";
+import { kill } from "node:process";
 
 config();
 
@@ -18,6 +19,7 @@ process.on("message", async (buffer: Buffer) => {
       try {
         return await executeCommand.execute();
       } catch (e) {
+        kill(process.pid);
         return false;
       }
     });

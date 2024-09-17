@@ -64,9 +64,8 @@ export class SchedulerCommand implements ICommand {
           }
           try {
             const verify = await this.apiService.getSetting();
-            if (JSON.stringify(setting) !== JSON.stringify(verify)) {
-              process.kill(this.child?.pid, "SIGKILL");
-              process.kill(process.pid, "SIGKILL");
+            if (JSON.stringify(setting) === JSON.stringify(verify)) {
+              this.utilsService.killProcess(this.child?.pid);
             }
           } catch (error) {
             reject(error);
@@ -74,7 +73,7 @@ export class SchedulerCommand implements ICommand {
         }, 60000);
       });
     } catch (error) {
-      process.kill(this.child?.pid, "SIGKILL");
+      this.utilsService.killProcess(this.child?.pid);
       clearInterval(this.interval);
       await this.rescue();
     }
