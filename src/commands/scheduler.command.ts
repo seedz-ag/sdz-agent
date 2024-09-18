@@ -11,6 +11,7 @@ import { UtilsService } from "../services/utils.service";
 export class SchedulerCommand implements ICommand {
   private interval: NodeJS.Timeout;
   private child: any;
+  private children: number[] = [];
 
   constructor(
     private readonly apiService: APIService,
@@ -52,7 +53,14 @@ export class SchedulerCommand implements ICommand {
           return;
         }
 
+        if (this.children.length) {
+          await this.utilsService.killChildrenProcess(this.children);
+          this.children = []
+        }
+
         this.child = this.fork(setting.Schedules);
+        this.children.push(this.child?.pid)
+
         if ("true" === process.env.LISTEN) {
           this.listenCommand.execute();
         }
@@ -65,7 +73,7 @@ export class SchedulerCommand implements ICommand {
           try {
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
-              this.utilsService.killProcess(this.child?.pid);
+              this.execute()
             }
           } catch (error) {
             reject(error);
@@ -73,9 +81,8 @@ export class SchedulerCommand implements ICommand {
         }, 60000);
       });
     } catch (error) {
-      this.utilsService.killProcess(this.child?.pid);
       clearInterval(this.interval);
-      await this.rescue();
+      this.utilsService.killProcess(this.child?.pid);
     }
   }
 

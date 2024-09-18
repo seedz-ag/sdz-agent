@@ -20,7 +20,6 @@ process.on("message", async (buffer: Buffer) => {
         return await executeCommand.execute();
       } catch (e) {
         kill(process.pid);
-        return false;
       }
     });
   }

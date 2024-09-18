@@ -165,7 +165,7 @@ process.env.CLI = "1";
       environmentService.parse();
       const configureCommand = container.resolve(ConfigureCommand);
       await configureCommand.execute();
-      utilsService.killProcess();
+      utilsService.killProcess(process.pid);
     })
     .command(
       "run",
@@ -233,7 +233,7 @@ process.env.CLI = "1";
           !!spinner && spinner.fail("ERROR");
         } finally {
           loggerAdapter.push(null);
-          utilsService.killProcess();
+          utilsService.killProcess(process.pid);
         }
       }
     )
@@ -290,7 +290,7 @@ process.env.CLI = "1";
         }
 
         spinner.fail("STOPPED");
-        utilsService.killProcess();
+        utilsService.killProcess(process.pid);
       }
     )
     .command(
@@ -320,8 +320,8 @@ process.env.CLI = "1";
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
         const schedulerCommand = container.resolve(SchedulerCommand);
-        
-        let spinner : Ora|undefined
+
+        let spinner: Ora | undefined
 
         if (!environmentService.get("USE_CONSOLE_LOG")) {
           spinner = ora({
@@ -341,7 +341,7 @@ process.env.CLI = "1";
         await schedulerCommand.execute();
 
         spinner && spinner.fail("STOPPED");
-        utilsService.killProcess();
+        utilsService.killProcess(process.pid);
       }
     )
     .command("update", "Updates Agent code", async (argv) => {
@@ -381,11 +381,11 @@ process.env.CLI = "1";
   await new Promise<void>((resolve, reject) => {
     apiLoggerStream.on("close", () => {
       resolve();
-      utilsService.killProcess();
+      utilsService.killProcess(process.pid);
     });
     apiLoggerStream.on("error", () => {
       reject();
-      utilsService.killProcess();
+      utilsService.killProcess(process.pid);
     });
   });
 })();
