@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 #
 WORKDIR /opt/sdz-agent
 
@@ -14,7 +14,7 @@ RUN apt-get install -y \
   libssl-dev \
   git \
   supervisor \ 
-  libodbc2 \
+  libodbc1 \
   unzip \
   sudo \
   openvpn
