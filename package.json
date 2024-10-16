@@ -1,6 +1,6 @@
 {
   "name": "sdz-agent",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "license": "Apache",
   "private": true,
   "dependencies": {
