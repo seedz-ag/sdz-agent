@@ -1,5 +1,5 @@
-FROM ubuntu:22.04
-
+FROM ubuntu:24.04
+#
 WORKDIR /opt/sdz-agent
 
 ENV USER=$(/usr/bin/whoami)
@@ -14,7 +14,7 @@ RUN apt-get install -y \
   libssl-dev \
   git \
   supervisor \ 
-  libodbc1 \
+  libodbc2 \
   unzip \
   sudo \
   openvpn

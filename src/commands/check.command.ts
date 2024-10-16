@@ -1,5 +1,4 @@
 import colors from "colors";
-import dns from "dns";
 import { config } from "dotenv";
 import NetworkSpeedCheck from "network-speed";
 import { singleton } from "tsyringe";
@@ -11,45 +10,39 @@ import { ConsumerResolverService } from "../services/consumer-resolver.service";
 config();
 
 export type CheckCommandExecuteInput = {
-  type: "all" | "auth" | "datasource" | "dns" | "speed";
+  type: "all" | "auth" | "datasource" | "speed";
 };
 
 type ConnectionSpeed = { download: string; upload: string } | false;
 
 export type CheckCommandExecuteOutput =
   | {
-      type: "all";
-      checkAuth: boolean;
-      checkDataSource: boolean;
-      checkDNS: boolean;
-      checkConnectionSpeed: ConnectionSpeed;
-    }
+    type: "all";
+    checkAuth: boolean;
+    checkDataSource: boolean;
+    checkConnectionSpeed: ConnectionSpeed;
+  }
   | {
-      type: "auth";
-      checkAuth: boolean;
-    }
+    type: "auth";
+    checkAuth: boolean;
+  }
   | {
-      type: "datasource";
-      checkDataSource: boolean;
-    }
+    type: "datasource";
+    checkDataSource: boolean;
+  }
   | {
-      type: "dns";
-      checkDNS: boolean;
-    }
-  | {
-      type: "speed";
-      checkConnectionSpeed: ConnectionSpeed;
-    };
+    type: "speed";
+    checkConnectionSpeed: ConnectionSpeed;
+  };
 
 @singleton()
 export class CheckCommand
-  implements ICommand<CheckCommandExecuteInput, CheckCommandExecuteOutput>
-{
+  implements ICommand<CheckCommandExecuteInput, CheckCommandExecuteOutput> {
   constructor(
     private readonly apiService: APIService,
     private readonly consumerResolverService: ConsumerResolverService,
     private readonly httpClientAdapter: HttpClientAdapter
-  ) {}
+  ) { }
 
   private async checkAuth() {
     try {
@@ -75,30 +68,6 @@ export class CheckCommand
       await consumer.consume();
       return true;
     } catch (error) {
-      return false;
-    }
-  }
-
-  private async checkDNS(): Promise<boolean> {
-    try {
-      const { fqdn }: any = process.env.API_URL?.match(
-        /^(?<protocol>https?:\/\/)(?=(?<fqdn>[^:/]+))(?:(?<service>www|ww\d|cdn|ftp|mail|pop\d?|ns\d?|git)\.)?(?:(?<subdomain>[^:/]+)\.)*(?<domain>[^:/]+\.[a-z0-9]+)(?::(?<port>\d+))?(?<path>\/[^?]*)?(?:\?(?<query>[^#]*))?(?:#(?<hash>.*))?/i
-      )?.groups;
-
-      if (!fqdn) {
-        console.log(colors.bold("YOU MUST CONFIGURE YOUR AGENT FIRST"));
-        throw new Error();
-      }
-
-      return new Promise((resolve) => {
-        dns.resolve(fqdn, (err) => {
-          if (err) {
-            return resolve(false);
-          }
-          return resolve(true);
-        });
-      });
-    } catch {
       return false;
     }
   }
@@ -146,7 +115,6 @@ export class CheckCommand
     const response: CheckCommandExecuteOutput = {
       checkAuth: false,
       checkDataSource: false,
-      checkDNS: false,
       checkConnectionSpeed: false,
       type,
     };
@@ -159,9 +127,7 @@ export class CheckCommand
       response.checkDataSource = await this.checkDataSource();
     }
 
-    if (response.type === "all" || response.type === "dns") {
-      response.checkDNS = await this.checkDNS();
-    }
+
 
     if (response.type === "all" || response.type === "speed") {
       try {
@@ -170,7 +136,7 @@ export class CheckCommand
           download: download,
           upload: upload,
         };
-      } catch {}
+      } catch { }
     }
 
     return response;
