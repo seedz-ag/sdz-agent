@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-
+#
 WORKDIR /opt/sdz-agent
 
 ENV USER=$(/usr/bin/whoami)
