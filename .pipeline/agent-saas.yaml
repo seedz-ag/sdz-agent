@@ -15,5 +15,12 @@ resources:
     name: Platform Engineering/templates-pipeline
     ref: master
 
+variables:
+- group: sdz-agent
+
 extends:
-  template: build-ecr/github/seedz-ag/sdz-agent.yaml@template
+  template: build-ecr/github/seedz-ag/pipeline.yaml@template
+  parameters:
+    AWS_ACC_ID: $(AWS_ACC_ID)
+    REPOSITORY_NAME: $(REPOSITORY_NAME)
+    SNYK_ORG: $(SNYK_ORG)
