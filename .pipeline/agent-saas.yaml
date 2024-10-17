@@ -2,13 +2,11 @@ trigger:
   branches:
     include:
     - main
+
+pr:
+  branches:
     exclude:
-    - feature/*
-    - feat/*
-    - fix/*
-    - hotfix/*
-    - bugfix/*
-    - poc/*
+    - main
 
 resources:
   repositories:
