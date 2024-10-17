@@ -1,14 +1,21 @@
 trigger:
   branches:
     include:
-      - main
+    - main
+    exclude:
+    - feature/*
+    - feat/*
+    - fix/*
+    - hotfix/*
+    - bugfix/*
+    - poc/*
+
 resources:
   repositories:
-    - repository: template
-      type: git
-      name: Platform Engineering/templates-pipeline
-      ref: master
-variables:
-  - group: sdz-agent-v2
+  - repository: template
+    type: git
+    name: Platform Engineering/templates-pipeline
+    ref: master
+
 extends:
-  template: ecs/fargate/seedz-integration/nodejs/agent-saas.yaml@template
+  template: build-ecr/github/seedz-ag/sdz-agent.yaml@template
