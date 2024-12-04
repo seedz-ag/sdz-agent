@@ -42,6 +42,7 @@ export class APIService {
       `${this.environmentService.get("API_URL")}discovery`,
       {
         headers: this.getHeaders(),
+        timeout: this.environmentService.get("API_REQUEST_TIMEOUT"),
       }
     );
   }
@@ -56,7 +57,7 @@ export class APIService {
       `${this.environmentService.get("API_URL")}settings`,
       {
         headers: this.getHeaders(),
-        timeout: 60000,
+        timeout: this.environmentService.get('API_REQUEST_TIMEOUT'),
       }
     );
     if (!setting) {
@@ -85,6 +86,7 @@ export class APIService {
         data,
         {
           headers: this.getHeaders(),
+          timeout: this.environmentService.get('API_REQUEST_TIMEOUT')
         }
       );
     } catch (error: any) {
@@ -92,7 +94,7 @@ export class APIService {
         "error",
         `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
           "API_URL"
-        )}${resource} - ${error?.response?.data || ""}`
+        )}${resource}-${error.response?.data || ""}`
       );
       if (tries <= this.environmentService.get("RETRIES")) {
         await this.utilsService.wait(
@@ -116,12 +118,13 @@ export class APIService {
         {},
         {
           headers: this.getHeaders(),
+          timeout: this.environmentService.get('API_REQUEST_TIMEOUT'),
         }
       );
     } catch (error: any) {
       this.loggerAdapter.log(
         "error",
-        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings - ${error.response?.data || ""
+        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${error.response.data
         }`
       );
     }
@@ -145,15 +148,14 @@ export class APIService {
         ]),
         {
           headers: this.getHeadersLogs(),
-          timeout: 5000,
+          timeout: this.environmentService.get("API_REQUEST_TIMEOUT"),
         }
       )
-      .catch(async (e: any) => {
+      .catch((e: any) => {
         this.loggerAdapter.log(
           "error",
-          `ERROR ${process.env.API_URL}logs ${e?.response?.data?.message.toUpperCase() || e?.response?.data || e}`
+          `ERROR ${process.env.API_URL}logs ${e?.response?.data || ""}`
         );
-        await this.utilsService.wait(300000)
       });
   }
 }
