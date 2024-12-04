@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { IDiscovery } from "interfaces/discovery.interface";
+import { IDiscovery, IDiscoveryBody } from "interfaces/discovery.interface";
 import { argv } from "process";
 import { singleton } from "tsyringe";
 import { z } from "zod";
@@ -12,10 +12,10 @@ const environmentSchema = z.object({
       CLIENT_ID: z.string(),
       CLIENT_SECRET: z.string(),
     }),
-  AMAZON_ACCESS_KEY: z.string().optional(),
-  AMAZON_ACCESS_SECRET_KEY: z.string().optional(),
-  AMAZON_REGION: z.string().optional(),
-  AMAZON_S3_RAW_BUCKET: z.string().optional(),
+  API_REQUEST_TIMEOUT: z
+    .string()
+    .optional()
+    .transform((value: unknown) => Number(value) || 300_000),
   CHUNK_SIZE: z
     .string()
     .optional()
@@ -42,7 +42,7 @@ const environmentSchema = z.object({
   THROTTLE: z
     .string()
     .optional()
-    .default("2000")
+    .default("0")
     .transform((value: unknown) => Number(value)),
   TYPE: z.string().optional(),
   USE_CONSOLE_LOG: z
