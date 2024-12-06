@@ -16,6 +16,19 @@ const environmentSchema = z.object({
     .string()
     .optional()
     .transform((value: unknown) => Number(value) || 300_000),
+  AMAZON_ACCESS_KEY: z
+    .string()
+    .optional(),
+  AMAZON_ACCESS_SECRET_KEY: z
+    .string()
+    .optional(),
+  AMAZON_REGION: z
+    .string()
+    .optional(),
+  AMAZON_S3_RAW_BUCKET: z
+    .string()
+    .optional(),
+
   CHUNK_SIZE: z
     .string()
     .optional()

@@ -22,6 +22,7 @@ export class OracleAdapter implements IDatabaseAdapter {
   async connect(): Promise<void> {
     if (!this.connection) {
       try {
+        oracledb.initOracleClient();
         oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
         this.connection = await oracledb.getConnection({
           user: this.config.username,
