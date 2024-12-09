@@ -55,7 +55,7 @@ const environmentSchema = z.object({
   THROTTLE: z
     .string()
     .optional()
-    .default("0")
+    .default("2000")
     .transform((value: unknown) => Number(value)),
   TYPE: z.string().optional(),
   USE_CONSOLE_LOG: z
