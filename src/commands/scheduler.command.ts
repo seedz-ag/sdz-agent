@@ -5,7 +5,7 @@ import { ListenCommand } from "./listen.command";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { APIService } from "../services/api.service";
 import { EnvironmentService } from "../services/environment.service";
-import { getContainer } from "container";
+import { getContainer } from "../container";
 import { ExecuteCommand } from "./execute.command";
 import { gracefulShutdown, scheduleJob } from "node-schedule";
 
