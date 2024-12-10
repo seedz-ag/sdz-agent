@@ -1,11 +1,13 @@
 import { singleton } from "tsyringe";
 import { ICommand } from "../interfaces/command.interface";
-import { ISetting, ISchedule } from "../interfaces/setting.interface";
+import { ISetting } from "../interfaces/setting.interface";
 import { ListenCommand } from "./listen.command";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { APIService } from "../services/api.service";
 import { EnvironmentService } from "../services/environment.service";
-import { UtilsService } from "../services/utils.service";
+import { getContainer } from "container";
+import { ExecuteCommand } from "./execute.command";
+import { gracefulShutdown, scheduleJob } from "node-schedule";
 
 @singleton()
 export class SchedulerCommand implements ICommand {
@@ -16,28 +18,33 @@ export class SchedulerCommand implements ICommand {
     private readonly environtmentService: EnvironmentService,
     private readonly listenCommand: ListenCommand,
     private readonly loggerAdapter: LoggerAdapter,
-    private readonly utilsService: UtilsService
   ) {
     process.on("SIGTERM", () => {
       this.loggerAdapter.log("info", "STOPING SCHEDULER");
     });
   }
 
-  private fork(schedules: ISchedule[]) {
-    try {
-      const child = this.utilsService.fork("./src/job");
-      child.send(JSON.stringify(schedules));
-      return child;
-    } catch (error) {
-      this.loggerAdapter.log("error", { error });
-      this.fork(schedules);
-    }
+  private async schedule(cronExpression: string) {
+    const container = await getContainer();
+    const executeCommand = container.resolve(ExecuteCommand);
+    const loggerAdapter = container.resolve(LoggerAdapter);
+
+    loggerAdapter.log(`info`, `SCHEDULING JOB AT ${cronExpression}`);
+    return scheduleJob(cronExpression, async () => {
+      try {
+        return await executeCommand.execute();
+      } catch (e) {
+        return false;
+      }
+    });
   }
 
   public async execute() {
     try {
       await new Promise<void>(async (resolve, reject) => {
         this.loggerAdapter.log("info", "STARTING SCHEDULER");
+
+        const jobs = [];
 
         let setting: ISetting;
 
@@ -48,28 +55,25 @@ export class SchedulerCommand implements ICommand {
           return;
         }
 
-        let child = this.fork(setting.Schedules);
+        for (const { CronExpression } of setting.Schedules) {
+          jobs.push(this.schedule(CronExpression));
+        }
 
         if ("true" === process.env.LISTEN) {
           this.listenCommand.execute();
         }
 
         this.interval = setInterval(async () => {
-          if (!child) {
-            reject();
-            return;
-          }
           try {
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
-              child.kill(1);
               setting = verify;
-              child = this.fork(setting.Schedules);
+              await gracefulShutdown();
             }
           } catch (error) {
             reject(error);
           }
-        }, 60000);
+        }, 60_000);
       });
     } catch (error) {
       clearInterval(this.interval);

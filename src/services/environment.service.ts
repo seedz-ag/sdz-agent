@@ -12,6 +12,10 @@ const environmentSchema = z.object({
         CLIENT_ID: z.string(),
         CLIENT_SECRET: z.string(),
       }),
+  API_REQUEST_TIMEOUT: z
+    .string()
+    .optional()
+    .transform((value: unknown) => Number(value) || 300_000),
   CHUNK_SIZE: z
     .string()
     .optional()
