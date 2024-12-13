@@ -5,14 +5,13 @@ WORKDIR /opt/sdz-agent
 ENV USER=$(/usr/bin/whoami)
 
 # Run updates
-RUN apk update
-RUN apk upgrade
+RUN apt-get update --fix-missing -y && apt-get install -y
 
 # Install dependencies
-RUN apk --no-cache add \
-  bash \
-  build-base \
-  gcompat \
+RUN apt-get install -y \
+  curl \
+  build-essential \
+  libssl-dev \
   git \
   supervisor \ 
   libodbc2 \
@@ -34,16 +33,12 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 COPY . .
 
-RUN npm i -g npm@latest
+RUN npm i -ci
 
 RUN npm i -g ts-node
 
-RUN npm i 
-
 RUN cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/cli/libthcli.so /lib
-
 RUN cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/esql/libifgl* /lib
-
 ENV INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driver
 
 ENV LD_LIBRARY_PATH=/opt/sdz-agent/assets/instantclient_21_3/

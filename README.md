@@ -70,6 +70,6 @@ A Seedz pensando na nova lei LGPD criou uma estrutura configur√°vel, onde o usu√
 
 ##### oracle
 
-unzip instantclient-basic-linux.x64-21.3.0.0.0.zip for /assets/instantclient_21_3/
+unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
 
 export LD_LIBRARY_PATH=$(pwd)/assets/instantclient_21_3/
