@@ -1,6 +1,4 @@
-import Database from "sdz-agent-database";
 import fs from "fs";
-import { DateTime } from "luxon";
 import { singleton } from "tsyringe";
 import { EnvironmentService } from "../services/environment.service";
 import { HydratorService } from "../services/hydrator.service";
@@ -9,6 +7,7 @@ import { IConsumer } from "../interfaces/consumer.interface";
 import { ISetting } from "../interfaces/setting.interface";
 import { ITransport } from "../interfaces/transport.interface";
 import { LoggerAdapter } from "../adapters/logger.adapter";
+import { DatabaseAdapter } from "../adapters/database.adapter";
 
 @singleton()
 export class DatabaseConsumer implements IConsumer {
@@ -16,18 +15,26 @@ export class DatabaseConsumer implements IConsumer {
   private transport: ITransport;
 
   constructor(
+    private readonly databaseAdapter: DatabaseAdapter,
     private readonly environmentService: EnvironmentService,
     private readonly hydratorService: HydratorService,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   public async consume() {
     this.loggerAdapter.log("info", `CONNETING TO DATABASE`);
-    const database = new Database(
-      this.utilsService.extractDatabaseConfig(this.setting.Parameters)
-    );
-    const respository: any = database.getRepository();
+
+    const config = this.utilsService.extractDatabaseConfig(this.setting.Parameters);
+
+    const driver: any = (this.setting.Parameters.find(({ Key }) => "DATABASE_DRIVER" === Key)?.Value)?.toLocaleUpperCase()
+
+    if (!driver) {
+      this.loggerAdapter.log("error", `DATABASE DRIVER NOT FOUND`);
+      return
+    }
+    await this.databaseAdapter.initialize(driver.toLocaleUpperCase(), config, this.setting.Parameters);
+
     this.loggerAdapter.log("info", `DATABASE CONNECTED`);
 
     if (
@@ -36,43 +43,13 @@ export class DatabaseConsumer implements IConsumer {
       )
     ) {
       this.loggerAdapter.log("info", `EXECUTING DATABASE CHECK`);
-      await respository.execute("SELECT 1");
+      await this.databaseAdapter.checkConnection();
       this.loggerAdapter.log("info", `DATABASE CHECK DONE`);
       return;
     }
 
-    const lastExtraction = String(
-      this.utilsService.findParameter(
-        this.setting.Parameters,
-        "LAST_EXTRACTION"
-      )
-    );
-
-    if (lastExtraction) {
-      this.loggerAdapter.log(
-        "info",
-        `SETTING LAST_EXTRACTION ${lastExtraction}`
-      );
-    }
-
-    const days =
-      Number(this.environmentService.get("EXTRACT_LAST_N_DAYS")) ||
-      Number(
-        Math.ceil(
-          Math.abs(
-            DateTime.now().diff(
-              DateTime.fromFormat(lastExtraction, "yyyy-LL-dd"),
-              "days"
-            ).days
-          )
-        )
-      );
-
-    this.loggerAdapter.log("info", `RESOLVED EXTRACTION N DAYS: ${days}`);
-
-    process.argv.push(`--sqlDays=${days}`);
-
     const scope = this.environmentService.get("SCHEMA");
+
     if (scope) {
       this.loggerAdapter.log(
         "info",
@@ -111,8 +88,8 @@ export class DatabaseConsumer implements IConsumer {
       const file = `${process.cwd()}/output/${schema.Entity}`;
 
       const limit =
-        this.setting.Parameters.find(({ Key }) => "PAGE_SIZE" === Key)?.Value ||
-        1000;
+        Number(this.setting.Parameters.find(({ Key }) => "PAGE_SIZE" === Key)?.Value ||
+          1000);
 
       for (const index in queries) {
         const sql = queries[index];
@@ -131,7 +108,7 @@ export class DatabaseConsumer implements IConsumer {
           `EXECUTE SQL QUERY WITH LIMIT: ${limit}`
         );
 
-        let response = await respository.execute(sql.Command, page, limit);
+        let response = await this.databaseAdapter.query(sql.Command, page, limit);
 
         this.loggerAdapter.log("info", `SQL QUERY DONE`);
 
@@ -139,34 +116,37 @@ export class DatabaseConsumer implements IConsumer {
           const data = !this.utilsService.needsToHydrate(schema)
             ? response
             : response.map((row: Record<string, string>) =>
-                this.hydratorService.hydrate(schema.Maps, row)
-              );
+              this.hydratorService.hydrate(schema.Maps, row)
+            );
 
-          await Promise.all([
-            this.utilsService.writeJSON(
-              `raw-${schema.ApiResource || schema.Entity}`,
-              response
-            ),
-            this.transport.send(
-              `raw/${schema.ApiResource || schema.Entity}`,
-              response
-            ),
-          ]);
 
-          await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+          if (this.setting.Channel !== "SAAS_S3") {
+            await Promise.all([
+              this.utilsService.writeJSON(
+                `raw-${schema.ApiResource || schema.Entity}`,
+                response
+              ),
+              this.transport.send(
+                `raw/${schema.ApiResource || schema.Entity}`,
+                response
+              ),
+            ]);
 
+            await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+          }
+          const resource = this.setting.Channel === "SAAS_S3" ? schema.Entity : schema.ApiResource;
           await Promise.all([
             this.utilsService.writeJSON(
               schema.ApiResource || schema.Entity,
               data
             ),
-            this.transport.send(schema.ApiResource || schema.Entity, data),
+            this.transport.send(resource || schema.Entity, data),
           ]);
 
           await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
           page++;
-          response = await respository.execute(sql.Command, page, limit);
+          response = await this.databaseAdapter.query(sql.Command, page, limit);
         }
       }
     }

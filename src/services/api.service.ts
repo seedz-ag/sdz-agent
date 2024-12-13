@@ -14,7 +14,7 @@ export class APIService {
     private readonly httpClientAdapter: HttpClientAdapter,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   private getHeaders() {
     return {
@@ -124,8 +124,7 @@ export class APIService {
     } catch (error: any) {
       this.loggerAdapter.log(
         "error",
-        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${
-          error.response.data
+        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${error.response.data
         }`
       );
     }
@@ -141,12 +140,12 @@ export class APIService {
       .post(
         `${process.env.API_URL}logs`,
         (!ENV && log) ||
-          log.map((data) => [
-            data[0],
-            data[1],
-            ENV ? `[${ENV}] - ${data[2]}` : `${data[2]}`,
-            ...data.slice(3),
-          ]),
+        log.map((data) => [
+          data[0],
+          data[1],
+          ENV ? `[${ENV}] - ${data[2]}` : `${data[2]}`,
+          ...data.slice(3),
+        ]),
         {
           headers: this.getHeadersLogs(),
           timeout: this.environmentService.get("API_REQUEST_TIMEOUT"),

@@ -12,7 +12,7 @@ export default class HttpTransport implements ITransport {
     private readonly environmentService: EnvironmentService,
     private readonly utilsService: UtilsService,
     private readonly loggerAdapter: LoggerAdapter
-  ) {}
+  ) { }
 
   public async send(resource: string, data: unknown[]): Promise<void> {
     this.loggerAdapter.log(
@@ -20,22 +20,16 @@ export default class HttpTransport implements ITransport {
       `SENDING ${data.length} LINES TO /${resource}`
     );
 
-    const promises: Promise<any>[] = [];
-
     for (const chunk of this.utilsService.chunkData(data)) {
       this.loggerAdapter.log(
         "info",
         `SENDING CHUNK ${chunk.length} LINES TO /${resource}`
       );
 
-      if (this.environmentService.get("THROTTLE")) {
-        await this.apiService.sendResource(resource, chunk);
-        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
-        continue;
-      }
+      await this.apiService.sendResource(resource, chunk);
 
-      promises.push(this.apiService.sendResource(resource, chunk));
+      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
     }
-    await Promise.all(promises);
+
   }
 }

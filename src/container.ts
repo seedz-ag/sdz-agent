@@ -14,6 +14,7 @@ import { ListenResponseCommand } from "./commands/listen-response.command";
 import { ListenShellCommand } from "./commands/listen-shell.command";
 import { ListenCommand } from "./commands/listen.command";
 import { DatabaseConsumer } from "./consumers/database.consumer";
+import { DatabaseAdapter } from "./adapters/database.adapter";
 import { HttpConsumer } from "./consumers/http.consumer";
 import { APIService } from "./services/api.service";
 import { ArgsService } from "./services/args.service";
@@ -39,6 +40,13 @@ export const getContainer = async () => {
   container.register(
     CSVAdapter,
     { useClass: CSVAdapter },
+    {
+      lifecycle: Lifecycle.Singleton,
+    }
+  );
+  container.register(
+    DatabaseAdapter,
+    { useClass: DatabaseAdapter },
     {
       lifecycle: Lifecycle.Singleton,
     }

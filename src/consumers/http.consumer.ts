@@ -25,7 +25,7 @@ export class HttpConsumer implements IConsumer {
     private readonly interpolationService: InterpolationService,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   // FUNCTIONS
   private compile(
@@ -201,9 +201,8 @@ export class HttpConsumer implements IConsumer {
     this.cache[schema.Entity.toUpperCase()]++;
 
     fs.writeFileSync(
-      `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-request-${`0000${
-        this.cache[schema.Entity.toUpperCase()]
-      }`.slice(-5)}.json`,
+      `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-request-${`0000${this.cache[schema.Entity.toUpperCase()]
+        }`.slice(-5)}.json`,
       JSON.stringify(requestCompiled)
     );
 
@@ -257,22 +256,23 @@ export class HttpConsumer implements IConsumer {
       const data = !this.utilsService.needsToHydrate(schema)
         ? response
         : response.map((row: Record<string, string>) =>
-            this.hydratorService.hydrate(schema.Maps, row)
-          );
+          this.hydratorService.hydrate(schema.Maps, row)
+        );
 
-      await Promise.all([
-        this.utilsService.writeJSON(`raw-${resource}`, response),
-        this.transport.send(`raw/${resource}`, response),
-      ]);
+      if (this.setting.Channel !== "SAAS_S3") {
+        await Promise.all([
+          this.utilsService.writeJSON(`raw-${resource}}`, response),
+          this.transport.send(`raw/${resource}`, response),
+        ]);
 
-      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
-      if (
-        this.environmentService.get("RAW_ONLY") &&
-        !resource.startsWith("raw")
-      ) {
-        this.loggerAdapter.log("warn", `SENDING EXTRACTION TO RAW ONLY`);
-        return response;
+        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+
+        if (this.environmentService.get("RAW_ONLY") && !resource.startsWith("raw")
+        ) {
+          this.loggerAdapter.log("warn", `SENDING EXTRACTION TO RAW ONLY`);
+          return response;
+        }
       }
 
       await Promise.all([
@@ -345,8 +345,7 @@ export class HttpConsumer implements IConsumer {
           const command = JSON.parse(query.Command);
           this.interpolationService.setPage(0);
           fs.writeFileSync(
-            `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-${
-              query.Id
+            `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}-${query.Id
             }.json`,
             query.Command
           );

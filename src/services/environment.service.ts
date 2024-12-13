@@ -8,14 +8,27 @@ const environmentSchema = z.object({
   ...(argv.includes("configure")
     ? {}
     : {
-        API_URL: z.string().url(),
-        CLIENT_ID: z.string(),
-        CLIENT_SECRET: z.string(),
-      }),
+      API_URL: z.string().url(),
+      CLIENT_ID: z.string(),
+      CLIENT_SECRET: z.string(),
+    }),
   API_REQUEST_TIMEOUT: z
     .string()
     .optional()
     .transform((value: unknown) => Number(value) || 300_000),
+  AMAZON_ACCESS_KEY: z
+    .string()
+    .optional(),
+  AMAZON_ACCESS_SECRET_KEY: z
+    .string()
+    .optional(),
+  AMAZON_REGION: z
+    .string()
+    .optional(),
+  AMAZON_S3_RAW_BUCKET: z
+    .string()
+    .optional(),
+
   CHUNK_SIZE: z
     .string()
     .optional()
@@ -85,12 +98,12 @@ export class EnvironmentService {
         ...process.env,
         ...((this.environment?.ENV &&
           this.discovery && {
-            API_URL: this.discovery[this.environment.ENV]?.API_URL,
-            CLIENT_ID:
-              this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_ID,
-            CLIENT_SECRET:
-              this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_SECRET,
-          }) ||
+          API_URL: this.discovery[this.environment.ENV]?.API_URL,
+          CLIENT_ID:
+            this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_ID,
+          CLIENT_SECRET:
+            this.discovery[this.environment.ENV]?.CREDENTIALS.CLIENT_SECRET,
+        }) ||
           {}),
       });
     } catch (error: any) {

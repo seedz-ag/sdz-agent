@@ -12,6 +12,7 @@ import { gracefulShutdown, scheduleJob } from "node-schedule";
 @singleton()
 export class SchedulerCommand implements ICommand {
   private interval: NodeJS.Timeout;
+  private child: any;
 
   constructor(
     private readonly apiService: APIService,
@@ -41,6 +42,7 @@ export class SchedulerCommand implements ICommand {
 
   public async execute() {
     try {
+      clearInterval(this.interval);
       await new Promise<void>(async (resolve, reject) => {
         this.loggerAdapter.log("info", "STARTING SCHEDULER");
 
@@ -50,7 +52,9 @@ export class SchedulerCommand implements ICommand {
 
         try {
           setting = await this.apiService.getSetting();
-        } catch (error) {
+        } catch (error: any) {
+          this.loggerAdapter.log("info", `SCHEDULER ERROR WHILE GETING SETING: ${error?.response?.data?.message.toUpperCase() || error?.response?.data?.toUpperCase() || error}`);
+          await this.utilsService.wait(300000)
           reject(error);
           return;
         }
@@ -76,6 +80,7 @@ export class SchedulerCommand implements ICommand {
         }, 60_000);
       });
     } catch (error) {
+      process.kill(this.child?.pid, "SIGKILL");
       clearInterval(this.interval);
       await this.rescue();
     }

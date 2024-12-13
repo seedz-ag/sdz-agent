@@ -2,6 +2,7 @@
 config/dto/*
 config/sql/*
 docker/*
+assets/instantclient_21_3/*
 # Logs
 logs
 *.log

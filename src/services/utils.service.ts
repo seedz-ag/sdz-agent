@@ -2,7 +2,7 @@ import { fork } from "child_process";
 import kill from "tree-kill";
 import { writeFile } from "fs";
 import { singleton } from "tsyringe";
-import { ConfigDatabaseInterface } from "sdz-agent-types";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 import { IParameter, ISchema } from "../interfaces/setting.interface";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { EnvironmentService } from "./environment.service";
@@ -13,7 +13,7 @@ export class UtilsService {
   constructor(
     private readonly environmentService: EnvironmentService,
     private readonly loggerAdapter: LoggerAdapter
-  ) {}
+  ) { }
 
   public chunkData<T = unknown>(data: T[], length?: number): T[][] {
     const split = Number(
@@ -69,9 +69,12 @@ export class UtilsService {
     );
   }
 
-  public killProcess(exitCode = 1): Promise<void> {
+  async killProcess(child = 1): Promise<void> {
+    kill(child);
     kill(process.pid);
-    process.exit(exitCode);
+    await this.wait(2000);
+    process.kill(child, "SIGKILL");
+    process.kill(process.pid, "SIGKILL");
   }
 
   public mergeEnv(args: Record<string, any>) {
@@ -98,7 +101,7 @@ export class UtilsService {
   }
 
   public wait(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, this.getRandomThrotle(ms)));
   }
 
   public writeJSON(entity: string, data: any, exception = false) {
@@ -133,5 +136,11 @@ export class UtilsService {
         });
       })
     );
+  }
+
+  private getRandomThrotle(min: number) {
+    const max = min + 2500;
+    const random = Math.random() * (max - min) + min;
+    return Number(random.toFixed(0))
   }
 }
