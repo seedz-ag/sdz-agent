@@ -320,8 +320,8 @@ process.env.CLI = "1";
         const environmentService = container.resolve(EnvironmentService);
         environmentService.parse();
         const schedulerCommand = container.resolve(SchedulerCommand);
-        
-        let spinner : Ora|undefined
+
+        let spinner: Ora | undefined
 
         if (!environmentService.get("USE_CONSOLE_LOG")) {
           spinner = ora({
@@ -337,11 +337,16 @@ process.env.CLI = "1";
           loggerAdapter.pipe(consoleLoggerAdapter);
         }
         utilsService.mergeEnv(argv);
-
-        await schedulerCommand.execute();
-
-        spinner && spinner.fail("STOPPED");
-        utilsService.killProcess();
+        try {
+          await schedulerCommand.execute();
+          !!spinner && spinner.succeed("STOPPED");
+        } catch (error: any) {
+          loggerAdapter.log("error", error?.response?.data || error.message);
+          !!spinner && spinner.fail("ERROR");
+        } finally {
+          loggerAdapter.push(null);
+          utilsService.killProcess();
+        }
       }
     )
     .command("update", "Updates Agent code", async (argv) => {

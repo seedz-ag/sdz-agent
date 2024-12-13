@@ -45,9 +45,6 @@ export class MysqlAdapter implements IDatabaseAdapter {
     if (!this.connection) {
       await this.connect();
     }
-
-    console.log(query)
-
     try {
       const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
       return resultSet;
