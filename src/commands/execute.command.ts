@@ -32,7 +32,7 @@ export class ExecuteCommand implements ICommand {
     private readonly loggerAdapter: LoggerAdapter,
     private readonly s3Transport: S3Transport,
     private readonly vpnService: VPNService
-  ) { }
+  ) {}
 
   public async execute() {
     try {
@@ -118,7 +118,9 @@ export class ExecuteCommand implements ICommand {
         await this.vpnService.disconnect();
       }
 
-      kill(process.pid);
+      this.loggerAdapter.on("close", () => kill(process.pid));
+
+      this.loggerAdapter.push(null);
     } catch (error: any) {
       throw error;
     }
