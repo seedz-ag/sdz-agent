@@ -8,6 +8,8 @@ import { EnvironmentService } from "../services/environment.service";
 import { getContainer } from "../container";
 import { ExecuteCommand } from "./execute.command";
 import { gracefulShutdown, scheduleJob } from "node-schedule";
+import { APILoggerAdapter } from "../adapters/api-logger.adapter";
+import { ConsoleLoggerAdapter } from "../adapters/console-logger.adapter";
 
 @singleton()
 export class SchedulerCommand implements ICommand {
@@ -27,7 +29,11 @@ export class SchedulerCommand implements ICommand {
   private async schedule(cronExpression: string) {
     const container = await getContainer();
     const executeCommand = container.resolve(ExecuteCommand);
+    const apiLoggerAdapter = container.resolve(APILoggerAdapter);
+    const consoleLoggerAdapter = container.resolve(ConsoleLoggerAdapter);
     const loggerAdapter = container.resolve(LoggerAdapter);
+    loggerAdapter.pipe(consoleLoggerAdapter);
+    loggerAdapter.pipe(apiLoggerAdapter);
 
     loggerAdapter.log(`info`, `SCHEDULING JOB AT ${cronExpression}`);
     return scheduleJob(cronExpression, async () => {
