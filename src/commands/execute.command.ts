@@ -126,7 +126,7 @@ export class ExecuteCommand implements ICommand {
 
       this.loggerAdapter.on("close", async () => {
         while (this.apiLoggerAdapter.received > this.apiLoggerAdapter.sent) {
-          await this.utilService.wait(2_000)
+          await this.utilService.wait(5_000)
         }
         kill(process.pid)
       });
