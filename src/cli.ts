@@ -233,7 +233,6 @@ process.env.CLI = "1";
           !!spinner && spinner.fail("ERROR");
         } finally {
           loggerAdapter.push(null);
-          utilsService.killProcess();
         }
       }
     )

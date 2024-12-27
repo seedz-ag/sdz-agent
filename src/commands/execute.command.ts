@@ -122,13 +122,12 @@ export class ExecuteCommand implements ICommand {
         await this.vpnService.disconnect();
       }
 
-      this.loggerAdapter.log("info", `SENT ${this.apiLoggerAdapter.total} LOGS`);
 
       this.loggerAdapter.on("close", async () => {
         while (this.apiLoggerAdapter.received > this.apiLoggerAdapter.sent) {
-          await this.utilService.wait(5_000)
+          await this.utilService.wait(1_000)
         }
-        kill(process.pid)
+        setTimeout(() => kill(process.pid), 1_000)
       });
 
       this.loggerAdapter.push(null);
