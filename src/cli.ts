@@ -231,8 +231,6 @@ process.env.CLI = "1";
         } catch (error: any) {
           loggerAdapter.log("error", error?.response?.data || error.message);
           !!spinner && spinner.fail("ERROR");
-        } finally {
-          loggerAdapter.push(null);
         }
       }
     )
@@ -342,9 +340,6 @@ process.env.CLI = "1";
         } catch (error: any) {
           loggerAdapter.log("error", error?.response?.data || error.message);
           !!spinner && spinner.fail("ERROR");
-        } finally {
-          loggerAdapter.push(null);
-          utilsService.killProcess();
         }
       }
     )
