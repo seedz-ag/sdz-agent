@@ -7,6 +7,9 @@ import { UtilsService } from "../services/utils.service";
 
 @singleton()
 export class APILoggerAdapter extends Writable {
+  public received = 0;
+  public sent = 0;
+  public total = 0;
   constructor(
     private readonly apiService: APIService,
     private readonly utilsService: UtilsService
@@ -14,6 +17,8 @@ export class APILoggerAdapter extends Writable {
     super({
       objectMode: true,
       writev: (chunks, callback) => {
+        this.total += chunks.length
+        this.received++;
         const pages = this.utilsService.chunkData(chunks, 100);
         this.send(pages, callback);
       },
@@ -59,6 +64,7 @@ export class APILoggerAdapter extends Writable {
       })
       .finally(() => {
         if (!pages.length) {
+          this.sent++;
           callback();
           return;
         }

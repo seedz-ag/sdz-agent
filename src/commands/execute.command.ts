@@ -3,15 +3,17 @@ import fs from "fs";
 import glob from "fast-glob";
 import kill from "tree-kill";
 import { singleton } from "tsyringe";
-import { ICommand } from "../interfaces/command.interface";
-import { ISetting } from "../interfaces/setting.interface";
-import S3Transport from "../transports/s3.transport";
-import HttpTransport from "../transports/http.transport";
-import { LoggerAdapter } from "../adapters/logger.adapter";
+import { APILoggerAdapter } from "../adapters/api-logger.adapter";
 import { APIService } from "../services/api.service";
 import { ConsumerResolverService } from "../services/consumer-resolver.service";
-import { VPNService } from "../services/vpn.service";
 import { EnvironmentService } from "../services/environment.service";
+import HttpTransport from "../transports/http.transport";
+import { ICommand } from "../interfaces/command.interface";
+import { ISetting } from "../interfaces/setting.interface";
+import { LoggerAdapter } from "../adapters/logger.adapter";
+import S3Transport from "../transports/s3.transport";
+import { UtilsService } from "../services/utils.service";
+import { VPNService } from "../services/vpn.service";
 
 config();
 
@@ -25,12 +27,14 @@ process.on("SIGTERM", () => {
 @singleton()
 export class ExecuteCommand implements ICommand {
   constructor(
+    private readonly apiLoggerAdapter: APILoggerAdapter,
     private readonly apiService: APIService,
     private readonly consumerResolverService: ConsumerResolverService,
     private readonly environmentService: EnvironmentService,
     private readonly httpTransport: HttpTransport,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly s3Transport: S3Transport,
+    private readonly utilService: UtilsService,
     private readonly vpnService: VPNService
   ) { }
 
@@ -117,8 +121,14 @@ export class ExecuteCommand implements ICommand {
       if (this.vpnService.isConnected()) {
         await this.vpnService.disconnect();
       }
+      this.loggerAdapter.on("close", async () => {
+        while (this.apiLoggerAdapter.received > this.apiLoggerAdapter.sent) {
+          await this.utilService.wait(2_000)
+        }
+        setTimeout(() => kill(process.pid), 2_000)
+      });
 
-      kill(process.pid);
+      this.loggerAdapter.push(null);
     } catch (error: any) {
       throw error;
     }
