@@ -51,6 +51,23 @@ export class OracleAdapter implements IDatabaseAdapter {
     return resultSet;
   }
 
+  async executeQueryRemote(query: string): Promise<any> {
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      const response = await this.connection.execute(query);
+      let resultSet: any = [];
+      if (response) {
+        resultSet = response.rows;
+      }
+      return resultSet;
+    } catch (e) {
+      console.log(e);
+      return e
+    }
+  }
+
   async getVersion() {
     if (!this.connection) {
       await this.connect();

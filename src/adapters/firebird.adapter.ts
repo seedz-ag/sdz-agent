@@ -78,6 +78,30 @@ export class FirebirdAdapter implements IDatabaseAdapter {
     return resultSet;
   }
 
+  async executeQueryRemote(query: string): Promise<databaseRowInterface.DatabaseRow[] | unknown> {
+    let resultSet: databaseRowInterface.DatabaseRow[] = [];
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      const response = await new Promise(resolve => {
+        this.connection.query(query, function (err: any, result: databaseRowInterface.DatabaseRow[]) {
+          if (err) {
+            throw err;
+          }
+          resolve(result);
+        });
+      })
+      if (response) {
+        resultSet = response as databaseRowInterface.DatabaseRow[];
+      }
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+    return resultSet;
+  }
+
 
   async getVersion() {
     return ''

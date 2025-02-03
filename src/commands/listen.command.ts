@@ -22,7 +22,7 @@ export class ListenCommand implements ICommand {
     private readonly queryCommand: ListenQueryCommand,
     private readonly responseCommand: ListenResponseCommand,
     private readonly shellCommand: ListenShellCommand
-  ) {}
+  ) { }
 
   public execute() {
     return new Promise<void>(async (resolve, reject) => {
@@ -35,7 +35,10 @@ export class ListenCommand implements ICommand {
         Ping: (message: any) => {
           // if (process.env.LOG_PING) this.loggerAdapger.log("info", message.args);
         },
-        Query: (args: any) => this.queryCommand.execute(args),
+        Query: (args: any) => {
+          this.environmentService.parse();
+          return this.queryCommand.execute(args);
+        },
         Response: (args: any) => this.loggerAdapger.log("info", args),
         Shell: (args: any) => this.shellCommand.execute(args),
       };

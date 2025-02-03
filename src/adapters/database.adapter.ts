@@ -134,6 +134,10 @@ export class DatabaseAdapter implements IDatabaseAdapter {
     return this.adapter.execute(query);
   }
 
+  executeQueryRemote(query: string): Promise<any[] | unknown> {
+    return this.adapter.executeQueryRemote(query);
+  }
+
   getVersion(): Promise<string> {
     return this.adapter.getVersion();
   }

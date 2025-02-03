@@ -57,6 +57,24 @@ export class OdbcAdapter implements IDatabaseAdapter {
     return resultSet;
   }
 
+  async executeQueryRemote(query: string) {
+    let resultSet: any = [];
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      const response = await this.connection.query<DatabaseRow>(query);
+      if (response.length) {
+        resultSet = response.map(rows => rows);
+      }
+    }
+    catch (e) {
+      console.log(e);
+      return e
+    }
+    return resultSet;
+  }
+
   async getVersion() {
     return ''
   }

@@ -20,6 +20,7 @@ export type CheckCommandExecuteOutput =
     type: "all";
     checkAuth: boolean;
     checkDataSource: boolean;
+    checkDNS: boolean;
     checkConnectionSpeed: ConnectionSpeed;
   }
   | {
@@ -29,6 +30,10 @@ export type CheckCommandExecuteOutput =
   | {
     type: "datasource";
     checkDataSource: boolean;
+  }
+  | {
+    type: "dns";
+    checkDNS: boolean;
   }
   | {
     type: "speed";
@@ -116,6 +121,7 @@ export class CheckCommand
       checkAuth: false,
       checkDataSource: false,
       checkConnectionSpeed: false,
+      checkDNS: false,
       type,
     };
 

@@ -63,8 +63,25 @@ export class MssqlAdapter implements IDatabaseAdapter {
       }
       return resultSet;
     } catch (exception) {
-      // LOG QUERY EXCEPTION ERROR
-      throw exception;
+      console.log(exception)
+      return []
+    }
+  }
+
+  async executeQueryRemote(query: string): Promise<DatabaseRow[] | unknown> {
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      let resultSet: DatabaseRow[] = [];
+      const response = await this.connection.query(query);
+      if (response) {
+        resultSet = response.recordset;
+      }
+      return resultSet;
+    } catch (exception) {
+      console.log(exception)
+      return exception
     }
   }
 

@@ -249,6 +249,11 @@ process.env.CLI = "1";
             alias: "l",
             describe: "Shows received Ping",
             type: "boolean",
+          })
+          .option("use-console-log", {
+            alias: "c",
+            describe: "Use Console Log",
+            type: "boolean",
           }),
       async (argv) => {
         utilsService.mergeEnv(argv);
@@ -256,14 +261,21 @@ process.env.CLI = "1";
         environmentService.parse();
         const listenScheduler = container.resolve(ListenCommand);
 
-        const spinner = ora({
-          text: "LISTENING ",
-          spinner: earth,
-        });
+        let spinner: Ora | undefined;
 
-        spinner.start();
+        if (!environmentService.get("USE_CONSOLE_LOG")) {
+          spinner = ora({
+            text: "LISTENING ",
+            spinner: earth,
+          });
 
-        (global as any).spinner = spinner;
+          (global as any).spinner = spinner;
+
+          spinner.start();
+        } else {
+          const consoleLoggerAdapter = container.resolve(ConsoleLoggerAdapter);
+          loggerAdapter.pipe(consoleLoggerAdapter);
+        }
 
         utilsService.mergeEnv(argv);
 
@@ -286,7 +298,7 @@ process.env.CLI = "1";
           }
         }
 
-        spinner.fail("STOPPED");
+        spinner && spinner.fail("STOPPED");
         utilsService.killProcess();
       }
     )
