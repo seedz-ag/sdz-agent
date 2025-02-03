@@ -10,6 +10,7 @@ export interface IDatabaseAdapter {
     connect(): Promise<void>;
     disconnect?(): Promise<void>;
     execute(query: string): Promise<DatabaseRow[]>;
+    executeQueryRemote?(query: string): Promise<DatabaseRow[] | unknown>;
     getVersion(): Promise<string>;
     query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]>;
 }
