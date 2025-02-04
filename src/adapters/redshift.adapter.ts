@@ -57,6 +57,23 @@ export class RedshiftAdapter implements IDatabaseAdapter {
         return resultSet;
     }
 
+    async executeQueryRemote(query: string): Promise<DatabaseRow[] | unknown> {
+        let resultSet: DatabaseRow[] = [];
+        if (!this.connection) {
+            await this.connect();
+        }
+        try {
+            const response = await this.connection.query<any[]>(query);
+            if (response) {
+                resultSet = response["rows"];
+            }
+        } catch (e) {
+            console.log(e);
+            return e
+        }
+        return resultSet;
+    }
+
     async getVersion(): Promise<string> {
         return '';
     }

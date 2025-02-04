@@ -54,6 +54,24 @@ export class MongodbAdapter implements IDatabaseAdapter {
     return resultSet;
   }
 
+  async executeQueryRemote(query: string): Promise<DatabaseRow[] | unknown> {
+    let resultSet: DatabaseRow[] = [];
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      const input = JSON.parse(query);
+      const database = this.connection.db(this.config.schema);
+      const collection: any = database.collection(input["collection"]);
+      const command: any = collection[input["command"]].bind(collection);
+      resultSet = await (command)(input[input["command"]]).toArray();
+      return resultSet;
+    } catch (e) {
+      console.log(e);
+      return e;
+    }
+  }
+
   async getVersion() {
     return ''
   }

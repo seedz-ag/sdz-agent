@@ -2,6 +2,7 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import mysql, { Connection, RowDataPacket } from "mysql2/promise";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { unknown } from "zod";
 
 export class MysqlAdapter implements IDatabaseAdapter {
   private connection: Connection;
@@ -47,10 +48,23 @@ export class MysqlAdapter implements IDatabaseAdapter {
     }
     try {
       const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
+      return resultSet
+    } catch (exception) {
+      console.log(exception);
+      return []
+    }
+  }
+
+  async executeQueryRemote(query: string): Promise<DatabaseRow[] | unknown> {
+    if (!this.connection) {
+      await this.connect();
+    }
+    try {
+      const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
       return resultSet;
     } catch (exception) {
-      // LOG QUERY EXCEPTION ERROR
-      throw exception;
+      console.log(exception);
+      return exception;
     }
   }
 
