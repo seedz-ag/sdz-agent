@@ -14,6 +14,8 @@ RUN apt-get install -y \
   libssl-dev \
   git \
   supervisor \ 
+  libaio1 \
+  libaio-dev \
   libodbc2 \
   unzip \
   sudo \
