@@ -14,8 +14,7 @@ RUN apt-get install -y \
   libssl-dev \
   git \
   supervisor \ 
-  libaio1 \
-  libaio-dev \
+  libaio1t64 \
   libodbc2 \
   unzip \
   sudo \
@@ -45,6 +44,7 @@ ENV INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driv
 
 ENV LD_LIBRARY_PATH=/opt/sdz-agent/assets/instantclient_21_3/
 RUN unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
+RUN ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
 
 RUN chmod u+x ./agent
 
