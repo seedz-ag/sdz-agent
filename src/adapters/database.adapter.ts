@@ -16,6 +16,7 @@ import moment from "moment";
 import { IParameter } from "interfaces/setting.interface";
 import { DateTime } from "luxon";
 import { MongodbAdapter } from "./mongodb.adapter";
+import { SnowflakeAdapter } from "./snowflake.adapter";
 
 
 interface ConfigDatabaseInterface {
@@ -39,6 +40,7 @@ const DATABASE_ADAPTERS = {
   ORACLE: OracleAdapter,
   POSTGRES: PostgresAdapter,
   REDSHIFT: PostgresAdapter,
+  SNOWFLAKE: SnowflakeAdapter,
 };
 
 type DatabaseDriver = keyof typeof DATABASE_ADAPTERS;
