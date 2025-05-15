@@ -91,10 +91,6 @@ export class DatabaseConsumer implements IConsumer {
         Number(this.setting.Parameters.find(({ Key }) => "PAGE_SIZE" === Key)?.Value ||
           1000);
 
-      const orderBy =
-        this.setting.Parameters.find(({ Key }) => "ORDER_BY" === Key)?.Value ||
-          null;
-
       for (const index in queries) {
         const sql = queries[index];
         let page = 0;
@@ -112,7 +108,7 @@ export class DatabaseConsumer implements IConsumer {
           `EXECUTE SQL QUERY WITH LIMIT: ${limit}`
         );
 
-        let response = await this.databaseAdapter.query(sql.Command, page, limit, orderBy);
+        let response = await this.databaseAdapter.query(sql.Command, page, limit);
 
         this.loggerAdapter.log("info", `SQL QUERY DONE`);
 

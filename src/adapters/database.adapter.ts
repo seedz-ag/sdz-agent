@@ -153,7 +153,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
     await this.connect();
   }
 
-  query(query: string, page?: number, limit?: number, orderBy?: string | null): Promise<DatabaseRow[]> {
+  query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]> {
     return this.adapter.query(this.buildQuery(query), page, limit, query);
   }
 }
