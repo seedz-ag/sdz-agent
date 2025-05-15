@@ -89,13 +89,19 @@ export class MssqlAdapter implements IDatabaseAdapter {
     return ''
   }
 
-  query(query: string, page?: number, limit?: number): Promise<any> {
-    const statement = [
-      query,
-      "undefined" !== typeof page && limit ? `ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY` : null,
-    ]
-      .filter((item) => !!item)
-      .join(" ");
+  query(query: string, page?: number, limit?: number, orderBy?: string): Promise<any> {
+    let orderByQuery;
+    if (typeof page !== "undefined" && limit) {
+      if (orderBy) {
+        orderByQuery = `ORDER BY ${orderBy} ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+      } else {
+        orderByQuery = `ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+      }
+    } else {
+      orderByQuery = "";
+    }
+    const statement = [query, orderByQuery].filter((item) => !!item).join(" ");
+
     return this.execute(statement);
   }
 }

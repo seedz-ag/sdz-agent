@@ -134,8 +134,8 @@ export class DatabaseAdapter implements IDatabaseAdapter {
     return this.adapter.execute(query);
   }
 
-  executeQueryRemote(query: string): Promise<any[] | unknown> {
-    return this.adapter.executeQueryRemote(query);
+  async executeQueryRemote(query: string): Promise<any[] | unknown> {
+    return this.adapter.executeQueryRemote?.(query) || [];
   }
 
   getVersion(): Promise<string> {
@@ -153,7 +153,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
     await this.connect();
   }
 
-  query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]> {
-    return this.adapter.query(this.buildQuery(query), page, limit);
+  query(query: string, page?: number, limit?: number, orderBy?: string | null): Promise<DatabaseRow[]> {
+    return this.adapter.query(this.buildQuery(query), page, limit, query);
   }
 }
