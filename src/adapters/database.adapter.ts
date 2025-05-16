@@ -154,6 +154,6 @@ export class DatabaseAdapter implements IDatabaseAdapter {
   }
 
   query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]> {
-    return this.adapter.query(this.buildQuery(query), page, limit, query);
+    return this.adapter.query(this.buildQuery(query), page, limit);
   }
 }

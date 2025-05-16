@@ -12,5 +12,5 @@ export interface IDatabaseAdapter {
     execute(query: string): Promise<DatabaseRow[]>;
     executeQueryRemote?(query: string): Promise<DatabaseRow[] | unknown>;
     getVersion(): Promise<string>;
-    query(query: string, page?: number, limit?: number, orderBy?: string): Promise<DatabaseRow[]>;
+    query(query: string, page?: number, limit?: number): Promise<DatabaseRow[]>;
 }
