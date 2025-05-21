@@ -10,6 +10,5 @@ export interface ConfigDatabaseInterface {
     service?: string;
     username?: string;
     connectionstring?: string;
-    connectionString?: string;
     warehouse?: string | undefined;
 }
