@@ -36,7 +36,6 @@ export class FTPConsumer implements IConsumer {
         String(this.environmentService.get("TYPE"))
       )
     ) {
-      await this.ftpAdapter.connect();
       return;
     }
     const scope = this.environmentService.get("SCHEMA");
@@ -78,6 +77,8 @@ export class FTPConsumer implements IConsumer {
         `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}.json`,
         JSON.stringify(query)
       );
+      
+      await this.ftpAdapter.connect();
 
       const files = await this.ftpAdapter.list(query.Command);
 
