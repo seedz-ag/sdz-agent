@@ -103,6 +103,7 @@ export class FTPConsumer implements IConsumer {
   }
 
   public setSetting(setting: ISetting): this {
+    this.setting = setting;
     this.ftpAdapter.setConfig(this.extractFTPConfig(setting));
     return this;
   }
