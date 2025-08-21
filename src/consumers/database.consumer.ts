@@ -33,20 +33,16 @@ export class DatabaseConsumer implements IConsumer {
       this.loggerAdapter.log("error", `DATABASE DRIVER NOT FOUND`);
       return
     }
-    await this.databaseAdapter.initialize(driver.toLocaleUpperCase(), config, this.setting.Parameters);
 
+    this.loggerAdapter.log("info", `DATABASE DRIVER RESOLVED: ${driver.toLocaleUpperCase()}`);
+
+    await this.databaseAdapter.initialize(driver.toLocaleUpperCase(), config, this.setting.Parameters);
+    // Se chegou aqui, a conexão foi bem-sucedida
     this.loggerAdapter.log("info", `DATABASE CONNECTED`);
 
-    if (
-      ["all", "datasource"].includes(
-        String(this.environmentService.get("TYPE"))
-      )
-    ) {
-      this.loggerAdapter.log("info", `EXECUTING DATABASE CHECK`);
-      await this.databaseAdapter.checkConnection();
-      this.loggerAdapter.log("info", `DATABASE CHECK DONE`);
-      return;
-    }
+    this.loggerAdapter.log("info", `EXECUTING DATABASE CHECK`);
+    await this.databaseAdapter.checkConnection();
+    this.loggerAdapter.log("info", `DATABASE CHECK DONE`);
 
     const scope = this.environmentService.get("SCHEMA");
 

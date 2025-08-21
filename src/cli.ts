@@ -229,7 +229,7 @@ process.env.CLI = "1";
           await executeCommand.execute();
           !!spinner && spinner.succeed("DONE");
         } catch (error: any) {
-          loggerAdapter.log("error", error?.response?.data || error.message);
+          loggerAdapter.log("error", `EXECUTE COMMAND FAILED: ${error?.response?.data || error.message}`);
           !!spinner && spinner.fail("ERROR");
         }
       }

@@ -7,7 +7,17 @@ export class OdbcAdapter implements IDatabaseAdapter {
   private connection: Connection;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(private readonly config: ConfigDatabaseInterface) { 
+    this.validateConfig();
+  }
+
+  private validateConfig(): void {
+    const connectionString = this.config.connectionstring || this.config.connectionString;
+    if (!connectionString || String(connectionString).length === 0) {
+      const message = `Missing required database config for ODBC: connectionstring or connectionString`;
+      throw new Error(message);
+    }
+  }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -33,6 +43,19 @@ export class OdbcAdapter implements IDatabaseAdapter {
       } catch (e) {
         console.log(e);
       }
+    }
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!this.connection) {
+        await this.connect();
+      }
+      const result = await this.connection.query<DatabaseRow>("SELECT 1 as ok");
+      return Array.isArray(result);
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 

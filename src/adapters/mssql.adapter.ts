@@ -7,7 +7,22 @@ import { IParameter } from "interfaces/setting.interface";
 export class MssqlAdapter implements IDatabaseAdapter {
   private connection: ConnectionPool;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(private readonly config: ConfigDatabaseInterface) { 
+    this.validateConfig();
+  }
+
+  private validateConfig(): void {
+    const requiredFields = ["host", "port", "schema", "username", "password"];
+    const missing = requiredFields.filter(field => 
+      !this.config[field as keyof ConfigDatabaseInterface] || 
+      String(this.config[field as keyof ConfigDatabaseInterface]).length === 0
+    );
+
+    if (missing.length) {
+      const message = `Missing required database config for MSSQL: ${missing.join(", ")}`;
+      throw new Error(message);
+    }
+  }
 
   public buildQuery(query: string, parameters: IParameter[]) {
     return parameters.reduce((query, { Key, Value }) => {
@@ -43,6 +58,19 @@ export class MssqlAdapter implements IDatabaseAdapter {
       } catch (e) {
         console.log(e);
       }
+    }
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!this.connection) {
+        await this.connect();
+      }
+      const response = await this.connection.query("SELECT 1 as ok");
+      return !!response;
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 

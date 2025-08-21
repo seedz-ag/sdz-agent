@@ -4,7 +4,7 @@ import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
 export class RedshiftAdapter implements IDatabaseAdapter {
-    private connection: Redshift;
+    private connection: any;
     constructor(private readonly config: ConfigDatabaseInterface) { }
 
     async close(): Promise<void> {
@@ -41,13 +41,26 @@ export class RedshiftAdapter implements IDatabaseAdapter {
         return this.connection.close();
     }
 
+    async checkConnection(): Promise<boolean> {
+        try {
+            if (!this.connection) {
+                await this.connect();
+            }
+            const response = await this.connection.query("SELECT 1 as ok");
+            return !!response;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
     async execute(query: string): Promise<DatabaseRow[]> {
         let resultSet: DatabaseRow[] = [];
         if (!this.connection) {
             await this.connect();
         }
         try {
-            const response = await this.connection.query<any[]>(query);
+            const response = await this.connection.query(query);
             if (response) {
                 resultSet = response["rows"];
             }
@@ -63,7 +76,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
             await this.connect();
         }
         try {
-            const response = await this.connection.query<any[]>(query);
+            const response = await this.connection.query(query);
             if (response) {
                 resultSet = response["rows"];
             }

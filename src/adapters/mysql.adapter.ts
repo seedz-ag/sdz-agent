@@ -2,12 +2,26 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import mysql, { Connection, RowDataPacket } from "mysql2/promise";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
-import { unknown } from "zod";
 
 export class MysqlAdapter implements IDatabaseAdapter {
   private connection: Connection;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(private readonly config: ConfigDatabaseInterface) { 
+    this.validateConfig();
+  }
+
+  private validateConfig(): void {
+    const requiredFields = ["host", "port", "schema", "username", "password"];
+    const missing = requiredFields.filter(field => 
+      !this.config[field as keyof ConfigDatabaseInterface] || 
+      String(this.config[field as keyof ConfigDatabaseInterface]).length === 0
+    );
+
+    if (missing.length) {
+      const message = `Missing required database config for MYSQL: ${missing.join(", ")}`;
+      throw new Error(message);
+    }
+  }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -32,6 +46,20 @@ export class MysqlAdapter implements IDatabaseAdapter {
       } catch (e) {
         console.log(e);
       }
+    }
+  }
+
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!this.connection) {
+        await this.connect();
+      }
+      const [rows] = await this.connection.query<RowDataPacket[]>("SELECT 1 as ok");
+      return Array.isArray(rows);
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 

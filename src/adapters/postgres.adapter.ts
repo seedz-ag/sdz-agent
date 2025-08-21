@@ -5,7 +5,22 @@ import { ConfigDatabaseInterface } from "../interfaces/config-database.interface
 
 export class PostgresAdapter implements IDatabaseAdapter {
   private connection: Client;
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(private readonly config: ConfigDatabaseInterface) { 
+    this.validateConfig();
+  }
+
+  private validateConfig(): void {
+    const requiredFields = ["host", "port", "schema", "username", "password"];
+    const missing = requiredFields.filter(field => 
+      !this.config[field as keyof ConfigDatabaseInterface] || 
+      String(this.config[field as keyof ConfigDatabaseInterface]).length === 0
+    );
+
+    if (missing.length) {
+      const message = `Missing required database config for POSTGRES: ${missing.join(", ")}`;
+      throw new Error(message);
+    }
+  }
 
 
   async close(): Promise<void> {
@@ -41,6 +56,19 @@ export class PostgresAdapter implements IDatabaseAdapter {
 
   disconnect(): Promise<void> {
     return this.connection.end();
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!this.connection) {
+        await this.connect();
+      }
+      const response: any = await this.connection.query<any[]>("SELECT 1 as ok");
+      return !!response;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
 
   async execute(query: string): Promise<DatabaseRow[]> {

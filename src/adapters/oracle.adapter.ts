@@ -7,7 +7,22 @@ export class OracleAdapter implements IDatabaseAdapter {
   private connection: Connection;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(private readonly config: ConfigDatabaseInterface) { 
+    this.validateConfig();
+  }
+
+  private validateConfig(): void {
+    const requiredFields = ["host", "port", "service", "schema", "username", "password"];
+    const missing = requiredFields.filter(field => 
+      !this.config[field as keyof ConfigDatabaseInterface] || 
+      String(this.config[field as keyof ConfigDatabaseInterface]).length === 0
+    );
+
+    if (missing.length) {
+      const message = `Missing required database config for ORACLE: ${missing.join(", ")}`;
+      throw new Error(message);
+    }
+  }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -35,6 +50,19 @@ export class OracleAdapter implements IDatabaseAdapter {
       } catch (e) {
         console.log(e);
       }
+    }
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!this.connection) {
+        await this.connect();
+      }
+      const result = await this.connection.execute("SELECT 1 as ok");
+      return !!result;
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 

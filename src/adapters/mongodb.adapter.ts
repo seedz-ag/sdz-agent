@@ -7,7 +7,22 @@ export class MongodbAdapter implements IDatabaseAdapter {
   private connection: MongoClient;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(private readonly config: ConfigDatabaseInterface) { 
+    this.validateConfig();
+  }
+
+  private validateConfig(): void {
+    const requiredFields = ["host", "schema", "username", "password"];
+    const missing = requiredFields.filter(field => 
+      !this.config[field as keyof ConfigDatabaseInterface] || 
+      String(this.config[field as keyof ConfigDatabaseInterface]).length === 0
+    );
+
+    if (missing.length) {
+      const message = `Missing required database config for MONGODB: ${missing.join(", ")}`;
+      throw new Error(message);
+    }
+  }
   async close(): Promise<void> {
     if (this.connection) {
       try {
@@ -29,6 +44,20 @@ export class MongodbAdapter implements IDatabaseAdapter {
       } catch (e) {
         console.log(e);
       }
+    }
+  }
+
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!this.connection) {
+        await this.connect();
+      }
+      const admin = this.connection.db(this.config.schema).admin();
+      const ping = await admin.ping();
+      return !!ping;
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 

@@ -2,7 +2,6 @@ import {
   DatabaseRow,
   IDatabaseAdapter,
 } from "interfaces/database-adapter.interface";
-import { RedshiftAdapter } from "./redshift.adapter";
 import { MysqlAdapter } from "./mysql.adapter";
 import { MssqlAdapter } from "./mssql.adapter";
 import { FirebirdAdapter } from "./firebird.adapter";
@@ -16,19 +15,8 @@ import moment from "moment";
 import { IParameter } from "interfaces/setting.interface";
 import { DateTime } from "luxon";
 import { MongodbAdapter } from "./mongodb.adapter";
+import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 
-
-interface ConfigDatabaseInterface {
-  host?: string;
-  locale?: string;
-  schema?: string;
-  password?: string;
-  port?: number;
-  server?: string;
-  service?: string;
-  username?: string;
-  connectionString?: string;
-}
 
 const DATABASE_ADAPTERS = {
   FIREBIRD: FirebirdAdapter,
@@ -108,7 +96,6 @@ export class DatabaseAdapter implements IDatabaseAdapter {
 
   async connect(): Promise<void> {
     try {
-
       const driver = this.driver.toLocaleUpperCase() as keyof typeof DATABASE_ADAPTERS;
 
       this.adapter = new DATABASE_ADAPTERS[driver](this.config);
@@ -116,6 +103,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
       await this.adapter.connect();
     } catch (exception) {
       console.error({ exception });
+      throw exception;
     }
   }
 

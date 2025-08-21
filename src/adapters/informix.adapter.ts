@@ -25,6 +25,19 @@ export class InformixAdapter implements IDatabaseAdapter {
     }
   }
 
+  async checkConnection(): Promise<boolean> {
+    try {
+      if (!informixConnect) {
+        await this.connect();
+      }
+      const result = informixConnect.querySync("SELECT 1 as ok");
+      return Array.isArray(result);
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  }
+
   async connect() {
     const options = {
       host: this.config.host,
