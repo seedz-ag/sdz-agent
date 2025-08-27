@@ -32,9 +32,14 @@ export default class S3Transport implements ITransport {
       region: environmentService.get("AMAZON_REGION"),
     });
   }
+  private extractBucketConfig(setting: ISetting): string | undefined {
+    const bucketParam = setting.Parameters.find(({ Key }) => Key === "AMAZON_S3_RAW_BUCKET");
+    return bucketParam?.Value;
+  }
 
-  private upload(resource: string, data: unknown[]) {
-
+  private async upload(resource: string, data: unknown[]) {
+    const bucket = this.extractBucketConfig(this.setting);
+    
     const hasBufferData = data.some(item => item instanceof Buffer);
     if (hasBufferData) {
       const resourceSplited = resource.split('/');
@@ -45,14 +50,14 @@ export default class S3Transport implements ITransport {
 
       this.loggerAdapter.log(
         "info",
-        `UPLOAD FTP FILE TO ${this.environmentService.get("AMAZON_S3_RAW_BUCKET")} - ${this.setting.TenantId}/${this.setting.Id}/${resourcePath}/${moment().format(
+        `UPLOAD FTP FILE TO ${bucket} - ${this.setting.TenantId}/${this.setting.Id}/${resourcePath}/${moment().format(
           "YYYY-MM-DD"
         )}/${fileName}`
       );
 
       return this.s3.putObject({
         Body: fileData,
-        Bucket: this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
+        Bucket: bucket,
         Key: `${this.setting.TenantId}/${this.setting.Id}/${resourcePath}/${moment().format(
           "YYYY-MM-DD"
         )}/${fileName}`,
@@ -62,18 +67,23 @@ export default class S3Transport implements ITransport {
 
     this.loggerAdapter.log(
       "info",
-      `UPLOAD TO ${this.environmentService.get("AMAZON_S3_RAW_BUCKET")} - ${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
-        "YYYY-MM-DD"
-      )}/${randomUUID()}.json`
+      `SENDING ${data.length} LINES/FILE TO /${resource}`
     );
 
-    return this.s3.putObject({
-      Body: JSON.stringify(data),
-      Bucket: this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
-      Key: `${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
-        "YYYY-MM-DD"
-      )}/${randomUUID()}.json`,
-    });
+    for (const chunk of this.utilsService.chunkData(data)) {
+      this.loggerAdapter.log(
+        "info",
+        `SENDING CHUNK ${chunk.length} LINES TO /${resource}`
+      );
+
+      await this.s3.putObject({
+        Body: JSON.stringify(chunk),
+        Bucket: bucket,
+        Key: `${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
+          "YYYY-MM-DD"
+        )}/${randomUUID()}.json`,
+      });
+    }
   }
 
   private getFileExtension(resource: string): string {
