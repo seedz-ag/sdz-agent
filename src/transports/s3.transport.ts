@@ -39,7 +39,7 @@ export default class S3Transport implements ITransport {
     if (hasBufferData) {
       const fileData = data.find(item => item instanceof Buffer) as Buffer;
       const fileExtension = this.getFileExtension(resource);
-      const fileName = this.getFileName(resource);
+      const fileName = this.getFileNameFromData(data);
       
       this.loggerAdapter.log(
         "info",
@@ -89,6 +89,29 @@ export default class S3Transport implements ITransport {
     return resource;
   }
 
+  private getFileNameFromData(data: unknown[]): string | undefined {
+    for (const item of data) {
+      if (typeof item === 'object' && item !== null) {
+        if ('filename' in item && typeof item.filename === 'string') {
+          return item.filename;
+        }
+        if ('name' in item && typeof item.name === 'string') {
+          return item.name;
+        }
+        if ('metadata' in item && typeof item.metadata === 'object' && item.metadata !== null) {
+          const metadata = item.metadata as Record<string, unknown>;
+          if ('filename' in metadata && typeof metadata.filename === 'string') {
+            return metadata.filename;
+          }
+          if ('name' in metadata && typeof metadata.name === 'string') {
+            return metadata.name;
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
   private getContentType(extension: string): string {
     const mimeTypes: { [key: string]: string } = {
       '.txt': 'text/plain',
@@ -105,17 +128,12 @@ export default class S3Transport implements ITransport {
   public async send(resource: string, data: unknown[]): Promise<void> {
     this.loggerAdapter.log(
       "info",
-      `SENDING ${data.length} LINES TO /${resource}`
+      `SENDING ${data.length} LINES/FILES TO /${resource}`
     );
 
     if (!this.setting) {
       this.setting = await this.apiService.getSetting();
     }
-
-    this.loggerAdapter.log(
-      "info",
-      `SENDING ${data.length} LINES TO /${resource}`
-    );
 
     await this.upload(resource, data);
 

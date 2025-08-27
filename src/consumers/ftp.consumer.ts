@@ -94,8 +94,7 @@ export class FTPConsumer implements IConsumer {
             `${query.Command}${file.name}`,
             stream
           );
-          const resourceWithExtension = `${schema.ApiResource}/${file.name}`;
-          await this.transport.send(resourceWithExtension, [data]);
+          await this.transport.send(schema.ApiResource, [data]);
           if (files.indexOf(file) < files.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
