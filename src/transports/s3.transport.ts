@@ -47,7 +47,7 @@ export default class S3Transport implements ITransport {
         "info",
         `UPLOAD FTP FILE TO ${this.environmentService.get("AMAZON_S3_RAW_BUCKET")} - ${this.setting.TenantId}/${this.setting.Id}/${resourcePath}/${moment().format(
           "YYYY-MM-DD"
-        )}/${fileName}${fileExtension}`
+        )}/${fileName}`
       );
 
       return this.s3.putObject({
@@ -55,7 +55,7 @@ export default class S3Transport implements ITransport {
         Bucket: this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
         Key: `${this.setting.TenantId}/${this.setting.Id}/${resourcePath}/${moment().format(
           "YYYY-MM-DD"
-        )}/${fileName}${fileExtension}`,
+        )}/${fileName}`,
         ContentType: this.getContentType(fileExtension)
       });
     }
