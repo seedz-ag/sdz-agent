@@ -33,10 +33,10 @@ export default class S3Transport implements ITransport {
     });
   }
 
-  private upload(resource: string, data: unknown[], ftp = false) {
+  private upload(resource: string, data: unknown[]) {
 
     const hasBufferData = data.some(item => item instanceof Buffer);
-    if (hasBufferData || ftp) {
+    if (hasBufferData) {
       const resourceSplited = resource.split('/');
       const resourcePath = resourceSplited[0];
       const fileData = data.find(item => item instanceof Buffer) as Buffer;
@@ -109,14 +109,14 @@ export default class S3Transport implements ITransport {
   public async send(resource: string, data: unknown[], ftp = false): Promise<void> {
     this.loggerAdapter.log(
       "info",
-      `SENDING ${data.length} LINES TO /${resource}`
+      `SENDING ${data.length} LINES/FILE TO /${resource}`
     );
 
     if (!this.setting) {
       this.setting = await this.apiService.getSetting();
     }
 
-    await this.upload(resource, data, ftp);
+    await this.upload(resource, data);
 
     await this.utilsService.wait(this.environmentService.get("THROTTLE"));
   }
