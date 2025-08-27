@@ -19,7 +19,7 @@ export class FTPConsumer implements IConsumer {
     private readonly ftpAdapter: FTPAdapter,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   private extractFTPConfig(setting: ISetting): FTPAdapterConfig {
     return setting.Parameters.filter(({ Key }) =>
@@ -77,7 +77,6 @@ export class FTPConsumer implements IConsumer {
         `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}.json`,
         JSON.stringify(query)
       );
-      
       await this.ftpAdapter.connect();
 
       const files = await this.ftpAdapter.list(query.Command);
@@ -91,13 +90,12 @@ export class FTPConsumer implements IConsumer {
               callback();
             }
           });
-                    await this.ftpAdapter.getFile(
+          await this.ftpAdapter.getFile(
             `${query.Command}${file.name}`,
             stream
           );
-          
-          await this.transport.send(schema.ApiResource, data);
-          
+          const resourceWithExtension = `${schema.ApiResource}/${file.name}`;
+          await this.transport.send(resourceWithExtension, [data]);
           if (files.indexOf(file) < files.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 1000));
           }

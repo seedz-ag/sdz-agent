@@ -33,7 +33,31 @@ export default class S3Transport implements ITransport {
     });
   }
 
-  private upload(resource: string, chunk: unknown[]) {
+  private upload(resource: string, data: unknown[]) {
+
+    const hasBufferData = data.some(item => item instanceof Buffer);
+    if (hasBufferData) {
+      const fileData = data.find(item => item instanceof Buffer) as Buffer;
+      const fileExtension = this.getFileExtension(resource);
+      const fileName = this.getFileName(resource);
+      
+      this.loggerAdapter.log(
+        "info",
+        `UPLOAD FTP FILE TO ${this.environmentService.get("AMAZON_S3_RAW_BUCKET")} - ${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
+          "YYYY-MM-DD"
+        )}/${fileName}.${fileExtension}`
+      );
+      
+      return this.s3.putObject({
+        Body: fileData,
+        Bucket: this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
+        Key: `${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
+          "YYYY-MM-DD"
+        )}/${fileName}.${fileExtension}`,
+        ContentType: this.getContentType(fileExtension)
+      });
+    }
+    
     this.loggerAdapter.log(
       "info",
       `UPLOAD TO ${this.environmentService.get("AMAZON_S3_RAW_BUCKET")} - ${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
@@ -41,12 +65,41 @@ export default class S3Transport implements ITransport {
       )}/${randomUUID()}.json`
     );
     return this.s3.putObject({
-      Body: JSON.stringify(chunk),
+      Body: JSON.stringify(data),
       Bucket: this.environmentService.get("AMAZON_S3_RAW_BUCKET"),
       Key: `${this.setting.TenantId}/${this.setting.Id}/${resource}/${moment().format(
         "YYYY-MM-DD"
       )}/${randomUUID()}.json`,
     });
+  }
+
+  private getFileExtension(resource: string): string {
+    if (resource.includes('.')) {
+      const lastDotIndex = resource.lastIndexOf('.');
+      return resource.substring(lastDotIndex);
+    }
+    return '.txt';
+  }
+
+  private getFileName(resource: string): string {
+    if (resource.includes('/')) {
+      const lastSlashIndex = resource.lastIndexOf('/');
+      return resource.substring(lastSlashIndex + 1);
+    }
+    return resource;
+  }
+
+  private getContentType(extension: string): string {
+    const mimeTypes: { [key: string]: string } = {
+      '.txt': 'text/plain',
+      '.csv': 'text/csv',
+      '.json': 'application/json',
+      '.xml': 'application/xml',
+      '.pdf': 'application/pdf',
+      '.zip': 'application/zip'
+    };
+    
+    return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
   }
 
   public async send(resource: string, data: unknown[]): Promise<void> {
@@ -59,13 +112,13 @@ export default class S3Transport implements ITransport {
       this.setting = await this.apiService.getSetting();
     }
 
-      this.loggerAdapter.log(
-        "info",
-        `SENDING CHUNK ${data.length} LINES TO /${resource}`
-      );
+    this.loggerAdapter.log(
+      "info",
+      `SENDING ${data.length} LINES TO /${resource}`
+    );
 
-      await this.upload(resource, data);
+    await this.upload(resource, data);
 
-      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
-    }
+    await this.utilsService.wait(this.environmentService.get("THROTTLE"));
   }
+}
