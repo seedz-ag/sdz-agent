@@ -38,7 +38,7 @@ export default class S3Transport implements ITransport {
     const hasBufferData = data.some(item => item instanceof Buffer);
     if (hasBufferData || ftp) {
       const resourceSplited = resource.split('/');
-      const resourcePath = resourceSplited[resourceSplited.length - 1];
+      const resourcePath = resourceSplited[0];
       const fileData = data.find(item => item instanceof Buffer) as Buffer;
       const fileExtension = this.getFileExtension(resource);
       const fileName = this.getFileName(resource);
