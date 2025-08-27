@@ -110,6 +110,7 @@ export class FTPAdapter {
 
   async list(path: string): Promise<FileInfo[]> {
     try {
+      console.log({path});
       return await this.client.list(path);
     } catch (e) {
       this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`);
