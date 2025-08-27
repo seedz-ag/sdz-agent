@@ -116,10 +116,6 @@ export default class S3Transport implements ITransport {
       this.setting = await this.apiService.getSetting();
     }
 
-    this.loggerAdapter.log(
-      "info",
-      `SENDING ${data.length} LINES TO /${resource}`
-    );
     await this.upload(resource, data, ftp);
 
     await this.utilsService.wait(this.environmentService.get("THROTTLE"));
