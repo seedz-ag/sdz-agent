@@ -103,6 +103,7 @@ export class FTPConsumer implements IConsumer {
           console.error(`Error processing file ${file.name}:`, error);
         }
       }
+      await this.ftpAdapter.disconnect();
     }
   }
 
