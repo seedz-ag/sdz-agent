@@ -69,4 +69,4 @@ unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt
 export LD_LIBRARY_PATH=$(pwd)/assets/instantclient_21_3/
 
 ### ⚠️ Migração de Segurança: Remoção de informixdb ⚠️
-Para fortalecer a segurança do serviço, a dependência informixdb foi removida devido a múltiplas vulnerabilidades críticas e de alta gravidade. Esta medida é essencial para proteger nosso sistema e os dados dos usuários. A última versão do nosso serviço que utilizava essa dependência é a 2.2.8.
+Para fortalecer a segurança do serviço, a dependência informixdb foi removida devido a múltiplas vulnerabilidades. A última versão do nosso serviço que utilizava essa dependência é a 2.2.8.
