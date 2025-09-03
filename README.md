@@ -58,12 +58,6 @@ Esse projeto usa o `Node 18.17`, `libodbc1`, `Cmake >= 3.x`, `g++ >= 9.x` certif
 
   Lembre-se de ativar o serviço no `services.msc` e de utilizar um usuário com permissão para a inicialização do serviço
 
-##### Problemas conhecidos
-
-1. Caso encontre problemas para compilar o ODBC da dependência do Informix DB no Windows, você pode utilizar o comando abaixo para remover a dependência do Agent:
-
-`npm run detach-informixdb`
-
 ###### LGPD
 
 A Seedz pensando na nova lei LGPD criou uma estrutura configurável, onde o usuário consegue definir quais dados ele deseja enviar, baseado em um processo mapaemanto de informacoes obtidas o DTO é possível que o cliente configure e selecione quais dados serão transmitidos.
@@ -73,3 +67,6 @@ A Seedz pensando na nova lei LGPD criou uma estrutura configurável, onde o usu�
 unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
 
 export LD_LIBRARY_PATH=$(pwd)/assets/instantclient_21_3/
+
+### ⚠️ Migração de Segurança: Remoção de informixdb ⚠️
+Para fortalecer a segurança do serviço, a dependência informixdb foi removida devido a múltiplas vulnerabilidades críticas e de alta gravidade. Esta medida é essencial para proteger nosso sistema e os dados dos usuários. A última versão do nosso serviço que utilizava essa dependência é a 2.2.8.
