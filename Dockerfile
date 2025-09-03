@@ -39,11 +39,6 @@ RUN npm i -ci
 
 RUN npm i -g ts-node
 
-# INFORMIX
-RUN cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/cli/libthcli.so /lib && \
-    cp -R ./node_modules/informixdb/installer/onedb-odbc-driver/lib/esql/libifgl* /lib
-ENV INFORMIXDIR=/opt/sdz-agent/node_modules/informixdb/installer/onedb-odbc-driver
-
 # ORACLE
 RUN unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
 RUN ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
