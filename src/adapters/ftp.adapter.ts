@@ -18,6 +18,21 @@ export class FTPAdapter {
 
   constructor(private readonly loggerAdapter: LoggerAdapter) {
     this.client = new SFTPClient();
+
+    this.client.on("end", () => {
+      this.loggerAdapter.log("warn", "SFTP connection ended.");
+      this.isConnected = false;
+    });
+
+    this.client.on("close", () => {
+      this.loggerAdapter.log("warn", "SFTP connection closed.");
+      this.isConnected = false;
+    });
+
+    this.client.on("error", (err) => {
+      this.loggerAdapter.log("error", `SFTP error: ${err.message}`);
+      this.isConnected = false;
+    });
   }
 
   public setConfig(config: FTPAdapterConfig) {
@@ -29,7 +44,6 @@ export class FTPAdapter {
       if (this.isConnected) {
         return true;
       }
-      
       await this.client.connect({ ...this.config, timeout: 5000 });
       this.isConnected = true;
       return true;
