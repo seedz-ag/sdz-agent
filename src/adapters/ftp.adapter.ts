@@ -20,17 +20,14 @@ export class FTPAdapter {
     this.client = new SFTPClient();
 
     this.client.on("end", () => {
-      this.loggerAdapter.log("warn", "SFTP connection ended.");
       this.isConnected = false;
     });
 
     this.client.on("close", () => {
-      this.loggerAdapter.log("warn", "SFTP connection closed.");
       this.isConnected = false;
     });
 
     this.client.on("error", (err) => {
-      this.loggerAdapter.log("error", `SFTP error: ${err.message}`);
       this.isConnected = false;
     });
   }
