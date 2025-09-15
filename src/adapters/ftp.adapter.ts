@@ -15,7 +15,7 @@ export class FTPAdapter {
   private readonly client: SFTPClient;
   private config: FTPAdapterConfig;
   private isConnected: boolean = false;
-
+  
   constructor(private readonly loggerAdapter: LoggerAdapter) {
     this.client = new SFTPClient();
 
@@ -44,7 +44,12 @@ export class FTPAdapter {
       if (this.isConnected) {
         return true;
       }
-      await this.client.connect({ ...this.config, timeout: 5000 });
+      await this.client.connect({
+        ...this.config,
+        timeout: 20000,
+        keepaliveInterval: 10000,
+        keepaliveCountMax: 6,
+      } as any);
       this.isConnected = true;
       return true;
     } catch (e) {
@@ -85,19 +90,28 @@ export class FTPAdapter {
   }
 
   async getFile(remoteFileName: string, stream: Writable): Promise<boolean> {
-    try {
+    const attemptDownload = async () => {
       if (!this.isConnected) {
         await this.connect();
       }
-      
-       this.loggerAdapter.log(
+      this.loggerAdapter.log(
         "info",
         `DOWNLOADING ${remoteFileName} FROM FTP.`
       );
-      
       await this.client.get(remoteFileName, stream);
+    };
+    try {
+      await attemptDownload();
       return true;
-    } catch (e) {
+    } catch (e: any) {
+      const message = e?.message || String(e);
+      if (message && message.includes("ECONNRESET")) {
+        this.loggerAdapter.log("warn", "ECONNRESET detected. Reconnecting and retrying download.");
+        try { await this.disconnect(); } catch {}
+        await this.connect();
+        await attemptDownload();
+        return true;
+      }
       this.loggerAdapter.log(
         "error",
         `ERROR DOWNLOADING ${remoteFileName} FROM FTP.`
@@ -132,7 +146,20 @@ export class FTPAdapter {
         await this.connect();
       }
       
-      const list = await this.client.list(path);
+      let list: FileInfo[];
+      try {
+        list = await this.client.list(path);
+      } catch (e: any) {
+        const message = e?.message || String(e);
+        if (message && message.includes("ECONNRESET")) {
+          this.loggerAdapter.log("warn", "ECONNRESET on list. Reconnecting and retrying.");
+          try { await this.disconnect(); } catch {}
+          await this.connect();
+          list = await this.client.list(path);
+        } else {
+          throw e;
+        }
+      }
       if (!extension) {
         return list;
       }
