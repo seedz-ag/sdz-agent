@@ -16,6 +16,19 @@ export class FTPAdapter {
   private config: FTPAdapterConfig;
   private isConnected: boolean = false;
   
+  private async sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  
+  private isConnReset(err: any): boolean {
+    const message = err?.message || String(err);
+    return (
+      err?.code === "ECONNRESET" ||
+      message.includes("ECONNRESET") ||
+      err?.syscall === "read"
+    );
+  }
+  
   constructor(private readonly loggerAdapter: LoggerAdapter) {
     this.client = new SFTPClient();
 
@@ -47,9 +60,11 @@ export class FTPAdapter {
       }
       await this.client.connect({
         ...this.config,
-        timeout: 20000,
+        // Larger timeouts and keepalive for bigger files like CSV
+        readyTimeout: 60000,
+        timeout: 60000,
         keepaliveInterval: 10000,
-        keepaliveCountMax: 6,
+        keepaliveCountMax: 9,
       } as any);
       this.isConnected = true;
       return true;
@@ -91,34 +106,38 @@ export class FTPAdapter {
   }
 
   async getFile(remoteFileName: string, stream: Writable): Promise<boolean> {
-    const attemptDownload = async () => {
-      if (!this.isConnected) {
-        await this.connect();
-      }
-      this.loggerAdapter.log(
-        "info",
-        `DOWNLOADING ${remoteFileName} FROM FTP.`
-      );
-      await this.client.get(remoteFileName, stream);
-    };
-    try {
-      await attemptDownload();
-      return true;
-    } catch (e: any) {
-      const message = e?.message || String(e);
-      if (message && message.includes("ECONNRESET")) {
-        this.loggerAdapter.log("warn", "ECONNRESET detected. Reconnecting and retrying download.");
-        try { await this.disconnect(); } catch {}
-        await this.connect();
-        await attemptDownload();
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        if (!this.isConnected) {
+          await this.connect();
+        }
+        this.loggerAdapter.log(
+          "info",
+          `DOWNLOADING ${remoteFileName} FROM FTP. Attempt ${attempt}/${maxAttempts}`
+        );
+        await this.client.get(remoteFileName, stream);
         return true;
+      } catch (e: any) {
+        if (this.isConnReset(e) && attempt < maxAttempts) {
+          const backoff = 500 * Math.pow(2, attempt - 1);
+          this.loggerAdapter.log(
+            "warn",
+            `ECONNRESET on getFile. Reconnecting and retrying in ${backoff}ms (attempt ${attempt + 1}/${maxAttempts}).`
+          );
+          try { await this.disconnect(); } catch {}
+          await this.sleep(backoff);
+          await this.connect();
+          continue;
+        }
+        this.loggerAdapter.log(
+          "error",
+          `ERROR DOWNLOADING ${remoteFileName} FROM FTP.`
+        );
+        throw e;
       }
-      this.loggerAdapter.log(
-        "error",
-        `ERROR DOWNLOADING ${remoteFileName} FROM FTP.`
-      );
-      throw e;
     }
+    return false;
   }
 
   async renameFile(
@@ -147,19 +166,33 @@ export class FTPAdapter {
         await this.connect();
       }
       
-      let list: FileInfo[];
-      try {
-        list = await this.client.list(path);
-      } catch (e: any) {
-        const message = e?.message || String(e);
-        if (message && message.includes("ECONNRESET")) {
-          this.loggerAdapter.log("warn", "ECONNRESET on list. Reconnecting and retrying.");
-          try { await this.disconnect(); } catch {}
-          await this.connect();
+      let list: FileInfo[] = [];
+      const maxAttempts = 3;
+      let lastError: any = null;
+      let succeeded = false;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
           list = await this.client.list(path);
-        } else {
+          succeeded = true;
+          break;
+        } catch (e: any) {
+          lastError = e;
+          if (this.isConnReset(e) && attempt < maxAttempts) {
+            const backoff = 500 * Math.pow(2, attempt - 1);
+            this.loggerAdapter.log(
+              "warn",
+              `ECONNRESET on list. Reconnecting and retrying in ${backoff}ms (attempt ${attempt + 1}/${maxAttempts}).`
+            );
+            try { await this.disconnect(); } catch {}
+            await this.sleep(backoff);
+            await this.connect();
+            continue;
+          }
           throw e;
         }
+      }
+      if (!succeeded) {
+        throw lastError || new Error("Failed to list path");
       }
       if (!extension) {
         return list;
