@@ -13,11 +13,26 @@ export type FTPAdapterConfig = {
 @singleton()
 export class FTPAdapter {
   private readonly client: SFTPClient;
-
   private config: FTPAdapterConfig;
+  private isConnected: boolean = false;
 
   constructor(private readonly loggerAdapter: LoggerAdapter) {
     this.client = new SFTPClient();
+
+    this.client.on("end", () => {
+      this.loggerAdapter.log("warn", "SFTP connection ended.");
+      this.isConnected = false;
+    });
+
+    this.client.on("close", () => {
+      this.loggerAdapter.log("warn", "SFTP connection closed.");
+      this.isConnected = false;
+    });
+
+    this.client.on("error", (err) => {
+      this.loggerAdapter.log("error", `SFTP error: ${err.message}`);
+      this.isConnected = false;
+    });
   }
 
   public setConfig(config: FTPAdapterConfig) {
@@ -26,19 +41,23 @@ export class FTPAdapter {
 
   async connect() {
     try {
-      await this.client
-        .connect({ ...this.config, timeout: 5000 })
-        .then(() => {
-          this.client.end();
-          return true;
-        })
-        .catch((e: any) => {
-          throw e;
-        });
+      if (this.isConnected) {
+        return true;
+      }
+      await this.client.connect({ ...this.config, timeout: 5000 });
+      this.isConnected = true;
       return true;
     } catch (e) {
       this.loggerAdapter.log("error", "INVALID FTP CONFIGURATION.");
+      this.isConnected = false;
       throw e;
+    }
+  }
+
+  async disconnect() {
+    if (this.isConnected) {
+      await this.client.end();
+      this.isConnected = false;
     }
   }
 
@@ -46,16 +65,16 @@ export class FTPAdapter {
     localFileName: string,
     remoteFileName: string
   ): Promise<boolean> {
-    let complete = false;
     try {
-      await this.client
-        .fastPut(localFileName, remoteFileName, {
-          step: function (total_transferred: any, chunk: any, total: any) {},
-        })
-        .then(() => {
-          this.client.end();
-        });
-      complete = true;
+      if (!this.isConnected) {
+        await this.connect();
+      }
+      
+      await this.client.fastPut(localFileName, remoteFileName, {
+        step: function (total_transferred: any, chunk: any, total: any) {},
+      });
+      
+      return true;
     } catch (e) {
       this.loggerAdapter.log(
         "error",
@@ -63,16 +82,16 @@ export class FTPAdapter {
       );
       throw e;
     }
-    return complete;
   }
 
   async getFile(remoteFileName: string, stream: Writable): Promise<boolean> {
-    let complete = false;
     try {
-      await this.client.get(remoteFileName, stream).then(() => {
-        this.client.end();
-      });
-      complete = true;
+      if (!this.isConnected) {
+        await this.connect();
+      }
+      
+      await this.client.get(remoteFileName, stream);
+      return true;
     } catch (e) {
       this.loggerAdapter.log(
         "error",
@@ -80,24 +99,19 @@ export class FTPAdapter {
       );
       throw e;
     }
-    return complete;
   }
 
   async renameFile(
     remoteFileName: string,
     newRemoteFileName: string
   ): Promise<boolean> {
-    let complete = false;
     try {
-      await this.client
-        .rename(remoteFileName, newRemoteFileName)
-        .then(() => {
-          this.client.end();
-        })
-        .catch((err: TypeError) => {
-          throw err;
-        });
-      complete = true;
+      if (!this.isConnected) {
+        await this.connect();
+      }
+      
+      await this.client.rename(remoteFileName, newRemoteFileName);
+      return true;
     } catch (e) {
       this.loggerAdapter.log(
         "error",
@@ -105,13 +119,18 @@ export class FTPAdapter {
       );
       throw e;
     }
-    return complete;
   }
 
   async list(path: string): Promise<FileInfo[]> {
     try {
-      return await this.client.list(path);
+      if (!this.isConnected) {
+        await this.connect();
+      }
+      
+      const list = await this.client.list(path);
+      return list;
     } catch (e) {
+      console.log({e});
       this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`);
       throw e;
     }

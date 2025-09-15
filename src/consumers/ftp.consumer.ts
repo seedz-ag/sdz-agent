@@ -19,7 +19,7 @@ export class FTPConsumer implements IConsumer {
     private readonly ftpAdapter: FTPAdapter,
     private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
-  ) {}
+  ) { }
 
   private extractFTPConfig(setting: ISetting): FTPAdapterConfig {
     return setting.Parameters.filter(({ Key }) =>
@@ -36,7 +36,6 @@ export class FTPConsumer implements IConsumer {
         String(this.environmentService.get("TYPE"))
       )
     ) {
-      await this.ftpAdapter.connect();
       return;
     }
     const scope = this.environmentService.get("SCHEMA");
@@ -78,31 +77,38 @@ export class FTPConsumer implements IConsumer {
         `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}.json`,
         JSON.stringify(query)
       );
+      await this.ftpAdapter.connect();
 
       const files = await this.ftpAdapter.list(query.Command);
 
-      await Promise.all(
-        files.map((file) => {
-          return new Promise(async (resolve) => {
-            let data: Buffer = Buffer.from("");
-            const stream = new Writable();
-            stream.on("pipe", (chunk: Buffer) => {
+      for (const file of files) {
+        try {
+          let data: Buffer = Buffer.from("");
+          const stream = new Writable({
+            write(chunk, encoding, callback) {
               data = Buffer.concat([data, chunk]);
-            });
-            stream.on("close", async () => {
-              resolve(this.transport.send(schema.ApiResource, data));
-            });
-            await this.ftpAdapter.getFile(
-              `${query.Command}${file.name}`,
-              stream
-            );
+              callback();
+            }
           });
-        })
-      );
+          await this.ftpAdapter.getFile(
+            `${query.Command}${file.name}`,
+            stream
+          );
+          const resourceWithExtension = `${schema.Entity}/${file.name}`;
+          await this.transport.send(resourceWithExtension, [data]);
+          if (files.indexOf(file) < files.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } catch (error) {
+          console.error(`Error processing file ${file.name}:`, error);
+        }
+      }
+      await this.ftpAdapter.disconnect();
     }
   }
 
   public setSetting(setting: ISetting): this {
+    this.setting = setting;
     this.ftpAdapter.setConfig(this.extractFTPConfig(setting));
     return this;
   }
