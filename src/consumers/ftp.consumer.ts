@@ -81,6 +81,7 @@ export class FTPConsumer implements IConsumer {
 
       const files = await this.ftpAdapter.list(query.Command, schema.InputFormat);
 
+      console.log({files});
       for (const file of files) {
         try {
           let data: Buffer = Buffer.from("");
