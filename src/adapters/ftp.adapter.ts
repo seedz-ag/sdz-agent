@@ -126,14 +126,26 @@ export class FTPAdapter {
     }
   }
 
-  async list(path: string): Promise<FileInfo[]> {
+  async list(path: string, extension?: string): Promise<FileInfo[]> {
     try {
       if (!this.isConnected) {
         await this.connect();
       }
       
       const list = await this.client.list(path);
-      return list;
+      if (!extension) {
+        return list;
+      }
+
+      const normalizedExtension = extension.startsWith(".")
+        ? extension.toLowerCase()
+        : `.${extension.toLowerCase()}`;
+
+      return list.filter((entry) => {
+        const name = (entry as any).name as string | undefined;
+        if (!name) return false;
+        return name.toLowerCase().endsWith(normalizedExtension);
+      });
     } catch (e) {
       console.log({e});
       this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`);
