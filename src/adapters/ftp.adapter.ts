@@ -85,11 +85,6 @@ export class FTPAdapter {
       this.isConnected = false;
     });
 
-    this.client.on("error", (err) => {
-      console.log({err});
-      this.loggerAdapter.log("warn", `SFTP error: ${err.message}`);
-      this.isConnected = false;
-    });
   }
 
   public setConfig(config: FTPAdapterConfig) {
