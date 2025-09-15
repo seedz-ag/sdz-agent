@@ -31,8 +31,6 @@ RUN mkdir .nvm && \
 ENV NODE_PATH=$NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
 ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 COPY . .
 
 RUN npm i -ci
