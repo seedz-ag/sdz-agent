@@ -78,8 +78,8 @@ export class FTPConsumer implements IConsumer {
         JSON.stringify(query)
       );
       await this.ftpAdapter.connect();
-
       const files = await this.ftpAdapter.list(query.Command, schema.InputFormat);
+      await this.ftpAdapter.disconnect();
 
       console.log({files});
       for (const file of files) {
@@ -91,10 +91,12 @@ export class FTPConsumer implements IConsumer {
               callback();
             }
           });
+          await this.ftpAdapter.connect();
           await this.ftpAdapter.getFile(
             `${query.Command}${file.name}`,
             stream
           );
+          await this.ftpAdapter.disconnect();
           const resourceWithExtension = `${schema.Entity}/${file.name}`;
           await this.transport.send(resourceWithExtension, [data]);
           if (files.indexOf(file) < files.length - 1) {
