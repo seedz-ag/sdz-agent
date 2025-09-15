@@ -29,6 +29,49 @@ export class FTPAdapter {
     );
   }
   
+  private formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    const units = ["KB", "MB", "GB", "TB"];
+    let value = bytes / 1024;
+    let unitIndex = 0;
+    while (value >= 1024 && unitIndex < units.length - 1) {
+      value = value / 1024;
+      unitIndex++;
+    }
+    return `${value.toFixed(2)} ${units[unitIndex]}`;
+  }
+  
+  private async getRemoteFileSize(remoteFileName: string): Promise<number | null> {
+    const maxAttempts = 3;
+    let lastError: any = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        if (!this.isConnected) {
+          await this.connect();
+        }
+        const stats = await this.client.stat(remoteFileName);
+        const size = (stats as any)?.size as number | undefined;
+        return typeof size === "number" ? size : null;
+      } catch (e: any) {
+        lastError = e;
+        if (this.isConnReset(e) && attempt < maxAttempts) {
+          const backoff = 300 * Math.pow(2, attempt - 1);
+          this.loggerAdapter.log(
+            "warn",
+            `ECONNRESET on stat. Reconnecting and retrying in ${backoff}ms (attempt ${attempt + 1}/${maxAttempts}).`
+          );
+          try { await this.disconnect(); } catch {}
+          await this.sleep(backoff);
+          await this.connect();
+          continue;
+        }
+        break;
+      }
+    }
+    this.loggerAdapter.log("warn", `Could not determine remote file size for ${remoteFileName}. Error: ${lastError?.message || lastError}`);
+    return null;
+  }
+  
   constructor(private readonly loggerAdapter: LoggerAdapter) {
     this.client = new SFTPClient();
 
@@ -107,6 +150,7 @@ export class FTPAdapter {
 
   async getFile(remoteFileName: string, stream: Writable): Promise<boolean> {
     const maxAttempts = 3;
+    const size = await this.getRemoteFileSize(remoteFileName);
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         if (!this.isConnected) {
@@ -114,9 +158,18 @@ export class FTPAdapter {
         }
         this.loggerAdapter.log(
           "info",
-          `DOWNLOADING ${remoteFileName} FROM FTP. Attempt ${attempt}/${maxAttempts}`
+          `DOWNLOADING ${remoteFileName} FROM FTP${size !== null ? ` (size: ${this.formatBytes(size)} - ${size} bytes)` : ""}. Attempt ${attempt}/${maxAttempts}`
         );
+        const startedAt = Date.now();
         await this.client.get(remoteFileName, stream);
+        const elapsedMs = Date.now() - startedAt;
+        const speedMsg = size !== null && elapsedMs > 0
+          ? `, avg speed: ${this.formatBytes((size * 1000) / elapsedMs)}/s`
+          : "";
+        this.loggerAdapter.log(
+          "info",
+          `DOWNLOADED ${remoteFileName} in ${elapsedMs} ms${speedMsg}`
+        );
         return true;
       } catch (e: any) {
         if (this.isConnReset(e) && attempt < maxAttempts) {
