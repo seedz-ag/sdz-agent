@@ -90,6 +90,11 @@ export class FTPAdapter {
         await this.connect();
       }
       
+       this.loggerAdapter.log(
+        "info",
+        `DOWNLOADING ${remoteFileName} FROM FTP.`
+      );
+      
       await this.client.get(remoteFileName, stream);
       return true;
     } catch (e) {
