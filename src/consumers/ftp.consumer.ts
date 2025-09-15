@@ -83,19 +83,11 @@ export class FTPConsumer implements IConsumer {
 
       for (const file of files) {
         try {
-          let data: Buffer = Buffer.from("");
-          const stream = new Writable({
-            write(chunk, encoding, callback) {
-              data = Buffer.concat([data, chunk]);
-              callback();
-            }
-          });
-          await this.ftpAdapter.getFile(
-            `${query.Command}${file.name}`,
-            stream
+          const buffer = await this.ftpAdapter.getFileBuffer(
+            `${query.Command}${file.name}`
           );
           const resourceWithExtension = `${schema.Entity}/${file.name}`;
-          await this.transport.send(resourceWithExtension, [data]);
+          await this.transport.send(resourceWithExtension, [buffer]);
           if (files.indexOf(file) < files.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 1000));
           }

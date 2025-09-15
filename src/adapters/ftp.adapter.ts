@@ -193,6 +193,69 @@ export class FTPAdapter {
     return false;
   }
 
+  async getFileBuffer(remoteFileName: string): Promise<Buffer> {
+    const maxAttempts = 3;
+    const expectedSize = await this.getRemoteFileSize(remoteFileName);
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      let data: Buffer = Buffer.from("");
+      const stream = new Writable({
+        write(chunk, _encoding, callback) {
+          data = Buffer.concat([data, chunk]);
+          callback();
+        }
+      });
+      try {
+        if (!this.isConnected) {
+          await this.connect();
+        }
+        const startedAt = Date.now();
+        this.loggerAdapter.log(
+          "info",
+          `DOWNLOADING (buffer) ${remoteFileName} FROM FTP${expectedSize !== null ? ` (size: ${this.formatBytes(expectedSize)} - ${expectedSize} bytes)` : ""}. Attempt ${attempt}/${maxAttempts}`
+        );
+        await this.client.get(remoteFileName, stream);
+        const elapsedMs = Date.now() - startedAt;
+        const size = data.length;
+        const speedMsg = elapsedMs > 0 ? `, avg speed: ${this.formatBytes((size * 1000) / elapsedMs)}/s` : "";
+        this.loggerAdapter.log(
+          "info",
+          `DOWNLOADED (buffer) ${remoteFileName} in ${elapsedMs} ms (received: ${this.formatBytes(size)} - ${size} bytes)${speedMsg}`
+        );
+        if (expectedSize !== null && size !== expectedSize) {
+          this.loggerAdapter.log(
+            "warn",
+            `Downloaded size (${size}) differs from expected (${expectedSize}).${attempt < maxAttempts ? " Retrying." : ""}`
+          );
+          if (attempt < maxAttempts) {
+            try { await this.disconnect(); } catch {}
+            await this.sleep(300 * Math.pow(2, attempt - 1));
+            await this.connect();
+            continue;
+          }
+        }
+        return data;
+      } catch (e: any) {
+        if (this.isConnReset(e) && attempt < maxAttempts) {
+          const backoff = 500 * Math.pow(2, attempt - 1);
+          this.loggerAdapter.log(
+            "warn",
+            `ECONNRESET on getFileBuffer. Reconnecting and retrying in ${backoff}ms (attempt ${attempt + 1}/${maxAttempts}).`
+          );
+          try { await this.disconnect(); } catch {}
+          await this.sleep(backoff);
+          await this.connect();
+          continue;
+        }
+        this.loggerAdapter.log(
+          "error",
+          `ERROR DOWNLOADING (buffer) ${remoteFileName} FROM FTP.`
+        );
+        throw e;
+      }
+    }
+    throw new Error("Failed to download file buffer");
+  }
+
   async renameFile(
     remoteFileName: string,
     newRemoteFileName: string
