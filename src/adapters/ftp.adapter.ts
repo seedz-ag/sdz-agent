@@ -44,7 +44,13 @@ export class FTPAdapter {
       if (this.isConnected) {
         return true;
       }
-      await this.client.connect({ ...this.config, timeout: 5000 });
+      await this.client.connect({
+        ...this.config,
+        timeout: 5000,
+        readyTimeout: 20000,
+        keepaliveInterval: 10000,
+        keepaliveCountMax: 10,
+      } as any);
       this.isConnected = true;
       return true;
     } catch (e) {
@@ -69,11 +75,9 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
       await this.client.fastPut(localFileName, remoteFileName, {
-        step: function (total_transferred: any, chunk: any, total: any) {},
+        step: function (total_transferred: any, chunk: any, total: any) { },
       });
-      
       return true;
     } catch (e) {
       this.loggerAdapter.log(
@@ -89,13 +93,17 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
-       this.loggerAdapter.log(
+      this.loggerAdapter.log(
         "info",
         `DOWNLOADING ${remoteFileName} FROM FTP.`
       );
-      
       await this.client.get(remoteFileName, stream);
+
+      this.loggerAdapter.log(
+        "info",
+        `DOWNLOADED ${remoteFileName} FROM FTP.`
+      );
+
       return true;
     } catch (e) {
       this.loggerAdapter.log(
@@ -114,7 +122,6 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
       await this.client.rename(remoteFileName, newRemoteFileName);
       return true;
     } catch (e) {
@@ -131,7 +138,6 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
       const list = await this.client.list(path);
       if (!extension) {
         return list;
@@ -147,7 +153,7 @@ export class FTPAdapter {
         return name.toLowerCase().endsWith(normalizedExtension);
       });
     } catch (e) {
-      console.log({e});
+      console.log({ e });
       this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`);
       throw e;
     }
