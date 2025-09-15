@@ -78,8 +78,7 @@ export class FTPConsumer implements IConsumer {
         JSON.stringify(query)
       );
       await this.ftpAdapter.connect();
-
-      const files = await this.ftpAdapter.list(query.Command);
+      const files = await this.ftpAdapter.list(query.Command, schema.InputFormat);
 
       for (const file of files) {
         try {
