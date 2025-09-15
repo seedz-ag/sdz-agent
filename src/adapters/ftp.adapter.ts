@@ -20,17 +20,14 @@ export class FTPAdapter {
     this.client = new SFTPClient();
 
     this.client.on("end", () => {
-      this.loggerAdapter.log("warn", "SFTP connection ended.");
       this.isConnected = false;
     });
 
     this.client.on("close", () => {
-      this.loggerAdapter.log("warn", "SFTP connection closed.");
       this.isConnected = false;
     });
 
     this.client.on("error", (err) => {
-      this.loggerAdapter.log("error", `SFTP error: ${err.message}`);
       this.isConnected = false;
     });
   }
@@ -44,7 +41,13 @@ export class FTPAdapter {
       if (this.isConnected) {
         return true;
       }
-      await this.client.connect({ ...this.config, timeout: 5000 });
+      await this.client.connect({
+        ...this.config,
+        timeout: 5000,
+        readyTimeout: 20000,
+        keepaliveInterval: 10000,
+        keepaliveCountMax: 10,
+      } as any);
       this.isConnected = true;
       return true;
     } catch (e) {
@@ -69,11 +72,9 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
       await this.client.fastPut(localFileName, remoteFileName, {
-        step: function (total_transferred: any, chunk: any, total: any) {},
+        step: function (total_transferred: any, chunk: any, total: any) { },
       });
-      
       return true;
     } catch (e) {
       this.loggerAdapter.log(
@@ -89,8 +90,17 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
+      this.loggerAdapter.log(
+        "info",
+        `DOWNLOADING ${remoteFileName} FROM FTP.`
+      );
       await this.client.get(remoteFileName, stream);
+
+      this.loggerAdapter.log(
+        "info",
+        `DOWNLOADED ${remoteFileName} FROM FTP.`
+      );
+
       return true;
     } catch (e) {
       this.loggerAdapter.log(
@@ -109,7 +119,6 @@ export class FTPAdapter {
       if (!this.isConnected) {
         await this.connect();
       }
-      
       await this.client.rename(remoteFileName, newRemoteFileName);
       return true;
     } catch (e) {
@@ -121,16 +130,27 @@ export class FTPAdapter {
     }
   }
 
-  async list(path: string): Promise<FileInfo[]> {
+  async list(path: string, extension?: string): Promise<FileInfo[]> {
     try {
       if (!this.isConnected) {
         await this.connect();
       }
-      
       const list = await this.client.list(path);
-      return list;
+      if (!extension) {
+        return list;
+      }
+
+      const normalizedExtension = extension.startsWith(".")
+        ? extension.toLowerCase()
+        : `.${extension.toLowerCase()}`;
+
+      return list.filter((entry) => {
+        const name = (entry as any).name as string | undefined;
+        if (!name) return false;
+        return name.toLowerCase().endsWith(normalizedExtension);
+      });
     } catch (e) {
-      console.log({e});
+      console.log({ e });
       this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`);
       throw e;
     }

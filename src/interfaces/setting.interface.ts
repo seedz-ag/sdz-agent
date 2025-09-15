@@ -26,7 +26,7 @@ export interface ISchedule {
 export interface ISchema {
   ApiResource: string;
   Entity: string;
-  InputFormat: "AGENT" | "JSON";
+  InputFormat: "AGENT" | "JSON" | "CSV" | "XLS" | "XLSX" | "PARQUET";
   Maps: IMap[];
 }
 
