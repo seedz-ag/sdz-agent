@@ -77,15 +77,13 @@ export class FTPConsumer implements IConsumer {
         `${process.cwd()}/output/${schema.Entity.toLocaleLowerCase()}.json`,
         JSON.stringify(query)
       );
-      await this.ftpAdapter.connect();
-
       const files = await this.ftpAdapter.list(query.Command, schema.InputFormat);
 
       for (const file of files) {
         try {
-          const buffer = await this.ftpAdapter.getFileBuffer(
-            `${query.Command}${file.name}`
-          );
+          await this.ftpAdapter.connect();
+          const buffer = await this.ftpAdapter.getFileBuffer(`${query.Command}${file.name}`);
+          await this.ftpAdapter.disconnect();
           const resourceWithExtension = `${schema.Entity}/${file.name}`;
           await this.transport.send(resourceWithExtension, [buffer]);
           if (files.indexOf(file) < files.length - 1) {
@@ -93,6 +91,8 @@ export class FTPConsumer implements IConsumer {
           }
         } catch (error) {
           console.error(`Error processing file ${file.name}:`, error);
+        } finally {
+          await this.ftpAdapter.disconnect();
         }
       }
       await this.ftpAdapter.disconnect();

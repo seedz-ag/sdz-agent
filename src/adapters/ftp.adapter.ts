@@ -165,7 +165,6 @@ export class FTPAdapter {
           "info",
           `DOWNLOADED ${remoteFileName} in ${elapsedMs} ms${speedMsg}`
         );
-        this.disconnect();
         return true;
       } catch (e: any) {
         if (this.isConnReset(e) && attempt < maxAttempts) {
