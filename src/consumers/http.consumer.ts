@@ -127,7 +127,7 @@ export class HttpConsumer implements IConsumer {
 
   private searchDataPath = (data: any, path: string) => {
     try {
-      //this.loggerAdapter.log("info", `SEARCH DATA PATH`);
+      this.loggerAdapter.log("info", `SEARCH DATA PATH`);
       const dataPath = path.split(".");
       let key;
       let currentData = data;
@@ -147,7 +147,7 @@ export class HttpConsumer implements IConsumer {
           }, {})
         );
       }
-      // this.loggerAdapter.log("info", `DATA PATH FOUND`);
+      this.loggerAdapter.log("info", `DATA PATH FOUND`);
       return currentData || "";
     } catch (error) {
       this.loggerAdapter.log("error", error);
@@ -498,24 +498,11 @@ export class HttpConsumer implements IConsumer {
       }
     };
 
-    // Primeiro tenta usar o dataPath dinâmico exatamente como antes
-    let result = this.searchDataPath(feedEntry, dataPath);
-
-    // Se nada foi encontrado (resultado vazio), faz um fallback genérico
-    // convertendo o entry para objeto "flat" compatível com o restante do fluxo.
-    if (
-      !result ||
-      (Array.isArray(result) && result.length === 0) ||
-      (!Array.isArray(result) && typeof result === "object" && !Object.keys(result || {}).length)
-    ) {
-      const converted = this.convertEntryToObject(entry);
-      if (!converted || !Object.keys(converted).length) {
-        return [];
-      }
-      return [converted];
+    const converted = this.convertEntryToObject(entry);
+    if (!converted || !Object.keys(converted).length) {
+      return [];
     }
-
-    return result;
+    return [converted];
   }
 
   private async processStreamResults(
@@ -529,7 +516,6 @@ export class HttpConsumer implements IConsumer {
       return [];
     }
 
-    // Process results em lotes grandes para evitar uso excessivo de memória
     const BATCH_SIZE = 10_000;
     const allHydrated: any[] = [];
 
@@ -537,10 +523,9 @@ export class HttpConsumer implements IConsumer {
       const batchRaw = normalizedResults.slice(start, start + BATCH_SIZE);
       const batchHydrated = this.applyHydration(batchRaw, schema);
 
-      // Mantém compatibilidade retornando todos os registros hidratados
       allHydrated.push(...batchHydrated);
 
-      // Envia e grava em lotes de até 10.000 registros
+      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
       await this.sendResults(batchHydrated, batchRaw, resource);
     }
 
@@ -659,18 +644,18 @@ export class HttpConsumer implements IConsumer {
 
         for (const key in properties) {
           if (key.startsWith("$")) continue;
-          const propKey = key.startsWith("d:") ? key.substring(2) : key;
+          const propKey = key.toUpperCase();
           const propValue = properties[key];
 
           // Processar valores do xml-stream
           if (propValue && typeof propValue === "object") {
             if (propValue.$text !== undefined) {
-              result[propKey.toUpperCase()] = propValue.$text;
+              result[propKey] = propValue.$text;
             } else {
-              result[propKey.toUpperCase()] = propValue;
+              result[propKey] = propValue;
             }
           } else {
-            result[propKey.toUpperCase()] = propValue;
+            result[propKey] = propValue;
           }
         }
       }
