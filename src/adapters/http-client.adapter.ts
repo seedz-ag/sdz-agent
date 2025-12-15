@@ -139,18 +139,65 @@ export class HttpClientAdapter {
     timeout,
     url,
   }: HttpClientAdapterRequestInput<T>): Promise<T> {
-    const response = await axios({
+    const response = await this.executeRequest({
       data,
-      headers: this.filterHeaders(headers || {}),
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: !this.isInsecure(headers || {}),
-        ca: this.getCertificate(headers || {}),
-      }),
+      headers,
       method,
       responseType,
       timeout,
       url,
     });
     return response.data;
+  }
+
+  public async requestStream({
+    data,
+    headers,
+    method,
+    timeout,
+    url,
+  }: Omit<HttpClientAdapterRequestInput, "responseType">): Promise<NodeJS.ReadableStream> {
+    const response = await this.executeRequest({
+      data,
+      headers,
+      method,
+      responseType: "stream",
+      timeout,
+      url,
+    });
+    return response.data as NodeJS.ReadableStream;
+  }
+
+  private async executeRequest({
+    data,
+    headers,
+    method,
+    responseType,
+    timeout,
+    url,
+  }: {
+    data?: any;
+    headers?: AxiosRequestHeaders;
+    method?: string;
+    responseType?: any;
+    timeout?: number;
+    url: string;
+  }): Promise<any> {
+    const filteredHeaders = this.filterHeaders(headers || {});
+    const isInsecureRequest = this.isInsecure(headers || {});
+    const certificate = this.getCertificate(headers || {});
+
+    return axios({
+      data,
+      headers: filteredHeaders,
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: !isInsecureRequest,
+        ca: certificate,
+      }),
+      method,
+      responseType,
+      timeout,
+      url,
+    });
   }
 }
