@@ -2,6 +2,7 @@ import { get } from "dot-wild";
 import fs from "fs";
 import { singleton } from "tsyringe";
 import parser from "xml2json";
+import XmlStream from "xml-stream";
 import { IConsumer } from "../interfaces/consumer.interface";
 import { ISetting, ISchema } from "../interfaces/setting.interface";
 import { ITransport } from "../interfaces/transport.interface";
@@ -126,7 +127,7 @@ export class HttpConsumer implements IConsumer {
 
   private searchDataPath = (data: any, path: string) => {
     try {
-      this.loggerAdapter.log("info", `SEARCH DATA PATH`);
+      //this.loggerAdapter.log("info", `SEARCH DATA PATH`);
       const dataPath = path.split(".");
       let key;
       let currentData = data;
@@ -146,7 +147,7 @@ export class HttpConsumer implements IConsumer {
           }, {})
         );
       }
-      this.loggerAdapter.log("info", `DATA PATH FOUND`);
+      // this.loggerAdapter.log("info", `DATA PATH FOUND`);
       return currentData || "";
     } catch (error) {
       this.loggerAdapter.log("error", error);
@@ -205,6 +206,11 @@ export class HttpConsumer implements IConsumer {
         }`.slice(-5)}.json`,
       JSON.stringify(requestCompiled)
     );
+    // Processar com streaming se useStream estiver habilitado
+    if (request.useStream) {
+      this.loggerAdapter.log("info", `USING STREAM MODE FOR ${resource}`);
+      return await this.requestWithStream(schema, requestCompiled, dataPath, headers, resource, tries, request);
+    }
 
     let response = await this.httpClientAdapter
       .request(requestCompiled)
@@ -383,5 +389,313 @@ export class HttpConsumer implements IConsumer {
   public setTransport(transport: ITransport): this {
     this.transport = transport;
     return this;
+  }
+
+  private async requestWithStream(
+    schema: ISchema,
+    requestCompiled: any,
+    dataPath: string | undefined,
+    headers: any,
+    resource: string,
+    tries: number,
+    originalRequest: any
+  ): Promise<unknown[]> {
+    try {
+      const stream = await this.httpClientAdapter.requestStream(requestCompiled);
+      return this.processXmlStream(stream, schema, dataPath, resource);
+    } catch (error: any) {
+      return this.handleStreamError(
+        error,
+        schema,
+        requestCompiled,
+        dataPath,
+        headers,
+        resource,
+        tries,
+        originalRequest
+      );
+    }
+  }
+
+  private processXmlStream(
+    stream: NodeJS.ReadableStream,
+    schema: ISchema,
+    dataPath: string | undefined,
+    resource: string
+  ): Promise<unknown[]> {
+    return new Promise((resolve, reject) => {
+      const results: any[] = [];
+      let entryCount = 0;
+
+      const xml = this.createXmlStream(stream);
+      this.setupXmlStreamHandlers(xml, results, entryCount, schema, dataPath, resource, resolve, reject);
+    });
+  }
+
+  private createXmlStream(stream: NodeJS.ReadableStream): any {
+    const xml = new XmlStream(stream);
+    xml.collect("content");
+    xml.collect("m:properties");
+    return xml;
+  }
+
+  private setupXmlStreamHandlers(
+    xml: any,
+    results: any[],
+    entryCount: number,
+    schema: ISchema,
+    dataPath: string | undefined,
+    resource: string,
+    resolve: (value: unknown[]) => void,
+    reject: (reason?: any) => void
+  ): void {
+    let currentEntryCount = entryCount;
+
+    xml.on("endElement: entry", (entry: any) => {
+      try {
+        currentEntryCount++;
+        const processedEntry = this.processEntry(entry, dataPath);
+
+        if (processedEntry) {
+          if (Array.isArray(processedEntry)) {
+            results.push(...processedEntry);
+          } else {
+            results.push(processedEntry);
+          }
+        }
+
+        if (currentEntryCount % 100 === 0) {
+          this.loggerAdapter.log("info", `Processados ${currentEntryCount} entries via stream`);
+        }
+      } catch (error) {
+        this.loggerAdapter.log("error", `Erro ao processar entry: ${error}`);
+      }
+    });
+
+    xml.on("end", async () => {
+      this.loggerAdapter.log("info", `Stream concluído: ${results.length} itens processados`);
+      const finalResults = await this.processStreamResults(results, schema, resource);
+      resolve(finalResults);
+    });
+
+    xml.on("error", (error: Error) => {
+      this.loggerAdapter.log("error", `Erro no stream XML: ${error.message}`);
+      reject(error);
+    });
+  }
+
+  private processEntry(entry: any, dataPath: string | undefined): any {
+    if (dataPath) {
+      return this.extractDataWithPath(entry, dataPath);
+    }
+    return this.convertEntryToObject(entry);
+  }
+
+  private extractDataWithPath(entry: any, dataPath: string): any {
+    const feedEntry = {
+      feed: {
+        entry: [entry]
+      }
+    };
+
+    // Primeiro tenta usar o dataPath dinâmico exatamente como antes
+    let result = this.searchDataPath(feedEntry, dataPath);
+
+    // Se nada foi encontrado (resultado vazio), faz um fallback genérico
+    // convertendo o entry para objeto "flat" compatível com o restante do fluxo.
+    if (
+      !result ||
+      (Array.isArray(result) && result.length === 0) ||
+      (!Array.isArray(result) && typeof result === "object" && !Object.keys(result || {}).length)
+    ) {
+      const converted = this.convertEntryToObject(entry);
+      if (!converted || !Object.keys(converted).length) {
+        return [];
+      }
+      return [converted];
+    }
+
+    return result;
+  }
+
+  private async processStreamResults(
+    results: any[],
+    schema: ISchema,
+    resource: string
+  ): Promise<unknown[]> {
+    const normalizedResults = this.normalizeResults(results, resource);
+
+    if (!normalizedResults || normalizedResults.length === 0) {
+      return [];
+    }
+
+    // Process results em lotes grandes para evitar uso excessivo de memória
+    const BATCH_SIZE = 10_000;
+    const allHydrated: any[] = [];
+
+    for (let start = 0; start < normalizedResults.length; start += BATCH_SIZE) {
+      const batchRaw = normalizedResults.slice(start, start + BATCH_SIZE);
+      const batchHydrated = this.applyHydration(batchRaw, schema);
+
+      // Mantém compatibilidade retornando todos os registros hidratados
+      allHydrated.push(...batchHydrated);
+
+      // Envia e grava em lotes de até 10.000 registros
+      await this.sendResults(batchHydrated, batchRaw, resource);
+    }
+
+    return allHydrated;
+  }
+
+  private normalizeResults(results: any[], resource: string): any[] {
+    if (!Array.isArray(results)) {
+      if (!results || !Object.keys(results).length) {
+        this.loggerAdapter.log("info", `EMPTY: ${resource}`);
+        return [];
+      }
+      return [results];
+    }
+
+    if (results.length === 0) {
+      this.loggerAdapter.log("info", `EMPTY: ${resource}`);
+      return [];
+    }
+
+    return results;
+  }
+
+  private applyHydration(results: any[], schema: ISchema): any[] {
+    if (this.utilsService.needsToHydrate(schema)) {
+      this.loggerAdapter.log(
+        "info",
+        `DATA FOR: ${schema.Entity.toLocaleUpperCase()} WILL BE TRANFORMED USING SCHEMA MAPS`
+      );
+
+      return results.map((row: Record<string, string>) =>
+        this.hydratorService.hydrate(schema.Maps, row)
+      );
+    }
+
+    return results;
+  }
+
+  private async sendResults(
+    hydratedData: any[],
+    rawResults: any[],
+    resource: string
+  ): Promise<void> {
+    try {
+      if (this.setting.Channel !== "SAAS_S3") {
+        await Promise.all([
+          this.utilsService.writeJSON(`raw-${resource}`, rawResults),
+          this.transport.send(`raw/${resource}`, rawResults),
+        ]);
+        await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+
+        if (this.environmentService.get("RAW_ONLY") && !resource.startsWith("raw")) {
+          this.loggerAdapter.log("warn", `SENDING EXTRACTION TO RAW ONLY`);
+          return;
+        }
+      }
+
+      await Promise.all([
+        this.utilsService.writeJSON(resource, hydratedData),
+        this.transport.send(resource, hydratedData),
+      ]);
+      await this.utilsService.wait(this.environmentService.get("THROTTLE"));
+    } catch (error) {
+      this.loggerAdapter.log("error", `Erro ao processar resultados: ${error}`);
+      throw error;
+    }
+  }
+
+  private async handleStreamError(
+    error: any,
+    schema: ISchema,
+    requestCompiled: any,
+    dataPath: string | undefined,
+    headers: any,
+    resource: string,
+    tries: number,
+    originalRequest: any
+  ): Promise<unknown[]> {
+    this.loggerAdapter.log(
+      "error",
+      `TRYING(${tries}) TO REQUESTING ${resource}[${error?.response || ""}]`
+    );
+
+    const maxRetries = this.environmentService.get("RETRIES") || 3;
+    if (tries <= maxRetries) {
+      await this.utilsService.wait(
+        this.utilsService.calculateRetryTime(tries, 30_000)
+      );
+
+      return this.requestWithStream(
+        schema,
+        requestCompiled,
+        dataPath,
+        headers,
+        resource,
+        tries + 1,
+        originalRequest
+      );
+    }
+
+    throw error;
+  }
+
+  private convertEntryToObject(entry: any): any {
+    // Converter o objeto entry do xml-stream para o formato esperado
+    // Similar ao que o parser.toJson faz
+    const result: any = {};
+
+    // Processar content > m:properties > d:*
+    if (entry.content) {
+      const content = Array.isArray(entry.content) ? entry.content[0] : entry.content;
+      if (content && content["m:properties"]) {
+        const properties = Array.isArray(content["m:properties"])
+          ? content["m:properties"][0]
+          : content["m:properties"];
+
+        for (const key in properties) {
+          if (key.startsWith("$")) continue;
+          const propKey = key.startsWith("d:") ? key.substring(2) : key;
+          const propValue = properties[key];
+
+          // Processar valores do xml-stream
+          if (propValue && typeof propValue === "object") {
+            if (propValue.$text !== undefined) {
+              result[propKey.toUpperCase()] = propValue.$text;
+            } else {
+              result[propKey.toUpperCase()] = propValue;
+            }
+          } else {
+            result[propKey.toUpperCase()] = propValue;
+          }
+        }
+      }
+    }
+
+    // Processar outras propriedades do entry (id, title, etc.)
+    for (const key in entry) {
+      if (key === "content" || key.startsWith("$")) {
+        continue;
+      }
+
+      const value = entry[key];
+      if (value && typeof value === "object") {
+        if (value.$text !== undefined) {
+          result[key.toUpperCase()] = value.$text;
+        } else if (Array.isArray(value) && value.length > 0 && value[0].$text !== undefined) {
+          result[key.toUpperCase()] = value[0].$text;
+        } else {
+          result[key.toUpperCase()] = value;
+        }
+      } else {
+        result[key.toUpperCase()] = value;
+      }
+    }
+
+    return result;
   }
 }
