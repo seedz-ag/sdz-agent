@@ -630,11 +630,7 @@ export class HttpConsumer implements IConsumer {
   }
 
   private convertEntryToObject(entry: any): any {
-    // Converter o objeto entry do xml-stream para o formato esperado
-    // Similar ao que o parser.toJson faz
     const result: any = {};
-
-    // Processar content > m:properties > d:*
     if (entry.content) {
       const content = Array.isArray(entry.content) ? entry.content[0] : entry.content;
       if (content && content["m:properties"]) {
