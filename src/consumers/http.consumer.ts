@@ -75,7 +75,7 @@ export class HttpConsumer implements IConsumer {
       return data;
     });
     if (!tokenType) return token
-    return `${tokenType}' '${token}`;
+    return `${tokenType}${token}`;
   }
   private getResourceName({
     ApiResource,
