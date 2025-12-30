@@ -57,6 +57,7 @@ export class HttpConsumer implements IConsumer {
       url,
       path,
       method = "POST",
+      tokenType = null,
     } = authentication;
 
     const requestCompiled = {
@@ -67,12 +68,14 @@ export class HttpConsumer implements IConsumer {
       method,
       url,
     };
-    return this.httpClientAdapter.request(requestCompiled).then((data: any) => {
+    const token = await this.httpClientAdapter.request(requestCompiled).then((data: any) => {
       if (!!path) {
         return get(data, path);
       }
       return data;
     });
+    if (!tokenType) return token
+    return `${tokenType}' '${token}`;
   }
   private getResourceName({
     ApiResource,
