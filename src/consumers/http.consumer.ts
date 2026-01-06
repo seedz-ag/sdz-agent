@@ -361,16 +361,38 @@ export class HttpConsumer implements IConsumer {
 
           this.handleRange(command);
 
+          const { range } = command;
+          const isPagePagination = command.paginates && !range;
+
+          if (isPagePagination) {
+            if (!command.scope) {
+              command.scope = {};
+            }
+            command.scope.page = command.scope.page ?? 1;
+          }
+
           let response = await this.request(schema, command);
 
-          const { range } = command;
-
-          while ((response && response.length && command.paginates) || range) {
-            if (range && String(range.current.value) === String(range.stop)) {
-              break;
+          if (isPagePagination) {
+            while (response?.length) {
+              command.scope.page = (command.scope.page ?? 1) + 1;
+              const nextResponse = await this.request(schema, command);
+              
+              if (!nextResponse?.length) {
+                break;
+              }
+              
+              response = nextResponse;
             }
-            this.handleRange(command);
-            response = await this.request(schema, command);
+          } else if (range || (response?.length && command.paginates)) {
+            // comportamento original
+            while ((response?.length && command.paginates) || range) {
+              if (range && String(range.current.value) === String(range.stop)) {
+                break;
+              }
+              this.handleRange(command);
+              response = await this.request(schema, command);
+            }
           }
         } catch (error) {
           this.loggerAdapter.log(
