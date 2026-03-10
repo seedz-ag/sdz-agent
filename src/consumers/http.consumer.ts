@@ -49,41 +49,51 @@ export class HttpConsumer implements IConsumer {
   }
 
   private async authenticate(authentication: any, headers: any) {
-    const {
-      username,
-      usernameKey = "username",
-      password,
-      passwordKey = "password",
-      url,
-      path,
-      method = "POST",
-      tokenType = null,
-    } = authentication;
+    try {
+      this.loggerAdapter.log("info", "STARTING AUTHENTICATION");
+      const {
+        username,
+        usernameKey = "username",
+        password,
+        passwordKey = "password",
+        url,
+        path,
+        method = "POST",
+        tokenType = null,
+      } = authentication;
 
-    const insecureHeaderKey = Object.keys(headers || {}).find(
-      (key) => key.toUpperCase() === "INSECURE"
-    );
-    const requestHeaders = insecureHeaderKey
-      ? { [insecureHeaderKey]: headers[insecureHeaderKey] }
-      : undefined;
+      const insecureHeaderKey = Object.keys(headers || {}).find(
+        (key) => key.toUpperCase() === "INSECURE"
+      );
+      const requestHeaders = insecureHeaderKey
+        ? { [insecureHeaderKey]: headers[insecureHeaderKey] }
+        : undefined;
 
-    const requestCompiled = {
-      data: {
-        [usernameKey]: username,
-        [passwordKey]: password,
-      },
-      headers: requestHeaders,
-      method,
-      url,
-    };
-    const token = await this.httpClientAdapter.request(requestCompiled).then((data: any) => {
-      if (!!path) {
-        return get(data, path);
-      }
-      return data;
-    });
-    if (!tokenType) return token
-    return `${tokenType}${token}`;
+      const requestCompiled = {
+        data: {
+          [usernameKey]: username,
+          [passwordKey]: password,
+        },
+        headers: requestHeaders,
+        method,
+        url,
+      };
+      
+      this.loggerAdapter.log("info", `AUTHENTICATING TO: ${url}`);
+      const token = await this.httpClientAdapter.request(requestCompiled).then((data: any) => {
+        if (!!path) {
+          return get(data, path);
+        }
+        return data;
+      });
+      
+      this.loggerAdapter.log("info", "AUTHENTICATION SUCCESSFUL");
+      if (!tokenType) return token
+      return `${tokenType}${token}`;
+    } catch (error) {
+      this.loggerAdapter.log("error", `AUTHENTICATION FAILED: ${error}`);
+      throw error;
+    }
   }
   private getResourceName({
     ApiResource,
