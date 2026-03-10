@@ -48,7 +48,7 @@ export class HttpConsumer implements IConsumer {
     return this.compile(body, scope);
   }
 
-  private async authenticate(authentication: any) {
+  private async authenticate(authentication: any, headers: any) {
     const {
       username,
       usernameKey = "username",
@@ -60,11 +60,19 @@ export class HttpConsumer implements IConsumer {
       tokenType = null,
     } = authentication;
 
+    const insecureHeaderKey = Object.keys(headers || {}).find(
+      (key) => key.toUpperCase() === "INSECURE"
+    );
+    const requestHeaders = insecureHeaderKey
+      ? { [insecureHeaderKey]: headers[insecureHeaderKey] }
+      : undefined;
+
     const requestCompiled = {
       data: {
         [usernameKey]: username,
         [passwordKey]: password,
       },
+      headers: requestHeaders,
       method,
       url,
     };
@@ -175,7 +183,7 @@ export class HttpConsumer implements IConsumer {
     this.loggerAdapter.log("info", `GETTING RESOURCE`);
     const resource = await this.getResourceName(schema);
     if (!!authentication) {
-      const token = await this.authenticate(authentication);
+      const token = await this.authenticate(authentication, headers);
       scope.Authorization = token;
     }
     this.loggerAdapter.log(
