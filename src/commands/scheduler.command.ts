@@ -75,6 +75,7 @@ export class SchedulerCommand implements ICommand {
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
               setting = verify;
               await gracefulShutdown();
+              reject(new Error("SETTING CHANGED, RESTARTING SCHEDULER"));
             }
           } catch (error) {
             reject(error);
