@@ -40,7 +40,7 @@ export class ListenCommand implements ICommand {
           return this.queryCommand.execute(args);
         },
         Response: (args: any) => this.loggerAdapger.log("info", args),
-        Shell: (args: any) => this.shellCommand.execute(args),
+        Shell: ({ args, sessionId }: any) => this.shellCommand.execute({ args, sessionId }),
       };
 
       const httpAdapter = new HttpClientAdapter();
@@ -62,9 +62,9 @@ export class ListenCommand implements ICommand {
 
         stream.on("data", async (data: Buffer) => {
           const message = JSON.parse(data.toString());
-          const { arguments: args = [], command, sender } = message;
+          const { arguments: args = [], command, sender, sessionId } = message;
           try {
-            const result = await commands[command]({ args });
+            const result = await commands[command]({ args, sessionId });
             !["Ping", "Response"].includes(command) &&
               this.responseCommand.execute({ args: [result], channel: sender });
           } catch (error) {
