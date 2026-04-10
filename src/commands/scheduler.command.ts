@@ -7,7 +7,7 @@ import { APIService } from "../services/api.service";
 import { EnvironmentService } from "../services/environment.service";
 import { getContainer } from "../container";
 import { ExecuteCommand } from "./execute.command";
-import { gracefulShutdown, scheduleJob } from "node-schedule";
+import { Job, scheduleJob } from "node-schedule";
 import { APILoggerAdapter } from "../adapters/api-logger.adapter";
 import { ConsoleLoggerAdapter } from "../adapters/console-logger.adapter";
 
@@ -50,7 +50,7 @@ export class SchedulerCommand implements ICommand {
       await new Promise<void>(async (resolve, reject) => {
         this.loggerAdapter.log("info", "STARTING SCHEDULER");
 
-        const jobs = [];
+        const jobs: Job[] = [];
 
         let setting: ISetting;
 
@@ -62,7 +62,7 @@ export class SchedulerCommand implements ICommand {
         }
 
         for (const { CronExpression } of setting.Schedules) {
-          jobs.push(this.schedule(CronExpression));
+          jobs.push(await this.schedule(CronExpression));
         }
 
         if ("true" === process.env.LISTEN) {
@@ -75,7 +75,9 @@ export class SchedulerCommand implements ICommand {
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
               this.loggerAdapter.log("warn", "SETTING CHANGED");
               setting = verify;
-              await gracefulShutdown();
+              for (const job of jobs) {
+                job.cancel();
+              }
               reject(new Error("SETTING CHANGED, RESTARTING SCHEDULER"));
             }
           } catch (error) {
