@@ -73,6 +73,7 @@ export class SchedulerCommand implements ICommand {
           try {
             const verify = await this.apiService.getSetting();
             if (JSON.stringify(setting) !== JSON.stringify(verify)) {
+              this.loggerAdapter.log("warn", "SETTING CHANGED");
               setting = verify;
               await gracefulShutdown();
               reject(new Error("SETTING CHANGED, RESTARTING SCHEDULER"));
