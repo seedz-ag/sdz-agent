@@ -18,7 +18,7 @@ export class OracleAdapter implements IDatabaseAdapter {
       try {
         await this.connection.close();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "ORACLE CLOSE ERROR", e);
       }
     }
   }
@@ -37,7 +37,7 @@ export class OracleAdapter implements IDatabaseAdapter {
           `ALTER SESSION SET CURRENT_SCHEMA = ${this.config.schema}`
         );
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "ORACLE CONNECT ERROR", e);
       }
     }
   }
@@ -72,8 +72,8 @@ export class OracleAdapter implements IDatabaseAdapter {
       }
       return resultSet;
     } catch (e) {
-      console.log(e);
-      return e
+      this.loggerAdapter?.log("error", "ORACLE EXECUTE REMOTE ERROR", query, e);
+      return e;
     }
   }
 

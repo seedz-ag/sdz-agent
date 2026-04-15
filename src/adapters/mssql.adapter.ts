@@ -24,7 +24,7 @@ export class MssqlAdapter implements IDatabaseAdapter {
       try {
         await this.connection.close();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MSSQL CLOSE ERROR", e);
       }
     }
   }
@@ -45,7 +45,7 @@ export class MssqlAdapter implements IDatabaseAdapter {
           },
         })
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MSSQL CONNECT ERROR", e);
       }
     }
   }
@@ -84,8 +84,8 @@ export class MssqlAdapter implements IDatabaseAdapter {
       }
       return resultSet;
     } catch (exception) {
-      console.log(exception)
-      return exception
+      this.loggerAdapter?.log("error", "MSSQL EXECUTE REMOTE ERROR", query, exception);
+      return exception;
     }
   }
 

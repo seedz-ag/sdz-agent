@@ -21,7 +21,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
       try {
         await this.connection.end();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "FIREBIRD CLOSE ERROR", e);
       }
     }
   }
@@ -50,7 +50,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
           });
         })
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "FIREBIRD CONNECT ERROR", e);
       }
     }
   }
@@ -100,7 +100,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
         resultSet = response as databaseRowInterface.DatabaseRow[];
       }
     } catch (e) {
-      console.log(e);
+      this.loggerAdapter?.log("error", "FIREBIRD EXECUTE REMOTE ERROR", query, e);
       return e;
     }
     return resultSet;

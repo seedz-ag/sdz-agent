@@ -18,7 +18,7 @@ export class MysqlAdapter implements IDatabaseAdapter {
       try {
         await this.connection.end();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MYSQL CLOSE ERROR", e);
       }
     }
   }
@@ -34,16 +34,17 @@ export class MysqlAdapter implements IDatabaseAdapter {
           port: this.config.port,
         });
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MYSQL CONNECT ERROR", e);
       }
     }
   }
 
-
   async disconnect(): Promise<void> {
     try {
       return await this.connection.end();
-    } catch (exception) { }
+    } catch (e) {
+      this.loggerAdapter?.log("error", "MYSQL DISCONNECT ERROR", e);
+    }
   }
 
   async execute(query: string): Promise<DatabaseRow[]> {
@@ -67,7 +68,7 @@ export class MysqlAdapter implements IDatabaseAdapter {
       const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
       return resultSet;
     } catch (exception) {
-      console.log(exception);
+      this.loggerAdapter?.log("error", "MYSQL EXECUTE REMOTE ERROR", query, exception);
       return exception;
     }
   }

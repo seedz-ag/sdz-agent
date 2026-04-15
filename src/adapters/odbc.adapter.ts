@@ -18,7 +18,7 @@ export class OdbcAdapter implements IDatabaseAdapter {
       try {
         await this.connection.close();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "ODBC CLOSE ERROR", e);
       }
     }
   }
@@ -32,10 +32,9 @@ export class OdbcAdapter implements IDatabaseAdapter {
             loginTimeout: 999,
             connectionTimeout: 999,
           }
-
         );
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "ODBC CONNECT ERROR", e);
       }
     }
   }
@@ -73,8 +72,8 @@ export class OdbcAdapter implements IDatabaseAdapter {
       }
     }
     catch (e) {
-      console.log(e);
-      return e
+      this.loggerAdapter?.log("error", "ODBC EXECUTE REMOTE ERROR", query, e);
+      return e;
     }
     return resultSet;
   }

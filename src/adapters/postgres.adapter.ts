@@ -17,7 +17,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
       try {
         await this.connection.end();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "POSTGRES CLOSE ERROR", e);
       }
     }
   }
@@ -34,7 +34,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
         });
         await this.connection.connect();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "POSTGRES CONNECT ERROR", e);
       }
     }
   }
@@ -74,8 +74,8 @@ export class PostgresAdapter implements IDatabaseAdapter {
         resultSet = response["rows"];
       }
     } catch (e) {
-      console.log(e);
-      return e
+      this.loggerAdapter?.log("error", "POSTGRES EXECUTE REMOTE ERROR", query, e);
+      return e;
     }
     return resultSet;
   }
