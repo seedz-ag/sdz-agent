@@ -115,7 +115,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
       // ATTEMPT TO CONNECT
       await this.adapter.connect();
     } catch (exception) {
-      console.error({ exception });
+      this.loggerAdapter.log("error", "DATABASE CONNECT ERROR", exception);
     }
   }
 

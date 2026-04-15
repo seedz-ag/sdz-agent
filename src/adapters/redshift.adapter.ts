@@ -2,17 +2,21 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import Redshift from "node-redshift-connector";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class RedshiftAdapter implements IDatabaseAdapter {
     private connection: Redshift;
-    constructor(private readonly config: ConfigDatabaseInterface) { }
+    constructor(
+        private readonly config: ConfigDatabaseInterface,
+        private readonly loggerAdapter?: LoggerAdapter
+    ) { }
 
     async close(): Promise<void> {
         if (this.connection) {
             try {
                 await this.connection.close();
             } catch (e) {
-                console.log(e);
+                this.loggerAdapter?.log("error", "REDSHIFT CLOSE ERROR", e);
             }
         }
     }
@@ -28,7 +32,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
                     port: this.config.port,
                 });
             } catch (e) {
-                console.log(e);
+                this.loggerAdapter?.log("error", "REDSHIFT CONNECT ERROR", e);
             }
         }
     }
@@ -52,7 +56,7 @@ export class RedshiftAdapter implements IDatabaseAdapter {
                 resultSet = response["rows"];
             }
         } catch (e) {
-            console.log(e);
+            this.loggerAdapter?.log("error", "REDSHIFT EXECUTE ERROR", query, e);
         }
         return resultSet;
     }
@@ -68,8 +72,8 @@ export class RedshiftAdapter implements IDatabaseAdapter {
                 resultSet = response["rows"];
             }
         } catch (e) {
-            console.log(e);
-            return e
+            this.loggerAdapter?.log("error", "REDSHIFT EXECUTE REMOTE ERROR", query, e);
+            return e;
         }
         return resultSet;
     }

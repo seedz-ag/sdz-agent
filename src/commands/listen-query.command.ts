@@ -89,8 +89,8 @@ export class ListenQueryCommand
     try {
       setting = await this.apiService.getSetting();
     } catch (e) {
-      console.log(e)
-      return e
+      this.loggerAdapter.log("error", "LISTEN QUERY ERROR", e);
+      return e;
     }
 
     const setingDatabase = setting?.Parameters.filter(({ Key }) =>

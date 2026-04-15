@@ -418,7 +418,7 @@ export class HttpConsumer implements IConsumer {
             `CONSUMING ${schema.Entity.toLocaleUpperCase()}`
           );
 
-          console.error({ error });
+          this.loggerAdapter.log("error", "HTTP CONSUMER ERROR", error);
         }
       }
     }
