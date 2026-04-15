@@ -56,6 +56,9 @@ export class DatabaseConsumer implements IConsumer {
         `RUNNING EXTRACTION ONLY FOR SCHEMA: ${scope}`
       );
     }
+
+    const totalStart = Date.now();
+
     for (const schema of this.setting.Schemas) {
       if (scope && schema.Entity !== scope) {
         continue;
@@ -70,6 +73,8 @@ export class DatabaseConsumer implements IConsumer {
       ) {
         continue;
       }
+
+      const entityStart = Date.now();
 
       this.loggerAdapter.log(
         "info",
@@ -168,7 +173,19 @@ export class DatabaseConsumer implements IConsumer {
           }
         }
       }
+
+      const entityDuration = ((Date.now() - entityStart) / 1000).toFixed(2);
+      this.loggerAdapter.log(
+        "info",
+        `ENTITY ${schema.Entity.toLocaleUpperCase()} EXTRACTION COMPLETED IN ${entityDuration}s`
+      );
     }
+
+    const totalDuration = ((Date.now() - totalStart) / 1000).toFixed(2);
+    this.loggerAdapter.log(
+      "info",
+      `TOTAL EXTRACTION COMPLETED IN ${totalDuration}s`
+    );
   }
 
   public setSetting(setting: ISetting): this {
