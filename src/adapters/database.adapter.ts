@@ -111,7 +111,7 @@ export class DatabaseAdapter implements IDatabaseAdapter {
 
       const driver = this.driver.toLocaleUpperCase() as keyof typeof DATABASE_ADAPTERS;
 
-      this.adapter = new DATABASE_ADAPTERS[driver](this.config);
+      this.adapter = new DATABASE_ADAPTERS[driver](this.config, this.loggerAdapter);
       // ATTEMPT TO CONNECT
       await this.adapter.connect();
     } catch (exception) {

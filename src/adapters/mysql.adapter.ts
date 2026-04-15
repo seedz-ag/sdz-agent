@@ -2,12 +2,16 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import mysql, { Connection, RowDataPacket } from "mysql2/promise";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 import { unknown } from "zod";
 
 export class MysqlAdapter implements IDatabaseAdapter {
   private connection: Connection;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -46,8 +50,13 @@ export class MysqlAdapter implements IDatabaseAdapter {
     if (!this.connection) {
       await this.connect();
     }
-    const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
-    return resultSet;
+    try {
+      const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
+      return resultSet;
+    } catch (e) {
+      this.loggerAdapter?.log("error", "MYSQL EXECUTE ERROR", query, e);
+      throw e;
+    }
   }
 
   async executeQueryRemote(query: string): Promise<DatabaseRow[] | unknown> {
