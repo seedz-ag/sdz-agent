@@ -108,7 +108,17 @@ export class DatabaseConsumer implements IConsumer {
           `EXECUTE SQL QUERY WITH LIMIT: ${limit}`
         );
 
-        let response = await this.databaseAdapter.query(sql.Command, page, limit);
+        let response: any[];
+
+        try {
+          response = await this.databaseAdapter.query(sql.Command, page, limit);
+        } catch (error: any) {
+          this.loggerAdapter.log(
+            "error",
+            `SQL QUERY FAILED FOR ENTITY ${schema.Entity.toLocaleUpperCase()}: ${error.message}`
+          );
+          throw error;
+        }
 
         this.loggerAdapter.log("info", `SQL QUERY DONE`);
 
@@ -146,7 +156,16 @@ export class DatabaseConsumer implements IConsumer {
           await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
           page++;
-          response = await this.databaseAdapter.query(sql.Command, page, limit);
+
+          try {
+            response = await this.databaseAdapter.query(sql.Command, page, limit);
+          } catch (error: any) {
+            this.loggerAdapter.log(
+              "error",
+              `SQL QUERY FAILED FOR ENTITY ${schema.Entity.toLocaleUpperCase()} PAGE ${page}: ${error.message}`
+            );
+            throw error;
+          }
         }
       }
     }

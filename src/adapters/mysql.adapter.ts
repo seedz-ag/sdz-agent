@@ -46,13 +46,8 @@ export class MysqlAdapter implements IDatabaseAdapter {
     if (!this.connection) {
       await this.connect();
     }
-    try {
-      const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
-      return resultSet
-    } catch (exception) {
-      console.log(exception);
-      return []
-    }
+    const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
+    return resultSet;
   }
 
   async executeQueryRemote(query: string): Promise<DatabaseRow[] | unknown> {

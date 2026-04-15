@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { appendFileSync, mkdirSync, readdirSync, statSync, unlinkSync } from "fs";
 import { singleton } from "tsyringe";
 import { HttpClientAdapter } from "../adapters/http-client.adapter";
 import { LoggerAdapter } from "../adapters/logger.adapter";
@@ -130,7 +131,42 @@ export class APIService {
     }
   }
 
+  private fileLoggingEnabled = false;
+
+  public enableFileLogging(): void {
+    mkdirSync("./logs", { recursive: true });
+    this.cleanOldLogs();
+    this.fileLoggingEnabled = true;
+  }
+
+  private cleanOldLogs(): void {
+    try {
+      const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      readdirSync("./logs")
+        .filter((f) => f.startsWith("agent-") && f.endsWith(".log"))
+        .forEach((f) => {
+          const filePath = `./logs/${f}`;
+          if (statSync(filePath).mtimeMs < cutoff) unlinkSync(filePath);
+        });
+    } catch {
+      // silently ignore
+    }
+  }
+
+  private writeLogsToFile(log: string[][]): void {
+    if (!this.fileLoggingEnabled) return;
+    try {
+      const date = new Date().toISOString().slice(0, 10);
+      const lines = log.map((entry) => JSON.stringify(entry)).join("\n") + "\n";
+      appendFileSync(`./logs/agent-${date}.log`, lines, "utf8");
+    } catch {
+      // não bloqueia o fluxo principal se a escrita falhar
+    }
+  }
+
   public async sendLog(log: string[][]): Promise<boolean> {
+    this.writeLogsToFile(log);
+
     const ENV =
       process.env.CLIENT_ID !== this.environmentService.get("CLIENT_ID")
         ? "SND"
