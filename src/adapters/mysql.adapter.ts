@@ -55,7 +55,7 @@ export class MysqlAdapter implements IDatabaseAdapter {
       return resultSet;
     } catch (e) {
       this.loggerAdapter?.log("error", "MYSQL EXECUTE ERROR", query, e);
-      throw e;
+      return [];
     }
   }
 
