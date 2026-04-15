@@ -2,12 +2,16 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import oracledb, { Connection } from "oracledb";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class OracleAdapter implements IDatabaseAdapter {
   private connection: Connection;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -43,12 +47,17 @@ export class OracleAdapter implements IDatabaseAdapter {
   }
 
   async execute(query: string): Promise<any> {
-    const response = await this.connection.execute(query);
-    let resultSet: any = [];
-    if (response) {
-      resultSet = response.rows;
+    try {
+      const response = await this.connection.execute(query);
+      let resultSet: any = [];
+      if (response) {
+        resultSet = response.rows;
+      }
+      return resultSet;
+    } catch (e) {
+      this.loggerAdapter?.log("error", "ORACLE EXECUTE ERROR", query, e);
+      return [];
     }
-    return resultSet;
   }
 
   async executeQueryRemote(query: string): Promise<any> {

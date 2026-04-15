@@ -3,11 +3,15 @@ import mssql, { Connection, ConnectionPool } from "mssql";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 import { IParameter } from "interfaces/setting.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class MssqlAdapter implements IDatabaseAdapter {
   private connection: ConnectionPool;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
   public buildQuery(query: string, parameters: IParameter[]) {
     return parameters.reduce((query, { Key, Value }) => {
@@ -63,8 +67,8 @@ export class MssqlAdapter implements IDatabaseAdapter {
       }
       return resultSet;
     } catch (exception) {
-      console.log(exception)
-      return []
+      this.loggerAdapter?.log("error", "MSSQL EXECUTE ERROR", query, exception);
+      return [];
     }
   }
 

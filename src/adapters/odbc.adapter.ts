@@ -2,12 +2,16 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import odbc, { Connection } from "odbc";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class OdbcAdapter implements IDatabaseAdapter {
   private connection: Connection;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -52,7 +56,7 @@ export class OdbcAdapter implements IDatabaseAdapter {
       }
     }
     catch (e) {
-      console.log(e);
+      this.loggerAdapter?.log("error", "ODBC EXECUTE ERROR", query, e);
     }
     return resultSet;
   }

@@ -4,13 +4,17 @@ import { ConfigDatabaseInterface } from "../interfaces/config-database.interface
 
 import Firebird from "node-firebird";
 import { IParameter } from "interfaces/setting.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class FirebirdAdapter implements IDatabaseAdapter {
   private connection: any
     ;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
   async close(): Promise<void> {
     if (this.connection) {
@@ -73,7 +77,7 @@ export class FirebirdAdapter implements IDatabaseAdapter {
         resultSet = response as databaseRowInterface.DatabaseRow[];
       }
     } catch (e) {
-      console.log(e);
+      this.loggerAdapter?.log("error", "FIREBIRD EXECUTE ERROR", query, e);
     }
     return resultSet;
   }
