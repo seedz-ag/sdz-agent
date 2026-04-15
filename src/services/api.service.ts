@@ -130,14 +130,14 @@ export class APIService {
     }
   }
 
-  public async sendLog(log: string[][]) {
+  public async sendLog(log: string[][]): Promise<boolean> {
     const ENV =
       process.env.CLIENT_ID !== this.environmentService.get("CLIENT_ID")
         ? "SND"
         : false;
 
-    await this.httpClientAdapter
-      .post(
+    try {
+      await this.httpClientAdapter.post(
         `${process.env.API_URL}logs`,
         (!ENV && log) ||
         log.map((data) => [
@@ -150,12 +150,14 @@ export class APIService {
           headers: this.getHeadersLogs(),
           timeout: this.environmentService.get("API_REQUEST_TIMEOUT"),
         }
-      )
-      .catch((e: any) => {
-        this.loggerAdapter.log(
-          "error",
-          `ERROR ${process.env.API_URL}logs ${e?.response?.data || ""}`
-        );
-      });
+      );
+      return true;
+    } catch (e: any) {
+      this.loggerAdapter.log(
+        "error",
+        `ERROR ${process.env.API_URL}logs ${e?.response?.data || ""}`
+      );
+      return false;
+    }
   }
 }
