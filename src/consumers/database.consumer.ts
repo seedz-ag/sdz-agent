@@ -56,6 +56,9 @@ export class DatabaseConsumer implements IConsumer {
         `RUNNING EXTRACTION ONLY FOR SCHEMA: ${scope}`
       );
     }
+
+    const totalStart = Date.now();
+
     for (const schema of this.setting.Schemas) {
       if (scope && schema.Entity !== scope) {
         continue;
@@ -70,6 +73,8 @@ export class DatabaseConsumer implements IConsumer {
       ) {
         continue;
       }
+
+      const entityStart = Date.now();
 
       this.loggerAdapter.log(
         "info",
@@ -108,7 +113,17 @@ export class DatabaseConsumer implements IConsumer {
           `EXECUTE SQL QUERY WITH LIMIT: ${limit}`
         );
 
-        let response = await this.databaseAdapter.query(sql.Command, page, limit);
+        let response: any[];
+
+        try {
+          response = await this.databaseAdapter.query(sql.Command, page, limit);
+        } catch (error: any) {
+          this.loggerAdapter.log(
+            "error",
+            `SQL QUERY FAILED FOR ENTITY ${schema.Entity.toLocaleUpperCase()}: ${error.message}`
+          );
+          throw error;
+        }
 
         this.loggerAdapter.log("info", `SQL QUERY DONE`);
 
@@ -146,10 +161,31 @@ export class DatabaseConsumer implements IConsumer {
           await this.utilsService.wait(this.environmentService.get("THROTTLE"));
 
           page++;
-          response = await this.databaseAdapter.query(sql.Command, page, limit);
+
+          try {
+            response = await this.databaseAdapter.query(sql.Command, page, limit);
+          } catch (error: any) {
+            this.loggerAdapter.log(
+              "error",
+              `SQL QUERY FAILED FOR ENTITY ${schema.Entity.toLocaleUpperCase()} PAGE ${page}: ${error.message}`
+            );
+            throw error;
+          }
         }
       }
+
+      const entityDuration = ((Date.now() - entityStart) / 1000).toFixed(2);
+      this.loggerAdapter.log(
+        "info",
+        `ENTITY ${schema.Entity.toLocaleUpperCase()} EXTRACTION COMPLETED IN ${entityDuration}s`
+      );
     }
+
+    const totalDuration = ((Date.now() - totalStart) / 1000).toFixed(2);
+    this.loggerAdapter.log(
+      "info",
+      `TOTAL EXTRACTION COMPLETED IN ${totalDuration}s`
+    );
   }
 
   public setSetting(setting: ISetting): this {

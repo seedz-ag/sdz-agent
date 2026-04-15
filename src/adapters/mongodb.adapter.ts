@@ -2,21 +2,26 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import { MongoClient } from "mongodb";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class MongodbAdapter implements IDatabaseAdapter {
   private connection: MongoClient;
   private version: any;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
   async close(): Promise<void> {
     if (this.connection) {
       try {
         await this.connection.close();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MONGODB CLOSE ERROR", e);
       }
     }
   }
+
   async connect(): Promise<void> {
     if (!this.connection) {
       try {
@@ -27,7 +32,7 @@ export class MongodbAdapter implements IDatabaseAdapter {
         await client.connect();
         this.connection = client;
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MONGODB CONNECT ERROR", e);
       }
     }
   }
@@ -49,7 +54,7 @@ export class MongodbAdapter implements IDatabaseAdapter {
       resultSet = await (command)(input[input["command"]]).toArray();
       return resultSet;
     } catch (e) {
-      console.log(e);
+      this.loggerAdapter?.log("error", "MONGODB EXECUTE ERROR", query, e);
     }
     return resultSet;
   }
@@ -67,7 +72,7 @@ export class MongodbAdapter implements IDatabaseAdapter {
       resultSet = await (command)(input[input["command"]]).toArray();
       return resultSet;
     } catch (e) {
-      console.log(e);
+      this.loggerAdapter?.log("error", "MONGODB EXECUTE REMOTE ERROR", query, e);
       return e;
     }
   }

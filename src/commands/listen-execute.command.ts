@@ -41,7 +41,7 @@ export class ListenExecuteCommand
         await this.executeCommand.execute();
         resolve(true);
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter.log("error", "LISTEN EXECUTE ERROR", e);
         reject(e);
       }
     });

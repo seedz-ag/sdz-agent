@@ -3,6 +3,7 @@ import { createReadStream, unlinkSync } from "fs";
 import { createInterface } from "readline";
 import { Readable, Stream } from "stream";
 import { singleton } from "tsyringe";
+import { LoggerAdapter } from "../adapters/logger.adapter";
 import { APIService } from "./api.service";
 import { UtilsService } from "./utils.service";
 
@@ -16,6 +17,7 @@ type LogsServiceConsumeInput = {
 export class LogsService {
   constructor(
     private readonly apiService: APIService,
+    private readonly loggerAdapter: LoggerAdapter,
     private readonly utilsService: UtilsService
   ) {}
 
@@ -49,6 +51,7 @@ export class LogsService {
     const files = await glob("./output/*.log");
     for (const file of files) {
       let list: string[][] = [];
+      let failed = false;
       await this.consume({
         file,
         onLine: async (line: string, stream: Readable) => {
@@ -61,9 +64,10 @@ export class LogsService {
           if (list.length === 100) {
             const buffer = [...list];
             stream.once("pause", async () => {
-              await this.apiService.sendLog(
+              const success = await this.apiService.sendLog(
                 buffer.map((item) => [item[1], item[0], item[2]])
               );
+              if (!success) failed = true;
               stream.resume();
             });
             list = [];
@@ -75,14 +79,23 @@ export class LogsService {
 
           if (!list.length) return;
 
-          await this.apiService.sendLog(
+          const success = await this.apiService.sendLog(
             list.map((item) => {
               return [item[1], item[0], item[2]];
             })
           );
+          if (!success) failed = true;
         },
       });
-      files.forEach(unlinkSync);
+
+      if (failed) {
+        this.loggerAdapter.log(
+          "error",
+          `FAILED TO SEND LOGS FROM ${file}, FILE KEPT FOR RETRY`
+        );
+      } else {
+        unlinkSync(file);
+      }
     }
   }
 }

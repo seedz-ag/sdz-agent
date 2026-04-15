@@ -2,10 +2,14 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import { Client } from "pg";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 
 export class PostgresAdapter implements IDatabaseAdapter {
   private connection: Client;
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
 
   async close(): Promise<void> {
@@ -13,7 +17,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
       try {
         await this.connection.end();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "POSTGRES CLOSE ERROR", e);
       }
     }
   }
@@ -30,7 +34,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
         });
         await this.connection.connect();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "POSTGRES CONNECT ERROR", e);
       }
     }
   }
@@ -54,7 +58,7 @@ export class PostgresAdapter implements IDatabaseAdapter {
         resultSet = response["rows"];
       }
     } catch (e) {
-      console.log(e);
+      this.loggerAdapter?.log("error", "POSTGRES EXECUTE ERROR", query, e);
     }
     return resultSet;
   }
@@ -70,8 +74,8 @@ export class PostgresAdapter implements IDatabaseAdapter {
         resultSet = response["rows"];
       }
     } catch (e) {
-      console.log(e);
-      return e
+      this.loggerAdapter?.log("error", "POSTGRES EXECUTE REMOTE ERROR", query, e);
+      return e;
     }
     return resultSet;
   }

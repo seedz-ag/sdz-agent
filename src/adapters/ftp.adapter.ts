@@ -150,8 +150,7 @@ export class FTPAdapter {
         return name.toLowerCase().endsWith(normalizedExtension);
       });
     } catch (e) {
-      console.log({ e });
-      this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`);
+      this.loggerAdapter.log("error", `ERROR LISTING ${path} AT FTP.`, e);
       throw e;
     }
   }

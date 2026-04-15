@@ -99,7 +99,7 @@ export class FTPConsumer implements IConsumer {
             await new Promise(resolve => setTimeout(resolve, 1000));
           }
         } catch (error) {
-          console.error(`Error processing file ${file.name}:`, error);
+          this.loggerAdapter.log("error", `ERROR PROCESSING FILE ${file.name}`, error);
         }
       }
       await this.ftpAdapter.disconnect();

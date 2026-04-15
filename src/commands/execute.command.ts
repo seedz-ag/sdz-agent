@@ -47,6 +47,8 @@ export class ExecuteCommand implements ICommand {
         this.environmentService.parse();
       }
 
+      this.apiService.enableFileLogging();
+
       this.loggerAdapter.log("info", "STARTING EXECUTE COMMAND");
 
       //CLEAR OLD FILES
@@ -130,6 +132,10 @@ export class ExecuteCommand implements ICommand {
 
       this.loggerAdapter.push(null);
     } catch (error: any) {
+      this.loggerAdapter.log(
+        "error",
+        `SDZ-AGENT EXECUTE ERROR: ${error?.message || error}`
+      );
       throw error;
     }
   }

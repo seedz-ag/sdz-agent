@@ -2,19 +2,23 @@ import { DatabaseRow } from "../interfaces/database-row.interface";
 import mysql, { Connection, RowDataPacket } from "mysql2/promise";
 import { IDatabaseAdapter } from "interfaces/database-adapter.interface";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
+import { LoggerAdapter } from "./logger.adapter";
 import { unknown } from "zod";
 
 export class MysqlAdapter implements IDatabaseAdapter {
   private connection: Connection;
 
-  constructor(private readonly config: ConfigDatabaseInterface) { }
+  constructor(
+    private readonly config: ConfigDatabaseInterface,
+    private readonly loggerAdapter?: LoggerAdapter
+  ) { }
 
   async close(): Promise<void> {
     if (this.connection) {
       try {
         await this.connection.end();
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MYSQL CLOSE ERROR", e);
       }
     }
   }
@@ -30,16 +34,17 @@ export class MysqlAdapter implements IDatabaseAdapter {
           port: this.config.port,
         });
       } catch (e) {
-        console.log(e);
+        this.loggerAdapter?.log("error", "MYSQL CONNECT ERROR", e);
       }
     }
   }
 
-
   async disconnect(): Promise<void> {
     try {
       return await this.connection.end();
-    } catch (exception) { }
+    } catch (e) {
+      this.loggerAdapter?.log("error", "MYSQL DISCONNECT ERROR", e);
+    }
   }
 
   async execute(query: string): Promise<DatabaseRow[]> {
@@ -48,10 +53,10 @@ export class MysqlAdapter implements IDatabaseAdapter {
     }
     try {
       const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
-      return resultSet
-    } catch (exception) {
-      console.log(exception);
-      return []
+      return resultSet;
+    } catch (e) {
+      this.loggerAdapter?.log("error", "MYSQL EXECUTE ERROR", query, e);
+      return [];
     }
   }
 
@@ -63,7 +68,7 @@ export class MysqlAdapter implements IDatabaseAdapter {
       const [resultSet] = await this.connection.query<RowDataPacket[]>(query);
       return resultSet;
     } catch (exception) {
-      console.log(exception);
+      this.loggerAdapter?.log("error", "MYSQL EXECUTE REMOTE ERROR", query, exception);
       return exception;
     }
   }
