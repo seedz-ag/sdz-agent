@@ -1,5 +1,5 @@
 import { config } from "dotenv";
-import { Stream } from "stream";
+import { Readable } from "stream";
 import { singleton } from "tsyringe";
 
 import { HttpClientAdapter } from "../adapters/http-client.adapter";
@@ -51,7 +51,7 @@ export class ListenCommand implements ICommand {
       };
       try {
         this.loggerAdapger.log("info", "STREAM OPEN");
-        const stream = await httpAdapter.get<Stream>(
+        const stream = await httpAdapter.get<Readable>(
           `${process.env.API_URL}commands`,
           {
             headers,
@@ -60,21 +60,43 @@ export class ListenCommand implements ICommand {
           }
         );
 
+        const heavyCommands = ["Execute", "Query"];
+
         stream.on("data", async (data: Buffer) => {
-          const message = JSON.parse(data.toString());
-          const { arguments: args = [], command, sender } = message;
+          let command: string | undefined;
           try {
+            const message = JSON.parse(data.toString());
+            command = message.command;
+            const { arguments: args = [], sender } = message;
+
+            if (!command || !commands[command]) {
+              this.loggerAdapger.log("warn", `UNKNOWN COMMAND: ${command}`);
+              return;
+            }
+
             const result = await commands[command]({ args });
-            !["Ping", "Response"].includes(command) &&
-              this.responseCommand.execute({ args: [result], channel: sender });
+
+            if (!["Ping", "Response"].includes(command)) {
+              await this.responseCommand.execute({ args: [result], channel: sender });
+            }
+
+            if (heavyCommands.includes(command)) {
+              this.loggerAdapger.log("info", `${command} DONE, EXITING FOR MEMORY RECYCLE`);
+              stream.destroy();
+              resolve();
+            }
           } catch (error) {
-            this.loggerAdapger.log("error", error);
-            reject(error);
+            this.loggerAdapger.log("error", "COMMAND ERROR", error);
+            if (command && heavyCommands.includes(command)) {
+              stream.destroy();
+              reject(error);
+            }
           }
         });
 
         stream.on("error", async (error: any) => {
-          this.loggerAdapger.log("error", error);
+          this.loggerAdapger.log("error", "STREAM ERROR", error);
+          stream.destroy();
           reject(error);
         });
 

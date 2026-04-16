@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosRequestHeaders } from "axios";
+import axios, { Axios } from "axios";
 import https from "https";
 import { singleton } from "tsyringe";
 
@@ -28,7 +28,7 @@ export class HttpClientAdapter {
     });
   }
 
-  private filterHeaders(headers: AxiosRequestHeaders) {
+  private filterHeaders(headers: Record<string, any>) {
     return Object.keys(headers)
       .filter((key) => !this.forbiddenHeaders.includes(key))
       .reduce<Record<string, string>>((acc, key) => {
@@ -37,7 +37,7 @@ export class HttpClientAdapter {
       }, {});
   }
 
-  private getCertificate(headers: AxiosRequestHeaders) {
+  private getCertificate(headers: Record<string, any>) {
     return (
       (headers["Certificate-Authority"] &&
         String(headers["Certificate-Authority"])) ||
@@ -45,7 +45,7 @@ export class HttpClientAdapter {
     );
   }
 
-  private isInsecure(headers: AxiosRequestHeaders) {
+  private isInsecure(headers: Record<string, any>) {
     return Object.keys(headers)
       .map((key) => key.toUpperCase())
       .includes("INSECURE");
@@ -177,7 +177,7 @@ export class HttpClientAdapter {
     url,
   }: {
     data?: any;
-    headers?: AxiosRequestHeaders;
+    headers?: Record<string, any>;
     method?: string;
     responseType?: any;
     timeout?: number;

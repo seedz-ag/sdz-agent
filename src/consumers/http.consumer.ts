@@ -1,7 +1,7 @@
 import { get } from "dot-wild";
 import fs from "fs";
 import { singleton } from "tsyringe";
-import parser from "xml2json";
+import { XMLParser } from "fast-xml-parser";
 import XmlStream from "xml-stream";
 import { IConsumer } from "../interfaces/consumer.interface";
 import { ISetting, ISchema } from "../interfaces/setting.interface";
@@ -237,7 +237,7 @@ export class HttpConsumer implements IConsumer {
       .request(requestCompiled)
       .then((data) => {
         if (get(headers, "Accept") === "application/xml") {
-          return parser.toJson(data, { object: true });
+          return new XMLParser().parse(data);
         }
         return data;
       })

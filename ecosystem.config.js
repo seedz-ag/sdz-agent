@@ -7,7 +7,7 @@ module.exports = {
       interpreter: "node",
       env: {
         USE_CONSOLE_LOG: "false",
-        PM2_AGENT_CMD: "scheduler",
+        PM2_AGENT_CMD: "listen",
       },
     },
   ],

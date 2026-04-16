@@ -1,4 +1,4 @@
-import { appendFileSync } from "fs";
+import { appendFile, mkdir } from "fs/promises";
 import { DateTime } from "luxon";
 import { Writable } from "node:stream";
 import { singleton } from "tsyringe";
@@ -41,26 +41,30 @@ export class APILoggerAdapter extends Writable {
       return;
     }
 
+    const payload = chunks.map(({ chunk }) => {
+      const [timestamp, level, ...args] = chunk.data;
+      return [level, timestamp, ...args].map((item) =>
+        "string" !== typeof item ? JSON.stringify(item) : item
+      );
+    });
+
     this.apiService
-      .sendLog(
-        chunks.map(({ chunk }) => {
-          const [timestamp, level, ...args] = chunk.data;
-          return [level, timestamp, ...args].map((item) =>
-            "string" !== typeof item ? JSON.stringify(item) : item
-          );
-        })
-      )
+      .sendLog(payload)
       .then(() => {
         if (!pages.length) {
           this.cork();
           process.nextTick(() => this.uncork());
         }
       })
-      .catch((error) => {
-        chunks.forEach(({ chunk }) => {
-          const [timestamp, level, ...message] = chunk.data;
-          this.writeToFile(timestamp, level, ...message);
-        });
+      .catch(async () => {
+        try {
+          await this.apiService.sendLog(payload);
+        } catch {
+          chunks.forEach(({ chunk }) => {
+            const [timestamp, level, ...message] = chunk.data;
+            this.writeToFile(timestamp, level, ...message);
+          });
+        }
       })
       .finally(() => {
         if (!pages.length) {
@@ -72,8 +76,9 @@ export class APILoggerAdapter extends Writable {
       });
   }
 
-  private writeToFile(timestamp: string, level: string, ...args: any[]) {
+  private async writeToFile(timestamp: string, level: string, ...args: any[]) {
     const file = `output/${DateTime.now().toFormat("yyyy-LL-dd")}.log`;
-    appendFileSync(file, JSON.stringify([timestamp, level, ...args]) + "\n");
+    await mkdir("output", { recursive: true }).catch(() => {});
+    await appendFile(file, JSON.stringify([timestamp, level, ...args]) + "\n").catch(() => {});
   }
 }

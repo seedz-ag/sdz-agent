@@ -65,7 +65,7 @@ export class LogsService {
             const buffer = [...list];
             stream.once("pause", async () => {
               const success = await this.apiService.sendLog(
-                buffer.map((item) => [item[1], item[0], item[2]])
+                buffer.map((item) => [item[1], item[0], ...item.slice(2)])
               );
               if (!success) failed = true;
               stream.resume();
@@ -80,9 +80,7 @@ export class LogsService {
           if (!list.length) return;
 
           const success = await this.apiService.sendLog(
-            list.map((item) => {
-              return [item[1], item[0], item[2]];
-            })
+            list.map((item) => [item[1], item[0], ...item.slice(2)])
           );
           if (!success) failed = true;
         },

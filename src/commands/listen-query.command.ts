@@ -48,42 +48,26 @@ export class ListenQueryCommand
     const env: any = this.environmentService.get("ENV") || 'DEV';
     this.utilsService.mergeEnv(env);
 
-    if (Array.isArray(args) && args.length) {
-      args.forEach((args) => {
-        this.utilsService.mergeEnv(
-          args.reduce<Record<string, string>>((previous, current) => {
-            const { arg, value } = current;
-            if (arg) {
-              const key = arg.replace(/(--|\=)/g, "");
-              previous[key] = value && value.trim();
-            }
-            return previous;
-          }, {})
-        );
-      });
-    }
-
-
     if (env !== 'DEV') {
       this.environmentService.setDiscovery(await this.apiService.discovery());
       this.environmentService.parse();
     }
 
-    const command = args.pop() as any;
-    const query = command.filter((query: any) => {
+    const command = args[args.length - 1] as any;
+    const query = command?.filter((query: any) => {
       return query.label === 'query'
-    });
+    }) ?? [];
 
     if (!command || !query.length || !query[0].value) {
       this.loggerAdapter.log("info", "Query is Required");
       return ("Query is Required.");
     }
 
-    const isValid = !query[0].value
-      .toLocaleUpperCase()
-      .split(' ')
-      .some((word: string) => ['UPDATE ', 'INSERT ', 'DELETE '].includes(word));
-    if (!isValid) return ('ERROR')
+    const forbidden = /\b(UPDATE|INSERT|DELETE|DROP|ALTER|TRUNCATE|CREATE|GRANT|REVOKE)\b/i;
+    if (forbidden.test(query[0].value)) {
+      this.loggerAdapter.log("warn", "BLOCKED QUERY", query[0].value);
+      return "ERROR: Query contains forbidden statements";
+    }
 
     let setting: ISetting | undefined;
     try {

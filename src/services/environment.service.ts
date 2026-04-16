@@ -38,10 +38,6 @@ const environmentSchema = z.object({
     .string()
     .optional()
     .transform((value: unknown) => Number(value) || 0),
-  FOREVER: z
-    .string()
-    .optional()
-    .transform((value: unknown) => "true" === value || true === value || false),
   QUERY: z.string().optional(),
   RETRIES: z
     .string()

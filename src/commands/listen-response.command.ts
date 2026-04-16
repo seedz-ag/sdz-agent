@@ -39,12 +39,7 @@ export class ListenResponseCommand
         }
       );
     } catch (error: any) {
-      this.rescue(error);
+      this.loggerAdapter.log("error", "RESPONSE SEND FAILED", error?.message);
     }
-  }
-
-  public async rescue(error: Error) {
-    this.loggerAdapter.log("error", error.message, error.stack);
-    throw error;
   }
 }

@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import colors from "colors";
-import { binary, clock, dots, earth } from "cli-spinners";
+import { binary, dots, earth } from "cli-spinners";
 import ora, { Ora } from "ora";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
@@ -12,12 +12,12 @@ import { LoggerAdapter } from "./adapters/logger.adapter";
 import { CheckCommand } from "./commands/check.command";
 import { ConfigureCommand } from "./commands/configure.command";
 import { ExecuteCommand } from "./commands/execute.command";
-import { SchedulerCommand } from "./commands/scheduler.command";
 import { UpdateCommand } from "./commands/update.command";
 import { ListenCommand } from "./commands/listen.command";
 import { EnvironmentService } from "./services/environment.service";
 import { UtilsService } from "./services/utils.service";
 import { LogsService } from "./services/logs.service";
+import { APIService } from "./services/api.service";
 
 process.env.CLI = "1";
 
@@ -28,6 +28,9 @@ process.env.CLI = "1";
   const loggerAdapter = container.resolve(LoggerAdapter);
   const logsService = container.resolve(LogsService);
   const apiLoggerAdapter = container.resolve(APILoggerAdapter);
+  const apiService = container.resolve(APIService);
+
+  apiService.enableFileLogging();
 
   try {
     loggerAdapter.log("info", "CONSUMING LOG");
@@ -239,12 +242,6 @@ process.env.CLI = "1";
       "Puts the Agent in Listening State",
       (yargs) =>
         yargs
-          .option("retries", {
-            alias: "r",
-            default: 1,
-            describe: "Number of retries",
-            type: "number",
-          })
           .option("log-ping", {
             alias: "l",
             describe: "Shows received Ping",
@@ -277,82 +274,15 @@ process.env.CLI = "1";
           loggerAdapter.pipe(consoleLoggerAdapter);
         }
 
-        utilsService.mergeEnv(argv);
-
-        let retries = Number(argv.retries);
-
-        while (retries > 0) {
-          try {
-            await listenScheduler.execute();
-          } catch (error: any) {
-            if ("ECONNABORTED" === error.code) {
-              console.log(
-                colors.red(
-                  "CONNECTION ABORTED, POSSIBLY AN INTERNET CONNECTION PROBLEM, PLEASE RUN AGENT CHECK FOR MORE INFORMATION"
-                )
-              );
-              break;
-            }
-          } finally {
-            retries--;
-          }
-        }
-
-        spinner && spinner.fail("STOPPED");
-        utilsService.killProcess();
-      }
-    )
-    .command(
-      "scheduler",
-      "Executes the scheduler",
-      (yargs) =>
-        yargs
-          .option("listen", {
-            alias: "l",
-            describe: "Enables listening with scheduler",
-            default: true,
-            type: "boolean",
-          })
-          .option("use-console-log", {
-            alias: "c",
-            describe: "Use Console Log",
-            type: "boolean",
-          })
-          .option("forever", {
-            alias: "f",
-            describe: "Restarts scheduler on any interruption",
-            default: true,
-            type: "boolean",
-          }),
-      async (argv) => {
-        utilsService.mergeEnv(argv);
-        const environmentService = container.resolve(EnvironmentService);
-        environmentService.parse();
-        const schedulerCommand = container.resolve(SchedulerCommand);
-
-        let spinner: Ora | undefined
-
-        if (!environmentService.get("USE_CONSOLE_LOG")) {
-          spinner = ora({
-            text: "WORKING ",
-            spinner: clock,
-          });
-
-          (global as any).spinner = spinner;
-
-          spinner.start();
-        } else {
-          const consoleLoggerAdapter = container.resolve(ConsoleLoggerAdapter);
-          loggerAdapter.pipe(consoleLoggerAdapter);
-        }
-        utilsService.mergeEnv(argv);
         try {
-          await schedulerCommand.execute();
-          !!spinner && spinner.succeed("STOPPED");
+          await listenScheduler.execute();
+          !!spinner && spinner.succeed("DONE");
         } catch (error: any) {
-          loggerAdapter.log("error", error?.response?.data || error.message);
+          loggerAdapter.log("error", "LISTEN ERROR", error?.code || error?.message);
           !!spinner && spinner.fail("ERROR");
         }
+
+        utilsService.killProcess();
       }
     )
     .command("update", "Updates Agent code", async (argv) => {

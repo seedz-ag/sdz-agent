@@ -1,72 +1,179 @@
-# Sumário
+# sdz-agent
 
-O sdz-agent é o integrador da Seedz, é responsável por gerenciar o hub de conexão entre o Client e a Seedz.
+O sdz-agent é o produto desenvolvido pelo time de Engenharia de Integração da Seedz para utilização nos clientes, parceiros e canais. Gerencia o processo de conexão entre eles e a Seedz, extraindo dados necessários para o consumo dos produtos Seedz (Fidelidade, Superação e outros).
+
+## O que mudou na v2.4
+
+- **Gerenciamento remoto**: execuções disparadas remotamente via SSE, sem necessidade de acesso ao ambiente do parceiro
+- **Escolha remota de ambiente**: Sandbox ou Produção sem trocar conexão manualmente
+- **Observabilidade**: check de saúde da instalação (rede, auth, DNS, velocidade) e logs enviados para a plataforma
+- **Instalação mais enxuta**: `scheduler` local removido, `informixdb` removido, dependências auditadas
 
 ## Requisitos
 
-OS: Ubuntu LTS 22.04
-RAM: 4GB
-HD: 20GB
+### Linux (Ubuntu 22.04+)
 
-#### Pacotes dependentes:
+| Recurso | Mínimo |
+|---------|--------|
+| Processador | Dual-Core |
+| RAM | 4 GB |
+| Disco | 20 GB |
+| Node.js | 22.14.0 (via NVM) |
+| Libs | `cmake 3.x+`, `g++ 9.x+`, `libodbc1`, `build-essential` |
 
-- sdz-agent-common
-- sdz-agent-database
+### Windows (Server 2016+, 10 Pro, 11 Pro)
 
-### Instalacão
+| Recurso | Mínimo |
+|---------|--------|
+| Processador | Quad-Core |
+| RAM | 16 GB |
+| Disco | 50 GB |
+| Node.js | 22.14.0 |
+| Dependências | Python 3.11, VS Build Tools 2017+, Git, node-gyp |
 
-Esse projeto usa o `Node 18.17`, `libodbc1`, `Cmake >= 3.x`, `g++ >= 9.x` certifique que a maquina contém essas versões instaladas.
-É necessário configuar o arquivo `.env` na raiz do projeto com os dados referentes a autenticacão na plataforma.
+## Instalação
 
-1. Clone o repositório do agent para uma pasta local
-2. Execute a instalação das dependências `npm i`
-3. Configure o .env com as credenciais e a url da API do ambiente desejado
+### Linux
 
-#### Utilização:
+```bash
+# 1. Instalar pré-requisitos
+sudo apt-get update && sudo apt-get install -y \
+    cmake build-essential g++-10 libodbc1
 
-- ##### \*nix
+# 2. Instalar NVM + Node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+# Reinicializar o terminal
+nvm install 22.14.0
+nvm alias default 22.14.0
 
-`./agent`
-`./agent --help`
+# 3. Clonar e instalar o agent
+git clone https://github.com/seedz-ag/sdz-agent.git /opt/sdz-agent
+cd /opt/sdz-agent
+npm install
+```
 
-- ##### Microsoft
+### Windows
 
-`agent.cmd`
-`agent.cmd --help`
+1. Instalar **Python 3.11**: https://www.python.org/downloads/
+2. Instalar **VS Build Tools** (2017+): https://aka.ms/vs/17/release/vs_BuildTools.exe
+   - Marcar: "Desenvolvimento para desktop com C++" e "Ferramentas de build do Node.js"
+3. Instalar **Node 22.14.0**: https://nodejs.org/en
+4. Instalar **Git**: https://git-scm.com/download/win
+5. Instalar `node-gyp`:
+   ```cmd
+   npm install -g node-gyp
+   ```
+6. Clonar e instalar:
+   ```cmd
+   git clone https://github.com/seedz-ag/sdz-agent.git C:\sdz-agent\sdz-agent
+   cd C:\sdz-agent\sdz-agent
+   npm install
+   ```
 
-#### Agendamento:
+## Configuração
 
-- ##### \*nix
+Criar arquivo `.env` na raiz do projeto:
 
-  Utilizar o gerenciador de serviços PM2
+```ini
+API_URL=<URL da Seedz>
+CLIENT_ID=<ClientID gerado pelo iPanel>
+CLIENT_SECRET=<ClientSecret gerado pelo iPanel>
+```
 
-  ```
-  npm i -g pm2
+Variáveis opcionais:
+- `USE_CONSOLE_LOG=true` — logs coloridos no console
+- `VERBOSE=true` — logging detalhado
+- `API_REQUEST_TIMEOUT=300000` — timeout em ms
 
-  pm2 start "agent scheduler"
+## Execução como serviço (PM2)
 
-  pm2 save
-  ```
+### Linux
 
-- ##### Windows
+```bash
+npm install -g pm2
+pm2 start "agent listen"
+pm2 save
+pm2 startup systemd
+```
 
-  Utilizar o gerenciador de serviços do Windows
+### Windows
 
-  ```
-  windows\node-windows-service\install.bat
-  ```
+```cmd
+npm install -g pm2 pm2-windows-startup pm2-windows-service
+pm2-startup install
+pm2-service-install -n "pm2"
+REM PM2_HOME value: C:\SEEDZ
+pm2 start ecosystem.config.js
+pm2 save
+```
 
-  Lembre-se de ativar o serviço no `services.msc` e de utilizar um usuário com permissão para a inicialização do serviço
+## Comandos
 
-###### LGPD
+```bash
+./agent --help                    # exibe todos os comandos
+./agent check all                 # valida conectividade
+./agent run                       # extração completa
+./agent run -r                    # envia apenas RAW
+./agent run -s <entidade>         # extração de entidade específica (ex: invoice)
+./agent run -c                    # extração com log no console
+./agent listen                    # modo principal em produção (SSE)
+./agent update                    # atualiza o código via git pull
+```
 
-A Seedz pensando na nova lei LGPD criou uma estrutura configurável, onde o usuário consegue definir quais dados ele deseja enviar, baseado em um processo mapaemanto de informacoes obtidas o DTO é possível que o cliente configure e selecione quais dados serão transmitidos.
+No Windows, usar `agent.cmd` no lugar de `./agent`.
 
-##### oracle
+## Observabilidade
 
-unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
+### Check de saúde
 
-export LD_LIBRARY_PATH=$(pwd)/assets/instantclient_21_3/
+```bash
+./agent check all
+```
 
-### ⚠️ Migração de Segurança: Remoção de informixdb ⚠️
-Para fortalecer a segurança do serviço, a dependência informixdb foi removida devido a múltiplas vulnerabilidades. A última versão do nosso serviço que utilizava essa dependência é a 2.2.8.
+Mostra:
+- **DATASOURCE**: conectividade com o banco
+- **DNS**: resolução de DNS
+- **INTERNET SPEED**: download/upload
+- **AUTH**: credenciais válidas
+
+### Logs
+
+O agent mantém **3 destinos de log** para garantir observabilidade:
+
+1. **API Seedz** (`{API_URL}logs`) — envio em batches de 100 logs
+2. **Arquivo local** (`./logs/agent-YYYY-MM-DD.log`) — persistência diária, auto-limpeza após 7 dias
+3. **Fallback** (`./output/YYYY-MM-DD.log`) — logs que falharam no envio, re-enviados na próxima inicialização
+
+### Acompanhar em tempo real
+
+```bash
+pm2 logs sdz-agent
+pm2 status
+pm2 describe sdz-agent
+```
+
+## Oracle (opcional)
+
+Se a extração usa banco Oracle, descompactar o Instant Client:
+
+```bash
+unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip \
+      -d /opt/sdz-agent/assets/
+```
+
+O script `./agent` já configura o `LD_LIBRARY_PATH` automaticamente.
+
+## LGPD
+
+O sdz-agent respeita a LGPD via estrutura configurável de mapeamento de campos. O cliente define, via plataforma Seedz, quais campos do DTO serão transmitidos.
+
+## Segurança
+
+Ver [`SECURITY.md`](./SECURITY.md) para detalhes sobre vulnerabilidades conhecidas e mitigações.
+
+## Migrações
+
+- **v2.4+**: `scheduler` removido (agendamento agora é server-side via SSE). O modo `listen` substitui
+- **v2.4+**: `node-schedule` removido
+- **v2.4+**: `xml2json` substituído por `fast-xml-parser` (remoção de vulnerabilidades)
+- **v2.2.8**: última versão com suporte a `informixdb` (removido por vulnerabilidades)
