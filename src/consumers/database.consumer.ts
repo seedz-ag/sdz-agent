@@ -116,7 +116,13 @@ export class DatabaseConsumer implements IConsumer {
         let response: any[];
 
         try {
+          const queryStart = Date.now();
           response = await this.databaseAdapter.query(sql.Command, page, limit);
+          const queryDuration = ((Date.now() - queryStart) / 1000).toFixed(2);
+          this.loggerAdapter.log(
+            "info",
+            `SQL QUERY [${schema.Entity.toLocaleUpperCase()}] PAGE ${page} RETURNED ${response?.length ?? 0} ROWS IN ${queryDuration}s`
+          );
         } catch (error: any) {
           this.loggerAdapter.log(
             "error",
@@ -124,8 +130,6 @@ export class DatabaseConsumer implements IConsumer {
           );
           throw error;
         }
-
-        this.loggerAdapter.log("info", `SQL QUERY DONE`);
 
         while (response && response.length) {
           const data = !this.utilsService.needsToHydrate(schema)
@@ -163,7 +167,13 @@ export class DatabaseConsumer implements IConsumer {
           page++;
 
           try {
+            const queryStart = Date.now();
             response = await this.databaseAdapter.query(sql.Command, page, limit);
+            const queryDuration = ((Date.now() - queryStart) / 1000).toFixed(2);
+            this.loggerAdapter.log(
+              "info",
+              `SQL QUERY [${schema.Entity.toLocaleUpperCase()}] PAGE ${page} RETURNED ${response?.length ?? 0} ROWS IN ${queryDuration}s`
+            );
           } catch (error: any) {
             this.loggerAdapter.log(
               "error",
