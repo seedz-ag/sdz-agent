@@ -25,7 +25,7 @@ export class DatabaseConsumer implements IConsumer {
   private formatDuration(ms: number): string {
     const minutes = Math.floor(ms / 60000);
     const seconds = ((ms % 60000) / 1000).toFixed(2);
-    return `${ms}ms / ${seconds}s / ${minutes}min`;
+    return `${ms}ms (${minutes}min ${seconds}s)`;
   }
 
   public async consume() {
