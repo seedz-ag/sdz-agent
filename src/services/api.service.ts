@@ -95,7 +95,7 @@ export class APIService {
         "error",
         `TRYING(${tries}) TO SEND RESOURCE ${this.environmentService.get(
           "API_URL"
-        )}${resource}-${error.response?.data || ""}`
+        )}${resource} - ${this.formatRequestError(error)}`
       );
       if (tries <= this.environmentService.get("RETRIES")) {
         await this.utilsService.wait(
@@ -125,10 +125,33 @@ export class APIService {
     } catch (error: any) {
       this.loggerAdapter.log(
         "error",
-        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings-${error.response.data
-        }`
+        `TOUCH SETTING ${this.environmentService.get("API_URL")}settings - ${this.formatRequestError(error)}`
       );
     }
+  }
+
+  private formatRequestError(error: any): string {
+    const status = error?.response?.status;
+    const statusText = error?.response?.statusText;
+    const data = error?.response?.data;
+    const hasData =
+      data !== undefined &&
+      data !== null &&
+      !(typeof data === "object" && Object.keys(data).length === 0) &&
+      !(typeof data === "string" && data.trim() === "");
+    const dataStr = hasData
+      ? typeof data === "object"
+        ? JSON.stringify(data)
+        : String(data)
+      : "";
+    const parts = [
+      status ? `status=${status}` : "",
+      statusText ? `statusText=${statusText}` : "",
+      error?.code ? `code=${error.code}` : "",
+      dataStr ? `data=${dataStr}` : "",
+      !hasData && error?.message ? `message=${error.message}` : "",
+    ].filter(Boolean);
+    return parts.length ? parts.join(" ") : "unknown error";
   }
 
   private fileLoggingEnabled = false;
