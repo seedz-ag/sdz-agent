@@ -22,6 +22,12 @@ export class DatabaseConsumer implements IConsumer {
     private readonly utilsService: UtilsService
   ) { }
 
+  private formatDuration(ms: number): string {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(2);
+    return `${ms}ms / ${seconds}s / ${minutes}min`;
+  }
+
   public async consume() {
     this.loggerAdapter.log("info", `CONNETING TO DATABASE`);
 
@@ -118,10 +124,9 @@ export class DatabaseConsumer implements IConsumer {
         try {
           const queryStart = Date.now();
           response = await this.databaseAdapter.query(sql.Command, page, limit);
-          const queryDuration = ((Date.now() - queryStart) / 1000).toFixed(2);
           this.loggerAdapter.log(
             "info",
-            `SQL QUERY [${schema.Entity.toLocaleUpperCase()}] PAGE ${page} RETURNED ${response?.length ?? 0} ROWS IN ${queryDuration}s`
+            `SQL QUERY [${schema.Entity.toLocaleUpperCase()}] PAGE ${page} RETURNED ${response?.length ?? 0} ROWS IN ${this.formatDuration(Date.now() - queryStart)}`
           );
         } catch (error: any) {
           this.loggerAdapter.log(
@@ -169,10 +174,9 @@ export class DatabaseConsumer implements IConsumer {
           try {
             const queryStart = Date.now();
             response = await this.databaseAdapter.query(sql.Command, page, limit);
-            const queryDuration = ((Date.now() - queryStart) / 1000).toFixed(2);
             this.loggerAdapter.log(
               "info",
-              `SQL QUERY [${schema.Entity.toLocaleUpperCase()}] PAGE ${page} RETURNED ${response?.length ?? 0} ROWS IN ${queryDuration}s`
+              `SQL QUERY [${schema.Entity.toLocaleUpperCase()}] PAGE ${page} RETURNED ${response?.length ?? 0} ROWS IN ${this.formatDuration(Date.now() - queryStart)}`
             );
           } catch (error: any) {
             this.loggerAdapter.log(
@@ -184,17 +188,15 @@ export class DatabaseConsumer implements IConsumer {
         }
       }
 
-      const entityDuration = ((Date.now() - entityStart) / 1000).toFixed(2);
       this.loggerAdapter.log(
         "info",
-        `ENTITY ${schema.Entity.toLocaleUpperCase()} EXTRACTION COMPLETED IN ${entityDuration}s`
+        `ENTITY ${schema.Entity.toLocaleUpperCase()} EXTRACTION COMPLETED IN ${this.formatDuration(Date.now() - entityStart)}`
       );
     }
 
-    const totalDuration = ((Date.now() - totalStart) / 1000).toFixed(2);
     this.loggerAdapter.log(
       "info",
-      `TOTAL EXTRACTION COMPLETED IN ${totalDuration}s`
+      `TOTAL EXTRACTION COMPLETED IN ${this.formatDuration(Date.now() - totalStart)}`
     );
   }
 
