@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "sdz-agent",
-      cwd: "C:/Program Files (x86)/sdz-agent",
+      cwd: "C:/Program Files (x86)/SEEDZ/sdz-agent",
       script: "pm2-start.js",
       interpreter: "node",
       env: {
