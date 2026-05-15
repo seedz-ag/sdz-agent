@@ -9,4 +9,5 @@ export interface ConfigDatabaseInterface {
     username?: string;
     connectionstring?: string;
     connectionString?: string;
+    skipDefaultOrderBy?: string | boolean;
 }

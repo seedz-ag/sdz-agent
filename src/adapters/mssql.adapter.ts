@@ -94,22 +94,20 @@ export class MssqlAdapter implements IDatabaseAdapter {
   }
 
   query(query: string, page?: number, limit?: number): Promise<any> {
-    if(!query.toLocaleUpperCase().includes('ORDER BY')) {
-      const statement = [
-        query,
-        "undefined" !== typeof page && limit ? `ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY` : null,
-      ]
-        .filter((item) => !!item)
-        .join(" ");
-      return this.execute(statement);
+    const hasOrderBy = query.toLocaleUpperCase().includes('ORDER BY');
+    const isPaginated = typeof page !== "undefined" && !!limit;
+    const skipDefault = this.config.skipDefaultOrderBy !== undefined
+      || (this.config as any).skipdefaultorderby !== undefined;
+
+    const parts = [query];
+
+    if (isPaginated) {
+      if (!hasOrderBy && !skipDefault) {
+        parts.push("ORDER BY TIPOQUERY ASC, R_E_C_N_O_ ASC");
+      }
+      parts.push(`OFFSET ${page! * limit!} ROWS FETCH NEXT ${limit} ROWS ONLY`);
     }
 
-    if (typeof page !== "undefined" && limit) {
-        const orderByQuery = `OFFSET ${page * limit} ROWS FETCH NEXT ${limit} ROWS ONLY`;
-        const statement = [query, orderByQuery].filter((item) => !!item).join(" ");
-        return this.execute(statement);
-    }
-
-    return this.execute(query); 
-    }
+    return this.execute(parts.join(" "));
+  }
 }
