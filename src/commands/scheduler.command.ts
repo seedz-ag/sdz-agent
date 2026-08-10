@@ -10,6 +10,7 @@ import { ExecuteCommand } from "./execute.command";
 import { Job, scheduleJob } from "node-schedule";
 import { APILoggerAdapter } from "../adapters/api-logger.adapter";
 import { ConsoleLoggerAdapter } from "../adapters/console-logger.adapter";
+import { TelemetryService } from "../services/telemetry.service";
 
 @singleton()
 export class SchedulerCommand implements ICommand {
@@ -20,6 +21,7 @@ export class SchedulerCommand implements ICommand {
     private readonly environtmentService: EnvironmentService,
     private readonly listenCommand: ListenCommand,
     private readonly loggerAdapter: LoggerAdapter,
+    private readonly telemetryService: TelemetryService,
   ) {
     process.on("SIGTERM", () => {
       this.loggerAdapter.log("info", "STOPING SCHEDULER");
@@ -38,7 +40,11 @@ export class SchedulerCommand implements ICommand {
     loggerAdapter.log(`info`, `SCHEDULING JOB AT ${cronExpression}`);
     return scheduleJob(cronExpression, async () => {
       try {
-        return await executeCommand.execute();
+        const result = await executeCommand.execute();
+        this.telemetryService.setWorkloadContext({
+          lastExecutionAt: new Date().toISOString(),
+        });
+        return result;
       } catch (e) {
         return false;
       }
@@ -48,6 +54,7 @@ export class SchedulerCommand implements ICommand {
   public async execute() {
     try {
       await new Promise<void>(async (resolve, reject) => {
+        this.telemetryService.start("scheduler");
         this.loggerAdapter.log("info", "STARTING SCHEDULER");
 
         const jobs: Job[] = [];
@@ -60,6 +67,10 @@ export class SchedulerCommand implements ICommand {
           reject(error);
           return;
         }
+
+        this.telemetryService.setWorkloadContext({
+          schedules: setting.Schedules.map(({ CronExpression }) => CronExpression),
+        });
 
         for (const { CronExpression } of setting.Schedules) {
           jobs.push(await this.schedule(CronExpression));

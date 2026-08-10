@@ -6,6 +6,7 @@ import { LoggerAdapter } from "../adapters/logger.adapter";
 import { EnvironmentService } from "./environment.service";
 import { IDiscovery } from "../interfaces/discovery.interface";
 import { ISetting } from "../interfaces/setting.interface";
+import { NetworkTelemetryRecorderService } from "./network-telemetry-recorder.service";
 import { UtilsService } from "./utils.service";
 
 @singleton()
@@ -14,6 +15,7 @@ export class APIService {
     private readonly environmentService: EnvironmentService,
     private readonly httpClientAdapter: HttpClientAdapter,
     private readonly loggerAdapter: LoggerAdapter,
+    private readonly networkTelemetryRecorder: NetworkTelemetryRecorderService,
     private readonly utilsService: UtilsService
   ) { }
 
@@ -102,6 +104,7 @@ export class APIService {
           this.utilsService.calculateRetryTime(tries, 60_000)
         );
         tries++;
+        this.networkTelemetryRecorder.recordRetry();
         return await this.sendResource(resource, data, tries);
       }
       throw error;
