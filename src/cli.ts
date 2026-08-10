@@ -48,7 +48,7 @@ process.env.CLI = "1";
     .epilog("for more information visit https://github.com/seedz-ag/sdz-agent")
     .showHelpOnFail(true) //, "whoops, something went wrong! run with --help")
     .usage("This is the SDZ Agent CLI\n\nUsage: $0 [options]")
-    .version("version", "1.5.0")
+    .version("version", utilsService.getPackageVersion())
     .command(
       "check <type>",
       "Check Agent Connectivity",

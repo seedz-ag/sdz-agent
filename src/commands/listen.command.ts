@@ -1,6 +1,6 @@
 import { config } from "dotenv";
 import { Stream } from "stream";
-import { singleton } from "tsyringe";
+import { container, singleton } from "tsyringe";
 
 import { HttpClientAdapter } from "../adapters/http-client.adapter";
 import { ICommand } from "../interfaces/command.interface";
@@ -10,6 +10,7 @@ import { ListenShellCommand } from "./listen-shell.command";
 import { ListenQueryCommand } from "./listen-query.command";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { EnvironmentService } from "../services/environment.service";
+import { TelemetryService } from "../services/telemetry.service";
 
 config();
 
@@ -21,11 +22,13 @@ export class ListenCommand implements ICommand {
     private readonly loggerAdapger: LoggerAdapter,
     private readonly queryCommand: ListenQueryCommand,
     private readonly responseCommand: ListenResponseCommand,
-    private readonly shellCommand: ListenShellCommand
+    private readonly shellCommand: ListenShellCommand,
+    private readonly telemetryService: TelemetryService
   ) { }
 
   public execute() {
     return new Promise<void>(async (resolve, reject) => {
+      this.telemetryService.start("listen");
       this.loggerAdapger.log("info", "START LISTENING COMMANDS");
       const commands: any = {
         Execute: (args: any) => {
@@ -43,7 +46,7 @@ export class ListenCommand implements ICommand {
         Shell: (args: any) => this.shellCommand.execute(args),
       };
 
-      const httpAdapter = new HttpClientAdapter();
+      const httpAdapter = container.resolve(HttpClientAdapter);
       const headers = {
         Authorization: `Basic ${Buffer.from(
           `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`

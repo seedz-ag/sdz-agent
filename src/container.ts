@@ -6,6 +6,8 @@ import { CSVAdapter } from "./adapters/csv.adapter";
 import { FTPAdapter } from "./adapters/ftp.adapter";
 import { HttpClientAdapter } from "./adapters/http-client.adapter";
 import { LoggerAdapter } from "./adapters/logger.adapter";
+import { SystemMetricsAdapter } from "./adapters/system-metrics.adapter";
+import { TelemetryOutboxAdapter } from "./adapters/telemetry-outbox.adapter";
 import { CheckCommand } from "./commands/check.command";
 import { ConfigureCommand } from "./commands/configure.command";
 import { ExecuteCommand } from "./commands/execute.command";
@@ -22,6 +24,10 @@ import { ConsumerResolverService } from "./services/consumer-resolver.service";
 import { EnvironmentService } from "./services/environment.service";
 import { HydratorService } from "./services/hydrator.service";
 import { InterpolationService } from "./services/interpolation.service";
+import { NetworkTelemetryRecorderService } from "./services/network-telemetry-recorder.service";
+import { TelemetrySamplerService } from "./services/telemetry-sampler.service";
+import { TelemetryStatsService } from "./services/telemetry-stats.service";
+import { TelemetryService } from "./services/telemetry.service";
 import { UtilsService } from "./services/utils.service";
 import { VPNService } from "./services/vpn.service";
 
@@ -68,6 +74,16 @@ export const getContainer = async () => {
   container.register(
     LoggerAdapter,
     { useClass: LoggerAdapter },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    SystemMetricsAdapter,
+    { useClass: SystemMetricsAdapter },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    TelemetryOutboxAdapter,
+    { useClass: TelemetryOutboxAdapter },
     { lifecycle: Lifecycle.Singleton }
   );
 
@@ -153,6 +169,26 @@ export const getContainer = async () => {
   container.register(
     InterpolationService,
     { useClass: InterpolationService },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    NetworkTelemetryRecorderService,
+    { useClass: NetworkTelemetryRecorderService },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    TelemetryStatsService,
+    { useClass: TelemetryStatsService },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    TelemetrySamplerService,
+    { useClass: TelemetrySamplerService },
+    { lifecycle: Lifecycle.Singleton }
+  );
+  container.register(
+    TelemetryService,
+    { useClass: TelemetryService },
     { lifecycle: Lifecycle.Singleton }
   );
   container.register(

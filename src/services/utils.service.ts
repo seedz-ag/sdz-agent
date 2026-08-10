@@ -1,6 +1,7 @@
 import { fork } from "child_process";
 import kill from "tree-kill";
-import { writeFile } from "fs";
+import { readFileSync, writeFile } from "fs";
+import { join } from "path";
 import { singleton } from "tsyringe";
 import { ConfigDatabaseInterface } from "../interfaces/config-database.interface";
 import { IParameter, ISchema } from "../interfaces/setting.interface";
@@ -10,6 +11,8 @@ import { EnvironmentService } from "./environment.service";
 @singleton()
 export class UtilsService {
   private counter: Record<string, number> = {};
+  private packageVersion?: string;
+
   constructor(
     private readonly environmentService: EnvironmentService,
     private readonly loggerAdapter: LoggerAdapter
@@ -58,6 +61,30 @@ export class UtilsService {
     return fork(job, process.argv, {
       execArgv: ["-r", "ts-node/register"],
     });
+  }
+
+  public getPackageVersion(): string {
+    if (this.packageVersion) return this.packageVersion;
+
+    const candidates = [
+      join(__dirname, "..", "..", "package.json"),
+      join(process.cwd(), "package.json"),
+    ];
+
+    for (const candidate of candidates) {
+      try {
+        const { version } = JSON.parse(readFileSync(candidate, "utf8"));
+        if (version) {
+          this.packageVersion = version;
+          return version;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    this.packageVersion = "0.0.0";
+    return this.packageVersion;
   }
 
   public hasAgentSchemaForCurrentEntity(
