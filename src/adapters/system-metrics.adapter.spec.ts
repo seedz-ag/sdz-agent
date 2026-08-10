@@ -146,4 +146,24 @@ describe("SystemMetricsAdapter", () => {
       expect(adapter.getOsName()).toBe("freebsd");
     });
   });
+
+  describe("getTimezone", () => {
+    it("returns the IANA timezone Node/ICU resolves for this process", () => {
+      expect(adapter.getTimezone()).toBe(
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+      );
+    });
+  });
+
+  describe("getUtcOffsetMinutes", () => {
+    it("is the inverse of Date.prototype.getTimezoneOffset()", () => {
+      const offsetSpy = jest
+        .spyOn(Date.prototype, "getTimezoneOffset")
+        .mockReturnValue(180);
+
+      expect(adapter.getUtcOffsetMinutes()).toBe(-180);
+
+      offsetSpy.mockRestore();
+    });
+  });
 });

@@ -32,7 +32,9 @@ describe("TelemetryService", () => {
     delete process.env.TELEMETRY;
 
     environmentService = { get: jest.fn((key: any) => ENV[key]) };
-    httpClientAdapter = { post: jest.fn().mockResolvedValue(undefined) };
+    httpClientAdapter = {
+      postRaw: jest.fn().mockResolvedValue({ data: undefined, headers: {} }),
+    };
     loggerAdapter = { log: jest.fn() };
     networkTelemetryRecorder = {
       snapshot: jest.fn().mockReturnValue({
@@ -64,6 +66,8 @@ describe("TelemetryService", () => {
       getOsName: jest.fn().mockReturnValue("linux"),
       getOsVersion: jest.fn().mockReturnValue("5.15.0"),
       getArch: jest.fn().mockReturnValue("x64"),
+      getTimezone: jest.fn().mockReturnValue("America/Sao_Paulo"),
+      getUtcOffsetMinutes: jest.fn().mockReturnValue(-180),
       getCpuCount: jest.fn().mockReturnValue(4),
       getMemTotalBytes: jest.fn().mockReturnValue(8_000_000),
     };
@@ -148,7 +152,15 @@ describe("TelemetryService", () => {
       expect(payload).toMatchObject({
         schemaVersion: 1,
         agent: { name: "sdz-agent", version: "9.9.9", mode: "scheduler" },
-        host: { hostname: "agent-host", os: "linux", osVersion: "5.15.0", arch: "x64" },
+        host: {
+          hostname: "agent-host",
+          os: "linux",
+          osVersion: "5.15.0",
+          arch: "x64",
+          timezone: "America/Sao_Paulo",
+          utcOffsetMinutes: -180,
+          clockDriftMs: null,
+        },
         windowSeconds: 60,
         resources: {
           cpuCount: 4,
@@ -178,8 +190,8 @@ describe("TelemetryService", () => {
 
       await service.collectAndShip();
 
-      expect(httpClientAdapter.post).toHaveBeenCalledTimes(1);
-      const [url, body, config] = httpClientAdapter.post.mock.calls[0];
+      expect(httpClientAdapter.postRaw).toHaveBeenCalledTimes(1);
+      const [url, body, config] = httpClientAdapter.postRaw.mock.calls[0];
 
       expect(url).toBe("https://api.example.com/telemetry");
       expect(Array.isArray(body)).toBe(true);
@@ -197,6 +209,33 @@ describe("TelemetryService", () => {
       expect(outboxAdapter.removeFirst).toHaveBeenCalledWith(1);
     });
 
+    it("derives clockDriftMs from the response Date header and reports it on the next payload", async () => {
+      const nowSpy = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
+      httpClientAdapter.postRaw.mockResolvedValueOnce({
+        data: undefined,
+        // server clock is 5s behind the agent's Date.now()
+        headers: { date: new Date(1_000_000 - 5_000).toUTCString() },
+      });
+      outboxAdapter.readAll.mockReturnValue([JSON.stringify({ schemaVersion: 1 })]);
+
+      await service.collectAndShip();
+      nowSpy.mockRestore();
+
+      outboxAdapter.readAll.mockReturnValue([]);
+      await service.collectAndShip();
+
+      const [[secondAppended]] = outboxAdapter.append.mock.calls.slice(-1);
+      expect(secondAppended[0].host.clockDriftMs).toBe(5_000);
+    });
+
+    it("leaves clockDriftMs null when the response has no Date header", async () => {
+      outboxAdapter.readAll.mockReturnValue([JSON.stringify({ schemaVersion: 1 })]);
+      await service.collectAndShip();
+
+      const [[appended]] = outboxAdapter.append.mock.calls.slice(-1);
+      expect(appended[0].host.clockDriftMs).toBeNull();
+    });
+
     it("does nothing (no HTTP call) when the outbox is empty", async () => {
       outboxAdapter.append.mockImplementation(() => {
         // simulate append failing to persist so readAll stays empty
@@ -205,13 +244,13 @@ describe("TelemetryService", () => {
 
       await service.collectAndShip();
 
-      expect(httpClientAdapter.post).not.toHaveBeenCalled();
+      expect(httpClientAdapter.postRaw).not.toHaveBeenCalled();
       expect(outboxAdapter.removeFirst).not.toHaveBeenCalled();
     });
 
     it("is best-effort: a shipping failure is logged and the WAL is kept (no throw)", async () => {
       outboxAdapter.readAll.mockReturnValue([JSON.stringify({ schemaVersion: 1 })]);
-      httpClientAdapter.post.mockRejectedValueOnce(new Error("network down"));
+      httpClientAdapter.postRaw.mockRejectedValueOnce(new Error("network down"));
 
       await expect(service.collectAndShip()).resolves.toBeUndefined();
 

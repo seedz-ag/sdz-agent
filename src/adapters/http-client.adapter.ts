@@ -160,6 +160,25 @@ export class HttpClientAdapter {
     return data;
   }
 
+  /**
+   * Same as post(), but also returns response headers. Used by telemetry to
+   * read the server's `Date` header and derive clock drift, without an
+   * extra round-trip.
+   */
+  public async postRaw<T, K = any>(
+    url: string,
+    payload: K,
+    config: IHttpClientRequestConfig = {}
+  ): Promise<{ data: T; headers: Record<string, string> }> {
+    const { headers = {} } = config;
+    const response = await this.timed(
+      this.getClient({
+        rejectUnauthorized: !this.isInsecure(headers),
+      }).post<T>(url, payload, config)
+    );
+    return { data: response.data, headers: response.headers as Record<string, string> };
+  }
+
   public async put<T, K = any>(
     url: string,
     payload: K,

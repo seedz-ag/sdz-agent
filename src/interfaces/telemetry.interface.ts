@@ -25,6 +25,17 @@ export interface ITelemetryHostInfo {
   os: TelemetryHostOS | string;
   osVersion: string;
   arch: string;
+  timezone: string;
+  utcOffsetMinutes: number;
+  /**
+   * Local clock minus the API's `Date` response header from the last
+   * successful telemetry ship (host clock ahead of the server when
+   * positive). null until the first successful ship. Coarse (~1s
+   * resolution, includes half the round-trip latency) — meant to catch
+   * gross misconfiguration (minutes/hours off), not to be a precise NTP
+   * measurement.
+   */
+  clockDriftMs: number | null;
 }
 
 export interface ITelemetryRuntimeInfo {

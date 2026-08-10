@@ -99,4 +99,16 @@ export class SystemMetricsAdapter {
   public getOsName(): TelemetryHostOS | string {
     return OS_NAME_BY_PLATFORM[process.platform] || process.platform;
   }
+
+  public getTimezone(): string {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+
+  /**
+   * Minutes east of UTC (e.g. America/Sao_Paulo => -180), the inverse sign
+   * of Date.prototype.getTimezoneOffset().
+   */
+  public getUtcOffsetMinutes(): number {
+    return -new Date().getTimezoneOffset();
+  }
 }

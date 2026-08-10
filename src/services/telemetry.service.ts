@@ -31,6 +31,7 @@ export class TelemetryService {
   private startedAt = new Date();
   private shipping = false;
   private workload: Record<string, unknown> = {};
+  private clockDriftMs: number | null = null;
 
   constructor(
     private readonly environmentService: EnvironmentService,
@@ -116,6 +117,9 @@ export class TelemetryService {
         os: this.systemMetricsAdapter.getOsName(),
         osVersion: this.systemMetricsAdapter.getOsVersion(),
         arch: this.systemMetricsAdapter.getArch(),
+        timezone: this.systemMetricsAdapter.getTimezone(),
+        utcOffsetMinutes: this.systemMetricsAdapter.getUtcOffsetMinutes(),
+        clockDriftMs: this.clockDriftMs,
       },
       runtime: {
         startedAt: this.startedAt.toISOString(),
@@ -171,8 +175,9 @@ export class TelemetryService {
       if (!lines.length) return;
 
       const batch = lines.map((line) => JSON.parse(line));
+      const requestSentAt = Date.now();
 
-      await this.httpClientAdapter.post(
+      const { headers: responseHeaders } = await this.httpClientAdapter.postRaw(
         `${this.environmentService.get("API_URL")}telemetry`,
         batch,
         {
@@ -181,6 +186,7 @@ export class TelemetryService {
         }
       );
 
+      this.updateClockDrift(responseHeaders, requestSentAt);
       this.outboxAdapter.removeFirst(lines.length);
     } catch (error: any) {
       this.loggerAdapter.log(
@@ -191,6 +197,24 @@ export class TelemetryService {
     } finally {
       this.shipping = false;
     }
+  }
+
+  /**
+   * Derives clock drift from the API's `Date` response header. Attributes
+   * the full round-trip to the local->server leg (a slight overestimate),
+   * which is fine for spotting gross drift but not a precise offset.
+   */
+  private updateClockDrift(
+    responseHeaders: Record<string, string>,
+    requestSentAt: number
+  ): void {
+    const serverDateHeader = responseHeaders?.date;
+    if (!serverDateHeader) return;
+
+    const serverTime = Date.parse(serverDateHeader);
+    if (Number.isNaN(serverTime)) return;
+
+    this.clockDriftMs = requestSentAt - serverTime;
   }
 
   private getHeaders() {
