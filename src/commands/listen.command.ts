@@ -10,6 +10,7 @@ import { ListenShellCommand } from "./listen-shell.command";
 import { ListenQueryCommand } from "./listen-query.command";
 import { LoggerAdapter } from "../adapters/logger.adapter";
 import { EnvironmentService } from "../services/environment.service";
+import { IdleTimer } from "../services/idle-timer.service";
 
 config();
 
@@ -43,6 +44,18 @@ export class ListenCommand implements ICommand {
         Shell: (args: any) => this.shellCommand.execute(args),
       };
 
+      /**
+       * Idle shutdown — only when asked for.
+       *
+       * Absent by default: an installed agent runs `listen` permanently, and an
+       * implicit TTL would bring every one of them down. The flag exists for the
+       * SAAS console session, which comes up for an investigation and must die
+       * on its own if the operator closes the tab.
+       */
+      const ttl = Number(this.environmentService.get("SESSION_TTL") ?? 0);
+      let idle: IdleTimer | undefined;
+      let closingByTtl = false;
+
       const httpAdapter = new HttpClientAdapter();
       const headers = {
         Authorization: `Basic ${Buffer.from(
@@ -60,9 +73,38 @@ export class ListenCommand implements ICommand {
           }
         );
 
+        if (ttl > 0) {
+          idle = new IdleTimer({
+            minutes: ttl,
+            onExpire: (ocioso) => {
+              closingByTtl = true;
+              this.loggerAdapger.log(
+                "info",
+                `IDLE FOR ${Math.round(ocioso / 1000)}s WITH TTL ${ttl}m — CLOSING SESSION`
+              );
+              // Close the stream so the CLI exits through its normal path
+              // instead of dying mid-flight.
+              (stream as any).destroy?.();
+              resolve();
+            },
+          }).start();
+
+          this.loggerAdapger.log("info", `SESSION TTL ${ttl}m`);
+        }
+
         stream.on("data", async (data: Buffer) => {
           const message = JSON.parse(data.toString());
           const { arguments: args = [], command, sender } = message;
+
+          /**
+           * The clock only resets on an effective command.
+           *
+           * The API sends `Ping` every 30s. Resetting on it would keep the TTL
+           * from ever firing — a forgotten session would stay alive forever,
+           * which is exactly what this is here to prevent.
+           */
+          idle?.touch(command);
+
           try {
             const result = await commands[command]({ args });
             !["Ping", "Response"].includes(command) &&
@@ -74,11 +116,19 @@ export class ListenCommand implements ICommand {
         });
 
         stream.on("error", async (error: any) => {
+          idle?.stop();
+          // A stream that drops after the TTL is not a failure: it is the exit we asked for.
+          if (closingByTtl) {
+            this.loggerAdapger.log("info", "SESSION CLOSED BY TTL");
+            resolve();
+            return;
+          }
           this.loggerAdapger.log("error", error);
           reject(error);
         });
 
         stream.on("end", async () => {
+          idle?.stop();
           this.loggerAdapger.log("info", "STREAM CLOSED");
           resolve();
         });

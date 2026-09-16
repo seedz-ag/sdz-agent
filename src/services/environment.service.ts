@@ -43,6 +43,19 @@ const environmentSchema = z.object({
     .optional()
     .transform((value: unknown) => "true" === value || true === value || false),
   QUERY: z.string().optional(),
+  /**
+   * Minutes without an effective command before a console session shuts down.
+   *
+   * Absent = NO LIMIT, which is how every installed agent behaves. Only the
+   * SAAS console session sets this.
+   *
+   * The name is specific and the value is garbage-tolerant on purpose: this
+   * schema is built from `...process.env` and `parse()` THROWS on failure. A
+   * generic name such as `TTL` could already exist on a customer machine for
+   * an unrelated reason, and a non-numeric value there would stop the agent
+   * from starting. `.catch(undefined)` degrades to "no limit" instead.
+   */
+  SESSION_TTL: z.coerce.number().positive().optional().catch(undefined),
   RETRIES: z
     .string()
     .default("3")
