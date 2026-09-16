@@ -250,6 +250,13 @@ process.env.CLI = "1";
             describe: "Shows received Ping",
             type: "boolean",
           })
+          // No alias: `mergeEnv` turns EVERY argv key into an environment
+          // variable, and a short alias would create a one-letter variable.
+          .option("session-ttl", {
+            describe:
+              "Closes the session after N minutes without an effective command (Ping does not count). Omit for no limit.",
+            type: "number",
+          })
           .option("use-console-log", {
             alias: "c",
             describe: "Use Console Log",
