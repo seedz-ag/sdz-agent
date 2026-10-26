@@ -185,7 +185,7 @@ Se a versão nova não autenticar em 3 partidas seguidas, o agente reinstala a a
 ```
 sdz-agent run                      entrypoint do serviço (scheduler + listen), usado pelo SCM/systemd/launchd
 sdz-agent scheduler                agenda as extrações conforme as Schedules da setting
-sdz-agent listen                   escuta comandos da plataforma (/commands)
+sdz-agent listen [--session-ttl N] escuta comandos da plataforma (/commands); com --session-ttl encerra após N min sem comando efetivo (Ping não conta)
 sdz-agent execute                  executa uma extração agora (= `run` do agente Node)
 sdz-agent check <auth|datasource|dns|speed|all>
 sdz-agent credentials set [--client-id ID] [--client-secret SECRET | --client-secret-stdin] [--api-url URL] [--non-interactive]

@@ -42,6 +42,7 @@ public sealed class ListenCommand
     public static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(90);
 
     private CancellationTokenSource? _connection;
+    private IdleTimer? _idle;
     private volatile CancellationTokenSource? _wait;
 
     /// <summary>True while a /commands stream is open.</summary>
@@ -109,6 +110,52 @@ public sealed class ListenCommand
             catch { return; }
             finally { _wait = null; }
         }
+    }
+
+    /// <summary>
+    /// The `listen` CLI command: up to <paramref name="retries"/> connections, and, when --session-ttl /
+    /// SESSION_TTL is set, an idle shutdown that closes the session after N minutes without an
+    /// effective command. Returns true when the session ended by TTL.
+    /// </summary>
+    public async Task<bool> RunSessionAsync(int retries, CancellationToken ct)
+    {
+        using var session = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        var closedByTtl = false;
+        var ttl = _env.SessionTtlMinutes;
+        if (ttl is { } minutes)
+        {
+            _idle = IdleTimer.FromMinutes(minutes, idleFor =>
+            {
+                closedByTtl = true;
+                _logger.Info($"IDLE FOR {Math.Round(idleFor.TotalSeconds)}s WITH TTL {minutes:0.##}m — CLOSING SESSION");
+                try { session.Cancel(); } catch (ObjectDisposedException) { }
+            }).Start();
+            _logger.Info($"SESSION TTL {minutes:0.##}m");
+        }
+
+        try
+        {
+            while (retries-- > 0 && !session.IsCancellationRequested)
+            {
+                try { await ExecuteAsync(session.Token).ConfigureAwait(false); }
+                catch (OperationCanceledException) when (session.IsCancellationRequested) { break; }
+                catch (HttpRequestFailedException e) when (e.IsTimeout)
+                {
+                    Console.WriteLine("CONNECTION ABORTED, POSSIBLY AN INTERNET CONNECTION PROBLEM, PLEASE RUN AGENT CHECK FOR MORE INFORMATION");
+                    break;
+                }
+                catch (Exception e) { _logger.Error(e.Message); }
+            }
+        }
+        finally
+        {
+            _idle?.Stop();
+            _idle = null;
+        }
+
+        // a stream that drops after the TTL is not a failure: it is the exit we asked for
+        if (closedByTtl) _logger.Info("SESSION CLOSED BY TTL");
+        return closedByTtl;
     }
 
     /// <summary>Runs until the stream closes (returns) or fails (throws).</summary>
@@ -190,6 +237,8 @@ public sealed class ListenCommand
     {
         var command = message["command"]?.ToString() ?? "";
         var sender = message["sender"]?.ToString();
+        // session TTL: only an effective command postpones the shutdown (Ping does not)
+        _idle?.Touch(command);
         var arguments = message["arguments"] as JsonArray ?? new JsonArray();
 
         try

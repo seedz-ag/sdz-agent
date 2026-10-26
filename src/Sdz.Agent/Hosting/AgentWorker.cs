@@ -49,6 +49,8 @@ public sealed class AgentWorker : BackgroundService
 
         // the command channel (remote management, remote updates) lives for the whole process,
         // independent of the setting/scheduler cycle and of the startup auth check
+        if (_env.SessionTtlMinutes is not null)
+            _logger.Warn("SESSION_TTL IGNORED IN SERVICE MODE: the installed agent keeps the command channel open permanently");
         Task listenLoop = Task.CompletedTask;
         if (_env.Listen)
         {

@@ -47,6 +47,15 @@ public sealed class AgentEnvironment
     public bool UseConsoleLog => GetBool("USE_CONSOLE_LOG");
     public bool Verbose => GetBool("VERBOSE");
     public bool Listen => GetBool("LISTEN");
+
+    /// <summary>
+    /// Minutes without an effective command before a console `listen` session shuts down
+    /// (--session-ttl). Null = no limit, which is how every installed agent behaves. Garbage-tolerant
+    /// on purpose: a non-numeric, zero or negative SESSION_TTL means "no limit" instead of failing.
+    /// </summary>
+    public double? SessionTtlMinutes =>
+        double.TryParse(GetOrNull("SESSION_TTL"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var m)
+        && m > 0 && double.IsFinite(m) ? m : null;
     public bool TelemetryEnabled => !string.Equals(GetOrNull("TELEMETRY")?.Trim(), "off", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Base credentials, before any discovery override. Logs always use these.</summary>

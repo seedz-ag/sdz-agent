@@ -26,7 +26,8 @@ public static class Program
                               a single extraction, like the legacy `agent run`.
           execute             One extraction now (-e ENV, -n DAYS, -q QUERY, -r, -s SCHEMA, -c)
           scheduler           Run the scheduler in the foreground (--no-listen, --no-forever)
-          listen              Listen for remote commands only (--retries N)
+          listen              Listen for remote commands only (--retries N, --session-ttl MINUTES:
+                              close after N minutes without an effective command; Ping does not count)
           check <type>        auth | datasource | dns | speed | all
           credentials <action> set | show | test | clear  (terminal management of the credentials;
                               set: --client-id, --client-secret | --client-secret-stdin, --api-url,
@@ -202,17 +203,8 @@ public static class Program
                 {
                     var retries = int.TryParse(cli.Get("retries"), out var r) ? r : 1;
                     var listen = provider.GetRequiredService<ListenCommand>();
-                    while (retries-- > 0 && !cts.IsCancellationRequested)
-                    {
-                        try { await listen.ExecuteAsync(cts.Token).ConfigureAwait(false); }
-                        catch (Core.Http.HttpRequestFailedException e) when (e.IsTimeout)
-                        {
-                            Console.WriteLine("CONNECTION ABORTED, POSSIBLY AN INTERNET CONNECTION PROBLEM, PLEASE RUN AGENT CHECK FOR MORE INFORMATION");
-                            break;
-                        }
-                        catch (Exception e) { logger.Error(e.Message); }
-                    }
-                    Console.WriteLine("✖ STOPPED");
+                    var byTtl = await listen.RunSessionAsync(retries, cts.Token).ConfigureAwait(false);
+                    Console.WriteLine(byTtl ? "✔ SESSION CLOSED BY TTL" : "✖ STOPPED");
                     break;
                 }
                 case "scheduler":
