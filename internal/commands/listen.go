@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -28,6 +29,7 @@ type Listen struct {
 	mu        sync.Mutex
 	conn      context.CancelFunc
 	connected atomic.Bool
+	idle      atomic.Pointer[IdleTimer]
 	wake      chan struct{}
 
 	api       *api.Service
@@ -126,6 +128,40 @@ func (l *Listen) RunForever(ctx context.Context) {
 	}
 }
 
+// RunSession is the `listen` CLI command: up to retries connections and, when --session-ttl /
+// SESSION_TTL is set, an idle shutdown after N minutes without an effective command.
+// Returns true when the session ended by TTL.
+func (l *Listen) RunSession(ctx context.Context, retries int) bool {
+	session, cancel := context.WithCancel(ctx)
+	defer cancel()
+	var closedByTTL atomic.Bool
+	if minutes := l.env.SessionTTLMinutes(); minutes > 0 {
+		t := NewIdleTimerMinutes(minutes, func(idleFor time.Duration) {
+			closedByTTL.Store(true)
+			l.logger.Infof("IDLE FOR %ds WITH TTL %sm — CLOSING SESSION", int(idleFor.Seconds()), strconv.FormatFloat(minutes, 'f', -1, 64))
+			cancel()
+		}).Start()
+		l.idle.Store(t)
+		defer func() { t.Stop(); l.idle.Store(nil) }()
+		l.logger.Infof("SESSION TTL %sm", strconv.FormatFloat(minutes, 'f', -1, 64))
+	}
+	for retries > 0 && session.Err() == nil {
+		retries--
+		if err := l.Run(session); err != nil && session.Err() == nil {
+			if re := core.AsRequestError(err); re != nil && re.IsTimeout() {
+				fmt.Println("CONNECTION ABORTED, POSSIBLY AN INTERNET CONNECTION PROBLEM, PLEASE RUN AGENT CHECK FOR MORE INFORMATION")
+				break
+			}
+			l.logger.Error(err.Error())
+		}
+	}
+	// a stream that drops after the TTL is not a failure: it is the exit we asked for
+	if closedByTTL.Load() {
+		l.logger.Info("SESSION CLOSED BY TTL")
+	}
+	return closedByTTL.Load()
+}
+
 func (l *Listen) Run(ctx context.Context) error {
 	l.telemetry.Start("listen")
 	l.logger.Info("START LISTENING COMMANDS")
@@ -182,6 +218,10 @@ func (l *Listen) Run(ctx context.Context) error {
 }
 
 func (l *Listen) handle(ctx context.Context, msg api.CommandMessage) {
+	// session TTL: only an effective command postpones the shutdown (Ping does not)
+	if t := l.idle.Load(); t != nil {
+		t.Touch(msg.Command)
+	}
 	args, _ := msg.Arguments.([]any)
 	var result any
 	var err error

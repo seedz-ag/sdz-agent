@@ -38,7 +38,8 @@ Commands:
                       manager starts). Outside a service manager it runs a single extraction.
   execute             One extraction now (-e ENV, -n DAYS, -q QUERY, -r, -s SCHEMA, -c)
   scheduler           Run the scheduler in the foreground (--no-listen, --no-forever)
-  listen              Listen for remote commands only (--retries N)
+  listen              Listen for remote commands only (--retries N, --session-ttl MINUTES:
+                      close after N minutes without an effective command; Ping does not count)
   check <type>        auth | datasource | dns | speed | all
   credentials <action> set | show | test | clear  (terminal management of the credentials;
                       set: --client-id, --client-secret | --client-secret-stdin, --api-url,
@@ -280,17 +281,11 @@ func run(argv []string) int {
 		if n := args.Get("retries"); n != "" {
 			fmt.Sscanf(n, "%d", &retries)
 		}
-		for retries > 0 && ctx.Err() == nil {
-			retries--
-			if err := app.Listen.Run(ctx); err != nil {
-				if re := core.AsRequestError(err); re != nil && re.IsTimeout() {
-					fmt.Println("CONNECTION ABORTED, POSSIBLY AN INTERNET CONNECTION PROBLEM, PLEASE RUN AGENT CHECK FOR MORE INFORMATION")
-					break
-				}
-				logger.Error(err.Error())
-			}
+		if app.Listen.RunSession(ctx, retries) {
+			fmt.Println("✔ SESSION CLOSED BY TTL")
+		} else {
+			fmt.Println("✖ STOPPED")
 		}
-		fmt.Println("✖ STOPPED")
 		return 0
 	case "scheduler":
 		if !args.Has("listen") {

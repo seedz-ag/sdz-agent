@@ -1,6 +1,7 @@
 package core
 
 import (
+	"math"
 	"fmt"
 	"net/url"
 	"os"
@@ -170,6 +171,17 @@ func (e *Env) Throttle() int           { return e.Int("THROTTLE", 0) }
 func (e *Env) Type() string            { return e.GetOrEmpty("TYPE") }
 func (e *Env) UseConsoleLog() bool     { return e.Bool("USE_CONSOLE_LOG") }
 func (e *Env) Listen() bool            { return e.Bool("LISTEN") }
+
+// SessionTTLMinutes is --session-ttl / SESSION_TTL: minutes without an effective command before a
+// console `listen` session shuts down. 0 = no limit (every installed agent). Garbage-tolerant on
+// purpose: a non-numeric, zero or negative value means "no limit" instead of failing.
+func (e *Env) SessionTTLMinutes() float64 {
+	v, err := strconv.ParseFloat(strings.TrimSpace(e.GetOrEmpty("SESSION_TTL")), 64)
+	if err != nil || v <= 0 || math.IsInf(v, 0) || math.IsNaN(v) {
+		return 0
+	}
+	return v
+}
 func (e *Env) TelemetryEnabled() bool  { return strings.ToLower(strings.TrimSpace(e.GetOrEmpty("TELEMETRY"))) != "off" }
 func (e *Env) AmazonAccessKey() string { return e.GetOrEmpty("AMAZON_ACCESS_KEY") }
 func (e *Env) AmazonSecretKey() string { return e.GetOrEmpty("AMAZON_ACCESS_SECRET_KEY") }

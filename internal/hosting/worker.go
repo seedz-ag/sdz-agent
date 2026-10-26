@@ -43,6 +43,9 @@ func RunService(ctx context.Context, runner Runner, deps Deps) error {
 
 	// the command channel (remote management, remote updates) lives for the whole process,
 	// independent of the setting/scheduler cycle and of the startup auth check
+	if deps.Env.SessionTTLMinutes() > 0 {
+		deps.Logger.Warn("SESSION_TTL IGNORED IN SERVICE MODE: the installed agent keeps the command channel open permanently")
+	}
 	if deps.Env.Listen() {
 		go runner.RunListen(ctx)
 	}
