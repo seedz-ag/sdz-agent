@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- LaunchAgent: starts the SDZ Agent tray app for every user at login (installed to /Library/LaunchAgents). -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ag.seedz.sdz-agent-tray</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/sdz-agent/sdz-agent-tray</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>ProcessType</key>
+    <string>Interactive</string>
+</dict>
+</plist>

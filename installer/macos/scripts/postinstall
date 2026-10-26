@@ -1,0 +1,25 @@
+#!/bin/bash
+# pkg postinstall: create the data directory and (re)load the LaunchDaemon.
+set -e
+DATA_DIR=/var/lib/sdz-agent
+PLIST=/Library/LaunchDaemons/ag.seedz.sdz-agent.plist
+
+mkdir -p "$DATA_DIR/output" "$DATA_DIR/logs"
+chmod 750 "$DATA_DIR"
+chown root:wheel "$PLIST"
+chmod 644 "$PLIST"
+chmod 755 /opt/sdz-agent/sdz-agent
+ln -sf /opt/sdz-agent/sdz-agent /usr/local/bin/sdz-agent 2>/dev/null || true
+
+# reload on upgrade
+launchctl bootout system "$PLIST" >/dev/null 2>&1 || true
+
+if [ -f "$DATA_DIR/.env" ]; then
+  launchctl bootstrap system "$PLIST"
+  echo "sdz-agent: service started."
+else
+  # register but let `sdz-agent configure` start it once credentials exist
+  launchctl bootstrap system "$PLIST" || true
+  echo "sdz-agent installed. Finish the setup with: sudo sdz-agent configure"
+fi
+exit 0

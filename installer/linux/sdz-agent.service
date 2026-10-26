@@ -1,0 +1,29 @@
+[Unit]
+Description=SDZ Agent (Seedz integration agent)
+Documentation=https://github.com/seedz-ag/sdz-agent-dotnet
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# Type=notify: the app uses Microsoft.Extensions.Hosting.Systemd and reports readiness.
+Type=notify
+ExecStart=/opt/sdz-agent/sdz-agent run
+WorkingDirectory=/var/lib/sdz-agent
+# /run/sdz-agent/control.sock: local control channel used by the tray app and `sdz-agent status`.
+# The socket itself is 0660 root:sdz-agent; the directory must be traversable by group members.
+RuntimeDirectory=sdz-agent
+RuntimeDirectoryMode=0755
+Environment=SDZ_AGENT_DATA_DIR=/var/lib/sdz-agent
+Environment=USE_CONSOLE_LOG=true
+Environment=DOTNET_gcServer=0
+# v1 runs as root because the VPN feature spawns openvpn (needs CAP_NET_ADMIN and
+# writes tun devices). Once VPN moves to a dedicated helper, switch to User=sdz-agent.
+User=root
+Restart=always
+RestartSec=60
+TimeoutStopSec=30
+KillSignal=SIGTERM
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

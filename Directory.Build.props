@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <Version>3.0.0</Version>
+    <Company>Seedz</Company>
+    <Product>SDZ Agent</Product>
+    <Authors>Seedz</Authors>
+    <Copyright>Copyright © Seedz</Copyright>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- ICU stays enabled: Microsoft.Data.SqlClient (MSSQL) refuses to run in invariant mode.
+         Linux packages depend on libicu; the test project opts into invariant mode on its own. -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+</Project>

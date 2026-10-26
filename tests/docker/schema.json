@@ -1,0 +1,898 @@
+{
+ "clientes": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "razao_social",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nome_fantasia",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao_financeira",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "telefone",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "celular",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "email",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_nascimento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "inscricao_municipal",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "inscricao_estadual",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "pais",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nome_contato",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "sexo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "rg",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "vendedor1",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "vendedor2",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "grupo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "familia",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "site",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "grupo_empresarial",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "car",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "simples_nacional",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "contribuinte_icms",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "contribuinte_ir",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "origem",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regiao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "filial",
+   "type": "VARCHAR"
+  }
+ ],
+ "itens_de_nota": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cep_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cpf_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cpf_vendedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "hora",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "categoria",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regra_negocio",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "numero",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "serie",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_emissao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "aceita_duplicata",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "controle_cpr",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_pedido",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_pedido_qion",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_pedido",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_empresa",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_pai",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nota_pai",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "descricao_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "marca_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_barra_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "unidade_medida_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "lote_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "quantidade_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_unidade_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_total_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "percentual_desconto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_desconto_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cfop_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "filial",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_vendedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_unidade_medida",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cidade",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "estado",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_servico",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nome_vendedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "domicilio_fiscao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "motivo_cancelamento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_cancelamento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "ordem_venda",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "centro_de_lucro",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "segmento_lucro",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cultura_destino",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "equipe_venda",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regiao_venda",
+   "type": "VARCHAR"
+  }
+ ],
+ "notas": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_recebimento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "numero",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "serie",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_fiscal",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_emissao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_despacho",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cidade",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "estado",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_total_produtos",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_total",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "lote",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo_movimento",
+   "type": "VARCHAR"
+  }
+ ],
+ "itens": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "descricao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "marca",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_fornecedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tributacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "quantidade_desconto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_fabricante",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "segmento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "grupo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "estado",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "modelo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "detalhe",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_de_barras",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "classe",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cartela",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "filial",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "caracteristicas",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "unidade_medida_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cnpj_fabricante",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "fator_conversao",
+   "type": "VARCHAR"
+  }
+ ],
+ "itens_de_pedido": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regra_negocio",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_pedido",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_pedido_qion",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_emissao",
+   "type": "DATE"
+  },
+  {
+   "name": "situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "barter",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_empresa",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_barra_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "descricao_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "unidade_medida_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "quantidade",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "quantidade_cancelada",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_unitario_liquido",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_unitario_bruto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_desconto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_total",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_exclusivo_item",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo_movimento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "quantidade_faturada",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "equipe_venda",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regiao_venda",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nome_vendedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_vendedor",
+   "type": "VARCHAR"
+  }
+ ],
+ "pedidos": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regra_negocio",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_pedido_qion",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_emissao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento_empresa",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_entrega",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "tipo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "vendedores",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_desconto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "condicao_pagamento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_frete",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "parcelas",
+   "type": "VARCHAR"
+  }
+ ],
+ "contas_a_receber": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "titulo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_cliente",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nome_fornecedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_emissao",
+   "type": "DATE"
+  },
+  {
+   "name": "documento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "serie",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_vencimento_original",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_vencimento_prorrogado",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "competencia",
+   "type": "DATE"
+  },
+  {
+   "name": "valor_bruto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_acrescimo",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_desconto",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "valor_liquido",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "parcela",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "situacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_pagamento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_vendedor",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "filial",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_situacao",
+   "type": "VARCHAR"
+  }
+ ],
+ "vendedores": [
+  {
+   "name": "id",
+   "type": "INT"
+  },
+  {
+   "name": "cnpj",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_criacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "data_atualizacao",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "documento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "razao_social",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "nome_fantasia",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "telefone_1",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "telefone_2",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "email",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "logradouro",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "numero",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "bairro",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "uf",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "cep",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "codigo_ibge",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "regiao_atendimento",
+   "type": "VARCHAR"
+  },
+  {
+   "name": "id_gestor",
+   "type": "VARCHAR"
+  }
+ ]
+}

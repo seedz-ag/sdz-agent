@@ -1,48 +1,24 @@
-FROM ubuntu:24.04
-#
-WORKDIR /opt/sdz-agent
-ENV USER=$(/usr/bin/whoami)
+# Imagem do agente para o modo SaaS (roda `scheduler` dentro da infra Seedz), equivalente ao Dockerfile do agente Node.
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY Directory.Build.props global.json Sdz.Agent.sln ./
+COPY src/Sdz.Agent/Sdz.Agent.csproj src/Sdz.Agent/
+COPY src/Sdz.Agent.Control/Sdz.Agent.Control.csproj src/Sdz.Agent.Control/
+RUN dotnet restore src/Sdz.Agent/Sdz.Agent.csproj -r linux-x64
+COPY src/Sdz.Agent src/Sdz.Agent
+COPY src/Sdz.Agent.Control src/Sdz.Agent.Control
+RUN dotnet publish src/Sdz.Agent/Sdz.Agent.csproj -c Release -r linux-x64 -o /out --no-restore
 
-# Run updates and Install dependencies
-RUN apt-get update --fix-missing -y && \
-    apt-get install -y \
-    curl \
-    build-essential \
-    libssl-dev \
-    git \
-    supervisor \
-    libaio1t64 \
-    libodbc2 \
-    unzip \
-    sudo \
-    openvpn
-
-#Logs supervisor
-RUN mkdir -p /var/log/supervisor
-
-# Install NVM
-ENV NVM_DIR=/opt/sdz-agent/.nvm
-ENV NODE_VERSION=20.16.0
-RUN mkdir .nvm && \
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash && \
-    . $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use $NODE_VERSION && \
-    nvm alias default $NODE_VERSION
-
-ENV NODE_PATH=$NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
-ENV PATH=$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
-
-COPY . .
-
-RUN npm i -ci
-
-RUN npm i -g ts-node
-
-# ORACLE
-RUN unzip /opt/sdz-agent/assets/instantclient-basic-linux.x64-21.3.0.0.0.zip -d /opt/sdz-agent/assets/
-RUN ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
-RUN echo "/opt/sdz-agent/assets/instantclient_21_3" > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
-ENV LD_LIBRARY_PATH=/opt/sdz-agent/assets/instantclient_21_3:$LD_LIBRARY_PATH
-
-RUN chmod u+x ./agent
-
-CMD ["./agent", "scheduler"]
+FROM mcr.microsoft.com/dotnet/runtime-deps:10.0
+RUN apt-get update && apt-get install -y --no-install-recommends unixodbc odbcinst openvpn ca-certificates tzdata \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/sdz-agent /opt/sdz-agent/sdz-agent
+COPY LICENSE /opt/sdz-agent/LICENSE
+ENV SDZ_AGENT_DATA_DIR=/var/lib/sdz-agent \
+    USE_CONSOLE_LOG=true \
+    SDZ_AGENT_AUTO_UPDATE=false \
+    TZ=America/Sao_Paulo
+RUN mkdir -p /var/lib/sdz-agent/output /var/lib/sdz-agent/logs
+WORKDIR /var/lib/sdz-agent
+ENTRYPOINT ["/opt/sdz-agent/sdz-agent"]
+CMD ["scheduler"]

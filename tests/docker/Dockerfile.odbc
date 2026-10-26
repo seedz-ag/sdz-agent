@@ -1,0 +1,5 @@
+# Runner para validar o driver ODBC do agente sem instalar unixODBC no host.
+FROM ubuntu:24.04
+RUN apt-get update && apt-get install -y --no-install-recommends unixodbc odbc-postgresql ca-certificates tzdata libicu74 && rm -rf /var/lib/apt/lists/*
+ENV SDZ_AGENT_DATA_DIR=/data
+ENTRYPOINT ["/app/sdz-agent"]

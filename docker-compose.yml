@@ -1,8 +1,14 @@
-version: '2'
+# Mesmo uso do docker-compose do agente Node: `docker compose up -d` com o .env (API_URL, CLIENT_ID, CLIENT_SECRET) ao lado.
 services:
   sdz-agent:
     build: .
-    working_dir: /opt/sdz-agent/
     env_file:
       - .env
-    command: ./agent scheduler
+    environment:
+      SDZ_AGENT_DATA_DIR: /var/lib/sdz-agent
+    volumes:
+      - sdz-agent-data:/var/lib/sdz-agent
+    restart: unless-stopped
+    command: ["scheduler"]
+volumes:
+  sdz-agent-data:

@@ -1,0 +1,39 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+
+  <!--
+    Builds sdz-agent-<version>-win-x64.msi from the self-contained publish output.
+    Usage:
+      scripts/publish.sh win-x64
+      dotnet build installer/windows/Sdz.Agent.Installer.wixproj -c Release
+      dotnet build installer/windows/Sdz.Agent.Installer.wixproj -c Release -p:PublishDir=/abs/path/to/publish/win-x64/
+    Works on Windows, Linux and macOS (WiX v5 is a .NET tool; no VS needed).
+    $(Version) comes from the repo-level Directory.Build.props.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <!-- pt-BR strings with en-US fallback for anything WixUI does not translate -->
+    <Cultures>pt-BR;en-US</Cultures>
+    <OutputName>sdz-agent-$(Version)-win-x64</OutputName>
+    <OutputPath>$(MSBuildThisFileDirectory)../../artifacts/</OutputPath>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)obj/$(Configuration)/</IntermediateOutputPath>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)../../artifacts/publish/win-x64/</PublishDir>
+    <RepoRoot>$(MSBuildThisFileDirectory)../../</RepoRoot>
+    <DefineConstants>$(DefineConstants);PublishDir=$(PublishDir);RepoRoot=$(RepoRoot);Version=$(Version)</DefineConstants>
+    <!-- ICE validation needs Windows Installer; skip it when building on Linux/macOS -->
+    <SuppressValidation Condition="'$(OS)' != 'Windows_NT'">true</SuppressValidation>
+    <SuppressIces>ICE61</SuppressIces>
+    <!-- properties inherited from Directory.Build.props that make no sense for a wixproj -->
+    <Nullable></Nullable>
+    <ImplicitUsings></ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+  </ItemGroup>
+
+  <!-- *.wxs files in this folder are compiled automatically by the WiX SDK -->
+
+</Project>
