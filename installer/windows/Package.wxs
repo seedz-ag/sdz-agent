@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SDZ Agent (Go edition) - Windows installer (WiX v5).
+  Same layout, service name and custom actions as the .NET installer; different UpgradeCode and product
+  name so the two editions are distinguishable in "Programs and Features" (only one should be installed:
+  both register the SDZ-AGENT service and keep .env/output/logs in the install folder).
+
+  Install flow (wizard): Welcome -> License -> Install folder -> Credentials (optional) -> Ready -> Progress -> Finish
+  Silent:  msiexec /i sdz-agent-3.0.0-win-x64.msi /qn [CLIENT_ID=xxx CLIENT_SECRET=yyy] [API_URL=https://...]
+  Upgrade: run the newer MSI (silently or not) on top; credentials are kept in the install folder (.env next to sdz-agent.exe)
+           and the Credentials dialog is skipped when a .env already exists.
+
+  What it does:
+    1. Copies sdz-agent.exe (service) + sdz-agent-tray.exe (tray app) + LICENSE to [ProgramFiles64Folder]SEEDZ\sdz-agent
+    2. Removes the legacy NSSM-based "SDZ-AGENT" service left by the old Node agent (fresh installs only)
+    3. If CLIENT_ID was supplied, runs "sdz-agent.exe configure ... -non-interactive" (validates the
+       credentials against the API, writes .env); a failure rolls the whole install back.
+       Without credentials the service still installs and runs idle; the user configures it later through
+       the tray app (which talks to the service over the \\.\pipe\sdz-agent-control named pipe).
+    4. Registers and starts the Windows service "SDZ-AGENT" (auto start, restart on failure every 60 s)
+    5. Registers the tray app to start at every login (HKLM Run) + Start Menu shortcut, and launches it
+       at the end of an interactive install
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <?ifndef Version ?>
+    <?define Version = "3.0.0" ?>
+  <?endif?>
+  <?ifndef PublishDir ?>
+    <?define PublishDir = "..\..\artifacts\publish\win-x64\" ?>
+  <?endif?>
+  <?ifndef RepoRoot ?>
+    <?define RepoRoot = "..\..\" ?>
+  <?endif?>
+
+  <!-- NEVER change the UpgradeCode: it is what ties every version of this product together for upgrades. -->
+  <?define UpgradeCode = "5B7D2E91-6C3A-4F8E-A1D4-9E2B7C6F3A58" ?>
+  <?define ServiceName = "SDZ-AGENT" ?>
+
+  <Package Name="SDZ Agent (Go)"
+           Manufacturer="Seedz"
+           Version="$(Version)"
+           UpgradeCode="$(UpgradeCode)"
+           Language="1046"
+           Codepage="1252"
+           Scope="perMachine"
+           Compressed="yes"
+           InstallerVersion="500">
+
+    <SummaryInformation Description="SDZ Agent (Go) - Seedz integration agent" Manufacturer="Seedz" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="Uma versão mais recente do SDZ Agent já está instalada. Desinstale-a antes de instalar esta versão."
+                  Schedule="afterInstallInitialize" />
+
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- ===== public properties (also settable on the msiexec command line) ===== -->
+    <Property Id="CLIENT_ID" Secure="yes" />
+    <Property Id="CLIENT_SECRET" Secure="yes" Hidden="yes" />
+    <Property Id="API_URL" Secure="yes" Value="https://api.integration.seedz.ag/integration/v1/" />
+    <Property Id="ARPPRODUCTICON" Value="SeedzIcon" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/seedz-ag/sdz-agent-go" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <!-- Finish page checkbox: open the tray panel (interactive installs only) -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Abrir o painel do SDZ Agent" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+    <Property Id="WixShellExecTarget" Value="[#TrayExeFile]" />
+
+    <Icon Id="SeedzIcon" SourceFile="seedz.ico" />
+
+    <!-- ===== directory layout ===== -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="SEEDZFOLDER" Name="SEEDZ">
+        <Directory Id="INSTALLFOLDER" Name="sdz-agent">
+          <!-- everything the agent produces (.env, output, logs, updates) stays in the install folder -->
+          <Directory Id="DATAOUTPUTFOLDER" Name="output" />
+          <Directory Id="DATALOGSFOLDER" Name="logs" />
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="AppMenuFolder" Name="SDZ Agent" />
+    </StandardDirectory>
+
+    <!-- Data directory used by the agent (.env, output\, logs\). Created so the service can write there
+         and kept on uninstall so a re-install finds the configuration again. -->
+
+    <!-- ===== components ===== -->
+    <ComponentGroup Id="AgentComponents" Directory="INSTALLFOLDER">
+      <Component Id="AgentExe" Guid="6A1F3C2D-4B5E-4A7C-9D8E-1F2A3B4C5D6F" Bitness="always64">
+        <File Id="AgentExeFile" Source="$(PublishDir)sdz-agent.exe" KeyPath="yes" />
+
+        <ServiceInstall Id="AgentServiceInstall"
+                        Name="$(ServiceName)"
+                        DisplayName="SDZ Agent"
+                        Description="Seedz Agent - integração de dados com a plataforma Seedz"
+                        Type="ownProcess"
+                        Start="auto"
+                        Account="LocalSystem"
+                        ErrorControl="normal"
+                        Arguments="run"
+                        Vital="yes"
+                        Interactive="no">
+          <!-- restart the service on every failure, 60 s delay, reset the failure counter daily -->
+          <util:ServiceConfig FirstFailureActionType="restart"
+                              SecondFailureActionType="restart"
+                              ThirdFailureActionType="restart"
+                              RestartServiceDelayInSeconds="60"
+                              ResetPeriodInDays="1" />
+          <ServiceDependency Id="Tcpip" />
+        </ServiceInstall>
+
+        <!-- stop+remove on uninstall; start at the end of install (only when configured, see condition below) -->
+        <ServiceControl Id="AgentServiceControl"
+                        Name="$(ServiceName)"
+                        Stop="both"
+                        Remove="uninstall"
+                        Wait="yes" />
+        <!-- the data dir is the install folder; the env var is the authoritative pointer for the service -->
+        <Environment Id="DataDirEnv" Name="SDZ_AGENT_DATA_DIR" Value="[INSTALLFOLDER]" Action="set" System="yes" Permanent="no" Part="all" />
+      </Component>
+
+      <!-- The service is always started at the end of the install: without credentials it idles until the
+           tray app (or `sdz-agent configure`) saves them through the control channel. -->
+      <Component Id="AgentServiceStart" Guid="7B2E4D3C-5C6F-4B8D-8E9F-2A3B4C5D6E70" Bitness="always64">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\SEEDZ\sdz-agent" Name="AutoStarted" Type="integer" Value="1" KeyPath="yes" />
+        <ServiceControl Id="AgentServiceStartCtl" Name="$(ServiceName)" Start="install" Wait="no" />
+      </Component>
+
+      <!-- Tray app: status + credentials UI for the logged-in user. Starts at every login (HKLM Run,
+           all users) and has a Start Menu shortcut. -->
+      <Component Id="TrayExe" Guid="8C3F5E4D-6D7A-4C9E-9F0A-3B4C5D6E7F81" Bitness="always64">
+        <File Id="TrayExeFile" Source="$(PublishDir)sdz-agent-tray.exe" KeyPath="yes">
+          <Shortcut Id="TrayStartMenuShortcut" Directory="AppMenuFolder" Name="SDZ Agent"
+                    Description="Status e credenciais do SDZ Agent" WorkingDirectory="INSTALLFOLDER"
+                    Icon="SeedzIcon" Advertise="yes" />
+        </File>
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Run" Name="SdzAgentTray"
+                       Type="string" Value="&quot;[INSTALLFOLDER]sdz-agent-tray.exe&quot;" />
+        <RemoveFolder Id="RemoveAppMenuFolder" Directory="AppMenuFolder" On="uninstall" />
+      </Component>
+
+      <Component Id="LicenseFile" Guid="9D4A6F5E-7E8B-4DAF-A01B-4C5D6E7F8A92" Bitness="always64">
+        <File Id="LicenseTxt" Source="$(RepoRoot)LICENSE" Name="LICENSE.txt" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="DataComponents" Directory="INSTALLFOLDER">
+      <Component Id="DataDirs" Guid="AE5B7A6F-8F9C-4EB0-B12C-5D6E7F8A9BA3" Bitness="always64" Permanent="yes">
+        <CreateFolder />
+        <CreateFolder Directory="DATAOUTPUTFOLDER" />
+        <CreateFolder Directory="DATALOGSFOLDER" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\SEEDZ\sdz-agent" Name="DataDir" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+      </Component>
+      <Component Id="InstallDirRegistry" Guid="BF6C8B70-90AD-4FC1-C23D-6E7F8A9BACB4" Bitness="always64">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\SEEDZ\sdz-agent" Name="InstallDir" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\SEEDZ\sdz-agent" Name="Version" Type="string" Value="$(Version)" />
+      </Component>
+    </ComponentGroup>
+
+    <Feature Id="Main" Title="SDZ Agent" Level="1" AllowAbsent="no" Display="hidden">
+      <ComponentGroupRef Id="AgentComponents" />
+      <ComponentGroupRef Id="DataComponents" />
+    </Feature>
+
+    <!-- ===== state detection ===== -->
+    <!-- SDZ_ENV_EXISTS: a .env already exists (upgrade / re-install) -> the Credentials dialog is skipped. -->
+    <Property Id="SDZ_ENV_EXISTS">
+      <DirectorySearch Id="DataDirSearch" Path="[CommonAppDataFolder]SEEDZ\sdz-agent">
+        <FileSearch Id="EnvFileSearch" Name=".env" />
+      </DirectorySearch>
+    </Property>
+
+    <!-- The legacy Node agent (NSSM) registered a service with the same name. -->
+    <Property Id="LEGACY_NSSM_SERVICE">
+      <RegistrySearch Id="LegacyServiceSearch" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\$(ServiceName)\Parameters" Name="Application" Type="raw" Bitness="always64" />
+    </Property>
+
+    <!-- ===== custom actions ===== -->
+    <!--
+      1) Remove the legacy NSSM service.
+         The old agent (nssm.exe) created "SDZ-AGENT" pointing at a .bat. Its registry key has a
+         Parameters\Application value (NSSM specific) which we use to detect it. We stop and delete it
+         with sc.exe in a deferred, elevated action before InstallServices so our ServiceInstall can
+         register the same name. Only on fresh installs (never on our own upgrades, where MajorUpgrade
+         already removed the previous service).
+    -->
+    <SetProperty Id="RemoveLegacyService"
+                 Value="&quot;[SystemFolder]cmd.exe&quot; /c sc.exe stop $(ServiceName) &amp; timeout /t 5 /nobreak &gt;nul &amp; sc.exe delete $(ServiceName)"
+                 Before="RemoveLegacyService" Sequence="execute" />
+    <CustomAction Id="RemoveLegacyService" BinaryRef="Wix4UtilCA_X64" DllEntry="WixQuietExec64"
+                  Execute="deferred" Impersonate="no" Return="ignore" />
+
+    <!--
+      2) Configure: validates the credentials against the API and writes [DATAFOLDER].env.
+         Runs after the exe is on disk and before the service is installed. Return="check" means a
+         non-zero exit code (invalid credentials, no network) aborts and rolls back the install.
+         Skipped when no CLIENT_ID was supplied (credentials are optional: a plain upgrade keeps the existing
+         .env, and a fresh install without credentials leaves the service idle until the tray app configures it).
+    -->
+    <SetProperty Id="ConfigureAgent"
+                 Value="&quot;[INSTALLFOLDER]sdz-agent.exe&quot; configure --client-id &quot;[CLIENT_ID]&quot; --client-secret &quot;[CLIENT_SECRET]&quot; --api-url &quot;[API_URL]&quot; --non-interactive"
+                 Before="ConfigureAgent" Sequence="execute" />
+    <CustomAction Id="ConfigureAgent" BinaryRef="Wix4UtilCA_X64" DllEntry="WixQuietExec64"
+                  Execute="deferred" Impersonate="no" Return="check" />
+
+    <!-- 3) Rollback of (2): drop the .env we may have written, but only on a first install
+            (on upgrades the previous .env must survive a failed attempt). -->
+    <SetProperty Id="RollbackConfigureAgent"
+                 Value="&quot;[SystemFolder]cmd.exe&quot; /c if exist &quot;[DATAFOLDER].env&quot; del /f /q &quot;[DATAFOLDER].env&quot;"
+                 Before="RollbackConfigureAgent" Sequence="execute" />
+    <CustomAction Id="RollbackConfigureAgent" BinaryRef="Wix4UtilCA_X64" DllEntry="WixQuietExec64"
+                  Execute="rollback" Impersonate="no" Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="RemoveLegacyService" After="InstallFiles" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED AND LEGACY_NSSM_SERVICE" />
+      <Custom Action="RollbackConfigureAgent" After="RemoveLegacyService" Condition="NOT Installed AND NOT WIX_UPGRADE_DETECTED AND NOT SDZ_ENV_EXISTS AND CLIENT_ID" />
+      <Custom Action="ConfigureAgent" After="RollbackConfigureAgent" Condition="NOT REMOVE~=&quot;ALL&quot; AND CLIENT_ID" />
+    </InstallExecuteSequence>
+
+    <!-- ===== UI ===== -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp" />
+
+    <UI Id="AgentUI">
+      <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+      <UIRef Id="WixUI_ErrorProgressText" />
+
+      <!-- insert CredentialsDlg between InstallDirDlg and VerifyReadyDlg (fresh installs only) -->
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="CredentialsDlg" Order="99"
+               Condition="(WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID=&quot;1&quot;) AND NOT SDZ_ENV_EXISTS" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="CredentialsDlg" Order="99"
+               Condition="NOT Installed AND NOT SDZ_ENV_EXISTS" />
+
+      <!-- Finish: launch the tray app (non-elevated, via WixShellExec) when the checkbox is left checked.
+           Interactive installs only (UILevel > 2); silent installs rely on the HKLM Run entry at next login. -->
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchTrayApp"
+               Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 AND NOT Installed AND UILevel &gt; 2" />
+    </UI>
+
+    <CustomAction Id="LaunchTrayApp" BinaryRef="Wix4UtilCA_X64" DllEntry="WixShellExec" Impersonate="yes" Execute="immediate" Return="ignore" />
+
+  </Package>
+</Wix>

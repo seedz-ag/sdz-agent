@@ -1,0 +1,12 @@
+{"Parameters": {"DATABASE_DRIVER": "MONGODB", "DATABASE_HOST": "127.0.0.1", "DATABASE_PORT": "17017", "DATABASE_USERNAME": "agent", "DATABASE_PASSWORD": "${MOCK_PASSWORD}", "DATABASE_SCHEMA": "agent_mock"},
+ "Queries": {
+  "customer": "{\"collection\":\"clientes\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "invoice-item": "{\"collection\":\"itens_de_nota\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "invoice": "{\"collection\":\"notas\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "item": "{\"collection\":\"itens\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "order-item": "{\"collection\":\"itens_de_pedido\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "order": "{\"collection\":\"pedidos\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "account-receivable": "{\"collection\":\"contas_a_receber\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "seller": "{\"collection\":\"vendedores\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}",
+  "property": "{\"collection\":\"propriedades\",\"command\":\"aggregate\",\"aggregate\":[{\"$skip\"::skip},{\"$limit\"::limit}]}"
+ }}

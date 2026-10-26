@@ -1,0 +1,89 @@
+# nfpm packaging definition for sdz-agent, Go edition (deb + rpm). Same package name as the .NET edition:
+# only one of the two can be installed on a machine (both own /opt/sdz-agent and the SDZ-AGENT service).
+# Build via scripts/package-linux.sh <linux-x64|linux-arm64> (stages the binary and runs nfpm), or manually:
+#   cp artifacts/publish/linux-x64/sdz-agent artifacts/stage/linux/sdz-agent && VERSION=3.0.0 ARCH=amd64 nfpm package -f installer/linux/nfpm.yaml -p deb -t artifacts/
+# Env vars: VERSION (from the VERSION file), ARCH (amd64|arm64). nfpm does not expand env vars in "src", hence the staging dir.
+name: sdz-agent
+arch: ${ARCH}
+platform: linux
+version: ${VERSION}
+version_schema: semver
+section: utils
+priority: optional
+maintainer: Seedz <suporte@seedz.ag>
+description: |
+  SDZ Agent (Go edition) - Seedz integration agent.
+  Extracts data from the customer's data source (SQL Server, Oracle, MySQL,
+  PostgreSQL, Firebird, MongoDB, ODBC, HTTP APIs, SFTP) and ships it to the
+  Seedz platform. Runs as a systemd service.
+vendor: Seedz
+homepage: https://github.com/seedz-ag/sdz-agent-go
+license: Apache-2.0
+
+# Static Go binaries (CGO_ENABLED=0): no runtime dependencies at all. The ODBC data
+# source is only available in builds made with `-tags odbc` (CGO), which dynamically
+# link libodbc; unixODBC is therefore a Recommends, not a Depends. The DB-specific
+# ODBC drivers remain the customer's responsibility.
+overrides:
+  deb:
+    recommends:
+      - unixodbc
+      - openvpn
+      # tray icon on GNOME needs the AppIndicator/StatusNotifier support (plus the GNOME extension)
+      - libappindicator3-1 | libayatana-appindicator3-1
+  rpm:
+    recommends:
+      - unixODBC
+      - openvpn
+      - libappindicator-gtk3
+
+contents:
+  - src: artifacts/stage/linux/sdz-agent
+    dst: /opt/sdz-agent/sdz-agent
+    file_info:
+      mode: 0755
+  # tray app (systray + local web panel): status + credentials UI for the logged-in user, talks to the service
+  # through /run/sdz-agent/control.sock (group sdz-agent)
+  - src: artifacts/stage/linux/sdz-agent-tray
+    dst: /opt/sdz-agent/sdz-agent-tray
+    file_info:
+      mode: 0755
+  - src: /opt/sdz-agent/sdz-agent-tray
+    dst: /usr/local/bin/sdz-agent-tray
+    type: symlink
+  - src: installer/linux/sdz-agent-tray.desktop
+    dst: /usr/share/applications/sdz-agent-tray.desktop
+    file_info:
+      mode: 0644
+  - src: installer/linux/sdz-agent-tray-autostart.desktop
+    dst: /etc/xdg/autostart/sdz-agent-tray.desktop
+    type: config
+    file_info:
+      mode: 0644
+  - src: cmd/sdz-agent-tray/assets/tray-ok.png
+    dst: /usr/share/icons/hicolor/64x64/apps/sdz-agent.png
+  - src: cmd/sdz-agent-tray/assets/app-icon.png
+    dst: /usr/share/icons/hicolor/256x256/apps/sdz-agent.png
+    file_info:
+      mode: 0644
+  - src: LICENSE
+    dst: /usr/share/doc/sdz-agent/LICENSE
+    file_info:
+      mode: 0644
+  - src: installer/linux/sdz-agent.service
+    dst: /lib/systemd/system/sdz-agent.service
+    type: config
+    file_info:
+      mode: 0644
+  - src: /opt/sdz-agent/sdz-agent
+    dst: /usr/local/bin/sdz-agent
+    type: symlink
+  - dst: /var/lib/sdz-agent
+    type: dir
+    file_info:
+      mode: 0750
+
+scripts:
+  postinstall: installer/linux/postinstall.sh
+  preremove: installer/linux/preremove.sh
+  postremove: installer/linux/postremove.sh

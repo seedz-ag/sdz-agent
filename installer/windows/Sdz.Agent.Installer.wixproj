@@ -1,0 +1,31 @@
+<Project Sdk="WixToolset.Sdk/5.0.2">
+
+  <!--
+    Builds sdz-agent-<version>-win-x64.msi from the Go binaries in artifacts/publish/win-x64
+    (sdz-agent.exe + sdz-agent-tray.exe, produced by scripts/build.sh win-x64).
+    Usage (Windows only - wix.exe refuses to run elsewhere):
+      dotnet build installer/windows/Sdz.Agent.Installer.wixproj -c Release -p:Version=3.0.0
+    The .NET SDK is only needed as the host for the WiX NuGet SDK; the agent itself is pure Go.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <Cultures>pt-BR;en-US</Cultures>
+    <Version Condition="'$(Version)' == ''">$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)../../VERSION').Trim())</Version>
+    <OutputName>sdz-agent-$(Version)-win-x64</OutputName>
+    <OutputPath>$(MSBuildThisFileDirectory)../../artifacts/</OutputPath>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)obj/$(Configuration)/</IntermediateOutputPath>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(MSBuildThisFileDirectory)../../artifacts/publish/win-x64/</PublishDir>
+    <RepoRoot>$(MSBuildThisFileDirectory)../../</RepoRoot>
+    <DefineConstants>$(DefineConstants);PublishDir=$(PublishDir);RepoRoot=$(RepoRoot);Version=$(Version)</DefineConstants>
+    <SuppressValidation Condition="'$(OS)' != 'Windows_NT'">true</SuppressValidation>
+    <SuppressIces>ICE61</SuppressIces>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="5.0.2" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="5.0.2" />
+  </ItemGroup>
+
+</Project>

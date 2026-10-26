@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSI built on Linux with msitools/wixl (WiX 3 schema subset). Same layout, service and
+  autostart as installer/windows/Package.wxs (WiX v5, Windows-only build), without the
+  credential wizard page and custom actions: credentials are entered in the tray app after
+  the install (or with `sdz-agent configure` from an elevated prompt / silent-install script).
+  Defines: Version, PublishDir, UpgradeCode, ProductName, Manufacturer
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="$(var.ProductName)" Language="1033" Version="$(var.Version)"
+           Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine"
+             Description="$(var.ProductName) $(var.Version)" Manufacturer="$(var.Manufacturer)" />
+    <Media Id="1" Cabinet="sdzagent.cab" EmbedCab="yes" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of $(var.ProductName) is already installed." />
+
+    <Icon Id="SeedzIcon" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="SeedzIcon" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/seedz-ag" />
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="Disable" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="SEEDZFOLDER" Name="SEEDZ">
+          <Directory Id="INSTALLFOLDER" Name="sdz-agent">
+            <!-- everything the agent produces (.env, output, logs, updates) stays in the install folder -->
+            <Directory Id="DATAOUTPUTFOLDER" Name="output" />
+            <Directory Id="DATALOGSFOLDER" Name="logs" />
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ProgramMenuSubfolder" Name="SDZ Agent" />
+      </Directory>
+    </Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="AgentExe" Guid="$(var.GuidAgent)" Win64="yes">
+        <File Id="AgentExeFile" Name="sdz-agent.exe" Source="$(var.PublishDir)/sdz-agent.exe" KeyPath="yes" />
+        <ServiceInstall Id="AgentServiceInstall" Name="SDZ-AGENT" DisplayName="SDZ Agent"
+                        Description="Seedz integration agent" Type="ownProcess" Start="auto" DelayedAutoStart="yes"
+                        ErrorControl="normal" Account="LocalSystem" Arguments="run" />
+        <ServiceControl Id="AgentServiceControl" Name="SDZ-AGENT" Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+        <!-- no Environment element in wixl: the agent's data dir on Windows is the install folder itself.
+             DelayedAutoStart is honoured by WiX on Windows; wixl warns and ignores it (service starts as plain auto). -->
+      </Component>
+      <Component Id="TrayExe" Guid="$(var.GuidTray)" Win64="yes">
+        <File Id="TrayExeFile" Name="sdz-agent-tray.exe" Source="$(var.PublishDir)/sdz-agent-tray.exe" KeyPath="yes" />
+        <!-- starts the tray for every user at login -->
+        <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="SdzAgentTray"
+                       Value="&quot;[INSTALLFOLDER]sdz-agent-tray.exe&quot;" Type="string" />
+      </Component>
+      <Component Id="LicenseFile" Guid="$(var.GuidLicense)" Win64="yes">
+        <File Id="LicenseTxt" Name="LICENSE.txt" Source="$(var.LicensePath)" KeyPath="yes" />
+      </Component>
+      <!-- Mesa software OpenGL: the Fyne panel needs OpenGL 2.0, which VMs / RDP sessions do not provide -->
+      <Component Id="MesaGl" Guid="$(var.GuidMesa)" Win64="yes">
+        <File Id="MesaOpengl32" Name="opengl32.dll" Source="$(var.PublishDir)/opengl32.dll" KeyPath="yes" />
+        <File Id="MesaGallium" Name="libgallium_wgl.dll" Source="$(var.PublishDir)/libgallium_wgl.dll" />
+        <File Id="MesaDxil" Name="dxil.dll" Source="$(var.PublishDir)/dxil.dll" />
+        <File Id="MesaLicense" Name="MESA-LICENSE.txt" Source="$(var.PublishDir)/MESA-LICENSE.txt" />
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="ProgramMenuSubfolder">
+      <Component Id="StartMenuShortcut" Guid="$(var.GuidShortcut)" Win64="yes">
+        <Shortcut Id="TrayShortcut" Name="SDZ Agent" Description="Painel do SDZ Agent"
+                  Target="[INSTALLFOLDER]sdz-agent-tray.exe" WorkingDirectory="INSTALLFOLDER" Icon="SeedzIcon" />
+        <RemoveFolder Id="RemoveProgramMenuSubfolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\SEEDZ\sdz-agent" Name="shortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- data directory is created at install and KEPT on uninstall (.env, output, logs) -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="DataFolder" Guid="$(var.GuidData)" Win64="yes">
+        <CreateFolder />
+        <RegistryValue Root="HKLM" Key="Software\SEEDZ\sdz-agent" Name="DataDir" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DATAOUTPUTFOLDER">
+      <Component Id="DataOutputFolder" Guid="$(var.GuidDataOut)" Win64="yes">
+        <CreateFolder />
+        <RegistryValue Root="HKLM" Key="Software\SEEDZ\sdz-agent" Name="OutputDir" Type="string" Value="[DATAOUTPUTFOLDER]" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DATALOGSFOLDER">
+      <Component Id="DataLogsFolder" Guid="$(var.GuidDataLogs)" Win64="yes">
+        <CreateFolder />
+        <RegistryValue Root="HKLM" Key="Software\SEEDZ\sdz-agent" Name="LogsDir" Type="string" Value="[DATALOGSFOLDER]" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="Main" Title="SDZ Agent" Level="1" Absent="disallow">
+      <ComponentRef Id="AgentExe" />
+      <ComponentRef Id="TrayExe" />
+      <ComponentRef Id="MesaGl" />
+      <ComponentRef Id="LicenseFile" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DataFolder" />
+      <ComponentRef Id="DataOutputFolder" />
+      <ComponentRef Id="DataLogsFolder" />
+    </Feature>
+  </Product>
+</Wix>

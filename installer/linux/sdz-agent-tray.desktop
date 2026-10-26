@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=SDZ Agent
+Comment=Seedz integration agent - status and credentials
+Exec=/opt/sdz-agent/sdz-agent-tray
+Icon=sdz-agent
+Terminal=false
+Categories=Utility;
+StartupNotify=false
+StartupWMClass=sdz-agent-tray

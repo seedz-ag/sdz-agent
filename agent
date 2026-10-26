@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-export LD_LIBRARY_PATH=$(pwd)/assets/instantclient_21_3/ 
-npx ts-node --pretty --logError --swc ./src/cli  $1 "${@:2:99}"

@@ -1,0 +1,15 @@
+# Runner para validar o driver ODBC do agente Go: compila com -tags odbc (CGO + unixodbc-dev) e roda
+# com o driver psqlodbc instalado. Contexto de build = raiz do repositório.
+FROM golang:1.26-bookworm AS build
+WORKDIR /src
+RUN apt-get update && apt-get install -y --no-install-recommends unixodbc-dev gcc libc6-dev && rm -rf /var/lib/apt/lists/*
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=1 go build -tags odbc -o /out/sdz-agent ./cmd/sdz-agent
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends unixodbc odbc-postgresql ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
+COPY --from=build /out/sdz-agent /app/sdz-agent
+ENV SDZ_AGENT_DATA_DIR=/data
+ENTRYPOINT ["/app/sdz-agent"]
