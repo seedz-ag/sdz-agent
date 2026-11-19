@@ -121,7 +121,8 @@ export class DatabaseAdapter implements IDatabaseAdapter {
 
   private defaultBuildQuery(query: string, parameters: IParameter[]) {
     return parameters.reduce((query, { Key, Value }) => {
-      return query.replace(new RegExp(`{${Key}}`, 'g'), Value);
+      // Key vem da configuração remota: escapa metacaracteres para casar só o literal {Key} (evita ReDoS)
+      return query.replace(new RegExp(`\\{${Key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\}`, 'g'), Value);
     }, query);
   }
 

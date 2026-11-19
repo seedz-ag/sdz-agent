@@ -15,7 +15,8 @@ export class MssqlAdapter implements IDatabaseAdapter {
 
   public buildQuery(query: string, parameters: IParameter[]) {
     return parameters.reduce((query, { Key, Value }) => {
-      return query.replace(new RegExp(`{${Key}}`, 'g'), Key !== "START_DATE" ? Value : `'${Value}'`);
+      // Key vem da configuração remota: escapa metacaracteres para casar só o literal {Key} (evita ReDoS)
+      return query.replace(new RegExp(`\\{${Key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\}`, 'g'), Key !== "START_DATE" ? Value : `'${Value}'`);
     }, query);
   }
 
